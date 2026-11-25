@@ -5,6 +5,7 @@
 window.World = (function () {
   const PI = Math.PI, GB = window.GB, G = window.GAME, Wd = G.world, el = GB.el, $ = id => document.getElementById(id), snd = GB.snd;
   let wilds = [], X = null, S = null, hud = null, sc = null, on = false, yaw = 0, zoom = 1, keys = {}, trail = [], npcs = [], dusts = [], gates = [], doors = [], tags = [], near = null, goal = null, zone = '', mt = 0, miniT = 0, ui = {}, drag = null, bannerT = 0, helpT = 0;
+  let camPull = 1;
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v)), pad = n => String(n).padStart(2, '0');
   const sv = () => { const s = GB.save; if (!s.world) s.world = {}; const w = s.world; w.dust = w.dust || 0; w.got = w.got || {}; w.talked = w.talked || {}; w.quests = w.quests || {}; w.seen = w.seen || {}; w.visited = w.visited || {}; w.friends = w.friends || {}; w.track = w.track || ''; return w; };
   const nameOf = n => (G.friends[n] || G.leads[n] || {}).name || (n === 'huru' ? G.names.huru : n);
@@ -26,11 +27,11 @@ window.World = (function () {
   function start(ctx) {
     X = ctx; S = ctx.S; hud = ctx.hud; sc = ctx.sc; on = true; keys = {}; trail = []; near = null; goal = null; zone = ''; helpT = 0;
     const w = sv(); if (!ctx.keepYaw) yaw = ctx.yaw != null ? ctx.yaw : 0;
-    S.cam.yaw = yaw; zoom = 1; S.zoom(1, true);
+    S.cam.yaw = yaw; zoom = 1; S.zoom(1, true); camPull = 1; S.cam.pull = 1;
     applyOpen(); buildNpcs(); buildWild(); buildDust(); buildGates(); buildHud(); S.look(X.lead.x, X.lead.z, true);
     drawParty(); drawTrack(); w.visited.plaza = 1; GB.store();
   }
-  function stop() { on = false; keys = {}; wilds = []; npcs = []; dusts = []; gates = []; doors = []; tags = []; near = null; goal = null; }
+  function stop() { on = false; if (S && S.cam) S.cam.pull = 1; keys = {}; wilds = []; npcs = []; dusts = []; gates = []; doors = []; tags = []; near = null; goal = null; }
   const here = () => ({ x: X.lead.x, z: X.lead.z });
 
   // ── 주민, 별가루, 사건 장소 ──
@@ -176,6 +177,12 @@ window.World = (function () {
     else {
       if (k('KeyQ')) yaw += dt * 1.9; if (k('KeyE')) yaw -= dt * 1.9;
       drive(L, dt);
+    }
+    {   // 카메라가 높은 건물 안으로 들어가 화면이 벽에 가려지지 않게, 뒤가 막히면 카메라를 당긴다
+      const cb = (S.cam.back || 0) * zoom, sd = (S.cam.side || 0) * zoom, sn = Math.sin(yaw), cs = Math.cos(yaw); let pull = 1;
+      const inside = t => { const cx = L.x + (sd * cs + cb * sn) * t, cz = L.z + (-sd * sn + cb * cs) * t; return sc.blocks.some(b => b.tall && Math.hypot(cx - b.x, cz - b.z) < b.r); };
+      for (let t = .12; t <= 1.001; t += .04) if (inside(t)) { pull = Math.max(.22, t - .1); break; }
+      camPull += (pull - camPull) * Math.min(1, dt * (pull < camPull ? 12 : 4)); S.cam.pull = camPull;
     }
     S.cam.yaw = yaw; S.look(L.x, L.z); followParty(dt);
     npcs.forEach(n => { const d = dist(n.a, L.x, L.z); if (d < 6) n.a.face(L.x, L.z); else if (!n.a.target) n.a.wantRy = n.def.ry || 0; });

@@ -25,3 +25,5 @@
 @keyframes journal-appear{0%{opacity:.12;filter:brightness(2.2) drop-shadow(0 0 12px var(--accent));transform:translateY(16px) scale(.76)}44%{opacity:1;filter:brightness(1.24) drop-shadow(0 0 15px var(--accent));transform:translateY(-6px) scale(1.035)}100%{transform:none}}
 @keyframes journal-wave{0%{opacity:.18;scale:.5}38%{opacity:1}100%{opacity:.62;scale:1.07}}
 @media(prefers-reduced-motion:reduce){.journal-model,.journal-ring{animation:none!important}}
+/* 도감 창이 길어 스크롤될 때도 일지 단추 줄은 아래에 붙어 온전히 보인다 */
+#pop .win>.body>.journal-links{position:sticky;bottom:0;margin:0;padding:14px 0 8px;background:#0a0b10;z-index:2}

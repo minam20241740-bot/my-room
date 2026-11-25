@@ -18,7 +18,7 @@
       const E = (color, k) => new T.MeshStandardMaterial({ color: '#10142e', emissive: color, emissiveIntensity: k == null ? 1 : k, roughness: .6 });   // 스스로 빛나는 재질
       const add = (m, x, y, z, parent) => { m.position.set(x, y, z); m.castShadow = m.receiveShadow = true; (parent || g).add(m); return m; };
       const lights = [], blocks = [], npcs = [], things = {}, doors = {};
-      const block = (x, z, r) => blocks.push({ x: x, z: z, r: r });
+      const block = (x, z, r, tall) => blocks.push({ x: x, z: z, r: r, tall: !!tall });   // tall: 카메라를 가리는 높은 건물
       let glowTex = null;
       const glow = (x, y, z, color, size) => {   // 가로등·간판 둘레의 번짐(항상 카메라를 보는 둥근 빛)
         if (!glowTex) { const cv = document.createElement('canvas'); cv.width = cv.height = 64; const q = cv.getContext('2d'), gr = q.createRadialGradient(32, 32, 0, 32, 32, 32);
@@ -172,16 +172,16 @@
         if (gap(ang + step)) { ang += .16; continue; }
         const a = ang + step; if (Math.abs(Math.atan2(Math.sin(a - oa), Math.cos(a - oa))) < .3) { ang += .1; continue; }
         const x = Math.cos(a) * R_RING, z = Math.sin(a) * R_RING, ry = Math.atan2(-Math.cos(a), -Math.sin(a)), h = 10 + ((n * 7) % 5) * 3.2;
-        townhouse(x, z, ry, w, 7, h, n); block(x, z, w * .5 + .5);
+        townhouse(x, z, ry, w, 7, h, n); block(x, z, w * .5 + .5, 1);
         if (LABELS[n % LABELS.length]) { const fx = Math.cos(a) * (R_RING - 3.7), fz = Math.sin(a) * (R_RING - 3.7); signAt(LABELS[n % LABELS.length], fx, 3.4, fz, ry, 3.6, ['#e8cf93', '#6fe0d0', '#f2c14e'][n % 3]); if (LABELS[n % LABELS.length] === '별사탕 가게') { const dx = Math.cos(a) * (R_RING - 3.9), dz = Math.sin(a) * (R_RING - 3.9); doors.sweets = { x: dx, z: dz }; const dm = add(new T.Mesh(new T.BoxGeometry(1.4, 2.2, .12), E('#ffe29a', 1.2)), dx, 1.1, dz); dm.rotation.y = ry; } }
         ang += step * 2 + .03; n++;
       }
       // 뒷줄: 멀리 보이는 높은 집(바깥)
-      for (let i = 0; i < 18; i++) { const a = i / 18 * TAU + .1, x = Math.cos(a) * (R_RING + 15), z = Math.sin(a) * (R_RING + 15); if (gap(a)) continue; townhouse(x, z, Math.atan2(-Math.cos(a), -Math.sin(a)), 9 + (i % 3) * 2, 9, 20 + (i * 5) % 14, i + 2); block(x, z, 6); }
+      for (let i = 0; i < 18; i++) { const a = i / 18 * TAU + .1, x = Math.cos(a) * (R_RING + 15), z = Math.sin(a) * (R_RING + 15); if (gap(a)) continue; townhouse(x, z, Math.atan2(-Math.cos(a), -Math.sin(a)), 9 + (i % 3) * 2, 9, 20 + (i * 5) % 14, i + 2); block(x, z, 6, 1); }
 
       // ── ARCHIVE 탐정 사무소: 광장 북동쪽 ──
       const ox = Math.cos(oa) * (R_RING - 1.2), oz = Math.sin(oa) * (R_RING - 1.2), ory = Math.atan2(-Math.cos(oa), -Math.sin(oa));
-      townhouse(ox, oz, ory, 9, 8, 15, 1); block(ox, oz, 5.2);
+      townhouse(ox, oz, ory, 9, 8, 15, 1); block(ox, oz, 5.2, 1);
       const fr = [Math.cos(oa) * (R_RING - 1.2 - 4.2), Math.sin(oa) * (R_RING - 1.2 - 4.2)];
       signAt('ARCHIVE 탐정 사무소', fr[0], 4.6, fr[1], ory, 5.8, '#e8cf93');
       const door = add(new T.Mesh(new T.BoxGeometry(1.5, 2.3, .12), E('#ffe29a', 1.3)), Math.cos(oa) * (R_RING - 1.2 - 4.05), 1.2, Math.sin(oa) * (R_RING - 1.2 - 4.05)); door.rotation.y = ory;

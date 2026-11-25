@@ -16,7 +16,7 @@ window.Stage3D = (function () {
   // turn(A안 턴제): 팀 뒤에서 상대를 바라본다. yaw는 카메라를 도는 각도(0은 -z 방향을 봄, -π/2는 +x 방향을 봄)
   const CAMS = { field: { side: -3.2, up: 10, back: 12.5, yaw: 0, fov: 30 }, battle: { side: -1, up: 6.6, back: 8.6, yaw: 0, fov: 30 }, turn: { side: 2.4, up: 4.6, back: 11, yaw: -Math.PI / 2, fov: 30 }, world: { side: 0, up: 6.4, back: 14.5, yaw: 0, fov: 40 } };   // world: 별빛도시를 걸어 다닐 때(뒤에서 따라가는 시점. yaw는 world.js가 돌린다)
   let zk = 1, zt = 1;   // 카메라 거리의 배율(지금 값, 목표 값). 훈련에서 팀과 상대가 멀어지면 field.js가 키운다
-  function camMode(n) { Object.assign(CAM, CAMS[n] || CAMS.field); zk = zt = 1; }
+  function camMode(n) { Object.assign(CAM, CAMS[n] || CAMS.field); CAM.pull = 1; zk = zt = 1; }
 
   function ok() {
     if (!T || !window.GLTFLoader || !window.THREE_VRM || (location.protocol === 'file:' && !window.ArchiveModels)) return false;
@@ -865,9 +865,9 @@ window.Stage3D = (function () {
     focus.lerp(want, 1 - Math.exp(-dt * 3.2));
     shk *= Math.exp(-dt * 8); const jx = dt > 0 ? (Math.random() - .5) * shk : 0, jy = dt > 0 ? (Math.random() - .5) * shk : 0;   // 화면 흔들림
     zk += (zt - zk) * (1 - Math.exp(-dt * 2.2));
-    const yw = CAM.yaw || 0, cs = Math.cos(yw), sn = Math.sin(yw), ox = CAM.side * zk, oz = CAM.back * zk;   // 카메라 자리와 바라보는 곳을 같은 각도만큼 돌린다
+    const yw = CAM.yaw || 0, cs = Math.cos(yw), sn = Math.sin(yw), pk = CAM.pull > 0 && CAM.pull < 1 ? CAM.pull : 1, ox = CAM.side * zk * pk, oz = CAM.back * zk * pk;   // 카메라 자리와 바라보는 곳을 같은 각도만큼 돌린다
     if (camera.fov !== CAM.fov) { camera.fov = CAM.fov; camera.updateProjectionMatrix(); }
-    camera.position.set(focus.x + ox * cs + oz * sn + jx, CAM.up * zk + jy, focus.z - ox * sn + oz * cs); camera.lookAt(focus.x + .6 * cs - 1.2 * sn + jx, 1 + jy, focus.z - .6 * sn - 1.2 * cs);
+    camera.position.set(focus.x + ox * cs + oz * sn + jx, CAM.up * zk * (.45 + .55 * pk) + jy, focus.z - ox * sn + oz * cs); camera.lookAt(focus.x + .6 * cs - 1.2 * sn + jx, 1 + jy, focus.z - .6 * sn - 1.2 * cs);
     sun.position.set(focus.x - 20, 34, focus.z + 16); sun.target.position.set(focus.x, 0, focus.z);
     if (lampOf) { lamp.position.set(lampOf.x, 2.2, lampOf.z + .1); lamp.intensity += (LAMP * lampPow - lamp.intensity) * Math.min(1, dt * 5); }
     camera.updateMatrixWorld();

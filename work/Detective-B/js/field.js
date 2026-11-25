@@ -153,8 +153,12 @@ window.Field = (function () {
       const L = sc.look(lead.x, lead.z); S.look(L[0], L[1]);
       marks.forEach(m => {
         if (!m.seen) { if (lightPal && dist(lightPal, m.x, m.z) < 4.6) { m.seen = true; m.ring.show(true); m.el.style.display = ''; snd('reveal'); } else return; }
-        const p = S.project(m.x, m.done ? .4 : 1.5, m.z); m.el.style.left = p.x + 'px'; m.el.style.top = p.y + 'px';
+        const p = S.project(m.x, m.done ? .4 : 1.5, m.z); m.el.style.left = p.x + 'px'; m.el.style.top = p.y + 'px'; m.px = p.x; m.py = p.y;
       });
+      {   // 조사 표시끼리 화면에서 겹치면 옆으로 벌려 따로 누를 수 있게 한다
+        const vis = marks.filter(m => m.px !== undefined && !m.done && m.el.style.display !== 'none').sort((a, b) => a.px - b.px);
+        for (let i = 1; i < vis.length; i++) for (let j = 0; j < i; j++) { const a = vis[j], b = vis[i]; if (Math.abs(b.py - a.py) < 84 && b.px - a.px < 96) { b.px = a.px + 96; b.el.style.left = b.px + 'px'; } }
+      }
       return 1;
     }
     if (mode === 'battle') { const k = B && B.slow > 0 ? .18 : 1; if (k < 1) B.slow -= dt; battleTick(dt * speed * k); return speed * k; }   // 기술을 쓰는 순간에는 잠깐 느려진다

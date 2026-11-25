@@ -63,6 +63,6 @@
 #pop .ql b { font-size: 34px; }
 #pop .ql small { margin-left: 14px; font-size: 24px; opacity: .75; }
 #pop .ql p { margin: 4px 0 0; font-size: 28px; }
-#pop .ql-sp { margin-top: 18px; font-weight: 900; color: var(--lime); }
+#pop .ql-sp { position: sticky; bottom: 0; margin: 0; padding: 14px 0 6px; background: #0a0b10; font-weight: 900; color: var(--lime); }   /* 의뢰가 많아 스크롤될 때도 아래에 붙어 보인다 */
 .noanim .w-prompt, .noanim .w-obj .arr { transition: none; }
 .noanim .w-tag i, .noanim .w-flash { animation: none; }

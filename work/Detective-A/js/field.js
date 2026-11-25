@@ -157,6 +157,10 @@ window.Field = (function () {
         const p = S.project(m.x, m.done ? .4 : 1.5, m.z); m.el.style.left = p.x + 'px'; m.el.style.top = p.y + 'px';
         m.px = p.x; m.py = p.y;
       });
+      {   // 조사 표시끼리 화면에서 겹치면 옆으로 벌려 따로 누를 수 있게 한다
+        const vis = marks.filter(m => m.px !== undefined && !m.done && m.el.style.display !== 'none').sort((a, b) => a.px - b.px);
+        for (let i = 1; i < vis.length; i++) for (let j = 0; j < i; j++) { const a = vis[j], b = vis[i]; if (Math.abs(b.py - a.py) < 84 && b.px - a.px < 96) { b.px = a.px + 96; b.el.style.left = b.px + 'px'; } }
+      }
       const shown = [];   // 표시가 서로 가리면 가까이 간 것만 이름을 보인다
       marks.forEach(m => { if (m.px === undefined || m.done || m.el.style.display === "none") return; const near = dist(lead, m.x, m.z) < 6, cover = shown.some(q => Math.abs(q.px - m.px) < 280 && Math.abs(q.py - m.py) < 140); const sp = m.el.querySelector("span"); if (sp) sp.style.display = (cover && !near) ? "none" : ""; if (!cover || near) shown.push(m); });
       return 1;
