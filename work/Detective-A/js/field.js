@@ -546,7 +546,7 @@ window.Field = (function () {
   function untilBig() { return (3 - (B.foeN + 1) % 3) % 3; }   // 상대의 큰 반응까지 남은 라운드. 0이면 이번 라운드 끝에 온다
   function drawTurn() {
     const u = B.ui; if (!u) return;
-    u.bar.style.width = B.stab + '%'; u.pct.textContent = '안정화 ' + Math.floor(B.stab) + '%'; u.box.classList.toggle('dim', B.hide); u.box.classList.toggle('brk', B.broken);
+    u.rnd.textContent = B.round; u.bar.style.width = B.stab + '%'; u.pct.textContent = '안정화 ' + Math.floor(B.stab) + '%'; u.box.classList.toggle('dim', B.hide); u.box.classList.toggle('brk', B.broken);
     u.tg.forEach((t, i) => { t.className = i < B.tough ? 'on' : ''; });
     u.pips.forEach((p, i) => { p.className = i < B.pts ? 'on' : ''; }); u.sc.querySelector('b').textContent = B.score; u.sc.querySelector('em').textContent = B.score >= 6 ? '필살기 최대' : B.score >= 3 ? '필살기 커짐' : ''; u.sc.classList.toggle('hot', B.score >= 3);
     B.team.forEach((m, i) => {
@@ -721,7 +721,7 @@ window.Field = (function () {
     }
   }
   function turnTick(d) {
-    if (B && B.ui && foe) { const p = S.project(foe.x, (foe.float || 0) + 2.55, foe.z); B.ui.box.style.left = p.x + 'px'; B.ui.box.style.top = p.y + 'px'; }   // 상대 정보 판은 상대 머리 위를 따라간다
+    if (B && B.ui && foe) { const p = S.project(foe.x, (foe.float || 0) + 2.55, foe.z); const bx = B.ui.box; bx.style.left = p.x + 'px'; bx.style.top = Math.max(p.y, (bx.offsetHeight || 110) + 104) + 'px'; }   // 상대 정보 판은 상대 머리 위를 따라간다
     if (!B || B.over) { FX.update(speed > 1 ? d * .7 : d); return; }
     B.clock += d; B.t += d; FX.update(speed > 1 && !B.ultBusy ? d * .7 : d);
     for (let n = 0; n < 20; n++) {

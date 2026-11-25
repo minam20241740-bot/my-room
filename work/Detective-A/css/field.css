@@ -524,3 +524,5 @@ button.pcard:hover { border-color: #f3e7c4; }
 }
 .sus[aria-pressed="true"] .sus-picked { display: block; }
 .sus:focus-visible { outline: 4px solid #fff; outline-offset: 4px; box-shadow: 0 0 0 12px var(--nv); }
+/* 숨은 동안 꼬리표가 '안정화 N%' 글자와 겹치지 않게 줄을 나눈다 */
+.fpan.dim .fn { flex-wrap: wrap; row-gap: 4px; padding-right: 150px; }
