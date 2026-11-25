@@ -110,6 +110,7 @@ window.RoomStage = (() => {
     renderer.toneMappingExposure = 1.15;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = T.PCFShadowMap;
+    renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = true;
     renderer.setPixelRatio(Math.min(devicePixelRatio, 1.25));
     const scene = new T.Scene();
     scene.background = new T.Color('#1e2033');
@@ -167,13 +168,17 @@ window.RoomStage = (() => {
     }
     const resize = new ResizeObserver(size);
     resize.observe(viewport);
+    let shadowLive = true, shadowTick = 0, shadowStale = false, shadowForce = true, shadowTimer = 0;
     function request() {
       if (frameRequest !== null || modelStatus !== 'ready') return;
       frameRequest = requestAnimationFrame(() => {
         frameRequest = null;
+        // 그림자 지도는 두 프레임에 한 번만 다시 그린다(그리기 횟수의 대부분이 그림자 패스라서). 움직임이 멈출 때는 마지막에 한 번 더 맞춘다.
+        if (shadowLive) { const fresh = shadowForce || (shadowTick++ & 1) === 0; renderer.shadowMap.needsUpdate = fresh; shadowStale = !fresh; shadowForce = false; }
         renderer.render(scene, camera);
         if (onUpdate) onUpdate();
         if (filmStage?.render()) request();
+        if (shadowStale) { clearTimeout(shadowTimer); shadowTimer = setTimeout(() => { if (shadowStale) { shadowForce = true; request(); } }, 90); }
       });
     }
     let onUpdate = null;
@@ -500,7 +505,7 @@ window.RoomStage = (() => {
     }
     function screening(video) {
       filmStage.setVideo(video);
-      renderer.shadowMap.autoUpdate=!video;
+      shadowLive=!video; shadowForce=true;
       renderer.shadowMap.needsUpdate=true;
       request();
     }

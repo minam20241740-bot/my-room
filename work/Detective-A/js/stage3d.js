@@ -621,6 +621,7 @@ window.Stage3D = (function () {
   }
 
   const AXIS_X = new T.Vector3(1, 0, 0);
+  const CHIBI = { ally_noel: 1, ally_sera: 1, mongeul_s3: 1, heuk_s3: 1 };
   function makeActor(key, height) {
     const g = lib[key] || lib[ALIAS[key]], a = { key: key, x: 0, z: 0, ry: 0, wantRy: 0, speed: 4, anim: 'idle', t: Math.random() * 9, wk: 0, aim: 0, hop: 0, target: null };
     const holder = new T.Group(); a.root = holder; a.act = () => false;
@@ -641,6 +642,12 @@ window.Stage3D = (function () {
       if (key === 'arthur' || key === 'eri') {   // 걷기 동작에 팔 흔들기를 덧붙이기 위한 뼈
         const bn = n => inner.getObjectByName(n), fix = { L: bn('J_Bip_L_UpperArm'), R: bn('J_Bip_R_UpperArm'), legL: bn('J_Bip_L_UpperLeg'), legR: bn('J_Bip_R_UpperLeg'), k: 0, on: false, qL: new T.Quaternion(), qR: new T.Quaternion(), z: 0 };
         if (fix.L && fix.R && fix.legL && fix.legR) { fix.restL = fix.legL.rotation.x; fix.restR = fix.legR.rotation.x; a.armFix = fix; }
+      }
+      if (CHIBI[key]) {   // 사람 모양 친구: 머리를 키우고 팔다리를 고르게 줄여 귀여운 비율로 세운다(뼈 크기만 바꾸고 발을 다시 땅에 맞춘다)
+        const bones = []; inner.traverse(o => { if (o.isBone) { const s = /Head/.test(o.name) ? 1.26 : /Thigh/.test(o.name) ? .8 : /UpperArm/.test(o.name) ? .9 : 0; if (s) bones.push([o, s]); } });
+        bones.forEach(b => b[0].scale.setScalar(b[1])); a.chibi = bones; inner.updateMatrixWorld(true);
+        let low = Infinity; inner.traverse(o => { if (o.isSkinnedMesh) { o.skeleton.update(); o.computeBoundingBox(); low = Math.min(low, o.boundingBox.clone().applyMatrix4(o.matrixWorld).min.y); } });
+        if (isFinite(low) && Math.abs(low) < .5) inner.position.y -= low;
       }
       if (a.clips.idle) a.clips.idle.play(); a.cur = 'idle';
       if (window.GAME.models[key].grounded) a.soles = soleVertices(holder, height || g.userData.h0);
@@ -836,6 +843,7 @@ window.Stage3D = (function () {
         if (a.journalGrip) a.journalGrip.restore();
         if (a.armFix && a.armFix.on) { const f = a.armFix; f.L.rotateZ(f.z); f.R.rotateZ(-f.z); f.L.quaternion.premultiply(f.qL.invert()); f.R.quaternion.premultiply(f.qR.invert()); f.on = false; }   // 지난 프레임에 덧붙인 만큼 되돌린다
         a.mixer.update(dt);
+        if (a.chibi) for (const b of a.chibi) b[0].scale.setScalar(b[1]);
         if (a.armFix) {   // 걷거나 달릴 때: 옆으로 벌어진 팔을 몸 쪽으로 모으고, 반대쪽 다리에 맞춰 앞뒤로 흔든다
           const f = a.armFix; f.k += (((a.cur === 'walk' || a.cur === 'run') ? 1 : 0) - f.k) * Math.min(1, dt * 8);
           if (f.k > .001) {
