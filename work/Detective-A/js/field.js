@@ -408,8 +408,8 @@ window.Field = (function () {
   function hit(v, col) {   // 훈련탄이 맞았다: 숫자가 뜨고 상대가 움찔한다. 큰 것이 맞으면 잠깐 멈추고 고리가 퍼지고 화면이 흔들린다
     if (!B || B.over) return;
     const gain = v / (C.duel.tough || 1); B.stab = Math.min(100, B.stab + gain);
-    S.burst(foe.x, .6, foe.z, col || '#bfe6ff', v >= 10 ? 16 : 5, v >= 10 ? .12 : .07); S.punch(foe);
-    if (v >= 10) { const sum = gain + (B.acc || 0); B.acc = 0; B.accT = .75; pop(foe.x, 1.5, foe.z, '+' + Math.max(1, Math.round(sum)), 'big'); S.shake(.5); S.ripple(foe.x, foe.z, col || '#ffd92e', 2.6); freeze = .08; } else B.acc = (B.acc || 0) + gain;   // 작은 것은 battleTick에서 모아서 보인다
+    S.burst(foe.x, .6, foe.z, col || '#bfe6ff', v >= 10 ? 26 : 10, v >= 10 ? .15 : .095); S.punch(foe);
+    if (v >= 10) { const sum = gain + (B.acc || 0); B.acc = 0; B.accT = .75; pop(foe.x, 1.5, foe.z, '+' + Math.max(1, Math.round(sum)), 'big'); S.shake(.7); S.ripple(foe.x, foe.z, col || '#ffd92e', 3.2); freeze = .1; } else B.acc = (B.acc || 0) + gain;   // 작은 것은 battleTick에서 모아서 보인다
     B.ui.box.classList.remove('hitp'); void B.ui.box.offsetWidth; B.ui.box.classList.add('hitp');
     if (B.stab >= 100) win();
   }

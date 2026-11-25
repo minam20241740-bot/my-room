@@ -273,7 +273,7 @@ window.Field = (function () {
   function endCombo() { B.combo = 0; const c = hud.querySelector('.combo'); if (c) c.remove(); }
   function actHit(gain, col, heavy) {
     if (!B || B.over) return; bumpCombo(); B.stab = Math.min(100, B.stab + gain); B.gauge = Math.min(100, B.gauge + 3);
-    S.burst(foe.x, .7, foe.z, col || '#bfe6ff', heavy ? 12 : 6, .08); S.punch(foe, 1); pop(foe.x, 1.7, foe.z, '+' + Math.max(1, Math.round(gain)), gain >= 9 ? 'big' : '');
+    S.burst(foe.x, .7, foe.z, col || '#bfe6ff', heavy ? 24 : 11, heavy ? .13 : .095); S.punch(foe, 1); pop(foe.x, 1.7, foe.z, '+' + Math.max(1, Math.round(gain)), gain >= 9 ? 'big' : '');
     B.ui.box.classList.remove('hitp'); void B.ui.box.offsetWidth; B.ui.box.classList.add('hitp');
     if (B.stab >= 100) actWin();
   }
