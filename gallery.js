@@ -132,8 +132,7 @@ window.RoomGallery = (() => {
     el.poster=file('Shadow_Poster.jpg');
     const connectedShadow = /^https?:$/.test(location.protocol)
       && location.hostname === '127.0.0.1' && !window.RoomPack && !window.RoomHosted;
-    el.src=connectedShadow ? '/_myroom_shadow.mp4' : file(name);
-    if (connectedShadow) el.addEventListener('error',()=>{el.src=file(name);},{once:true});
+    el.src=file(name);
   }
   function link(body,label,href) {
     const a=add(body,'a',label,'gallery-action');
@@ -428,7 +427,7 @@ window.RoomGallery = (() => {
       case 'Type':
         typeMotion(body); onExperience(); break;
       case 'Signal': signalBoard(body,onExperience); break;
-      case 'Shadow': video(body,'Shadow_Film.mp4',objects.Shadow.work+' · A·B·C안 차례 상영'); break;
+      case 'Shadow': video(body,'Shadow_Film.mp4',objects.Shadow.work); break;
       case 'Detective': detective(body); break;
       case 'Aqua': aquaWorks(body,onExperience); break;
       case 'Ribbon': mediaCards(body,[['리본 응접실','Ribbon_Room.jpg'],['리본 응접실 · 다른 시점','Ribbon_Room_Alt.jpg']]); break;

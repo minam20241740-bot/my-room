@@ -90,8 +90,10 @@
         player.tabIndex = 0;
         detail.insertBefore(player, picture);
         button.setAttribute('aria-expanded','true');
-        player.focus();
-        player.scrollIntoView({block:'nearest'});
+        player.focus({preventScroll:true});
+        // 위에 붙어 있는 닫기 단추 바로 아래에 체험 화면이 오게 창을 내린다(닫기가 화면 밖으로 밀려나지 않게)
+        const top = player.getBoundingClientRect().top - detail.getBoundingClientRect().top + detail.scrollTop;
+        detail.scrollTo({top: Math.max(0, top - 64)});
       });
       if (experience.type !== 'page') button.setAttribute('aria-expanded', 'false');
       actions.append(button);

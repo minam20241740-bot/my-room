@@ -38,7 +38,7 @@
   const movieFile = ui['theater-file'];
   const bundledMovie='assets/Illusio_Film.mp4';
   const localScreening=/^https?:$/.test(location.protocol) && location.hostname==='127.0.0.1';
-  const defaultMovie=() => window.RoomPack?.illusioHref ?? (localScreening && !window.RoomHosted ? '/_myroom_illusio.mp4' : bundledMovie);
+  const defaultMovie=() => bundledMovie;
 
   function loadPreferences() {
     try {
@@ -216,7 +216,7 @@
     ui['quest-title'].textContent = inTheater ? '마술 극장' : '첫 정리';
     ui['quest-detail'].textContent = inTheater ?
       (filmMounted ? '필름 장착 완료' : '영사기에 필름 장착하기') :
-      (completed ? '기획 메모 정리 완료' : value === 'holding' ? '자료함에 내려놓기' : '흩어진 기획 메모');
+      (completed ? '기획 메모 정리 완료' : value === 'holding' ? '자료함에 넣기' : '흩어진 기획 메모');
     if(atWindow) {
       ui['quest-title'].textContent='아침 창가';
       ui['quest-detail'].textContent='창 열기';
@@ -467,7 +467,7 @@
     })) return;
     showPhase('holding');
     say('책상 오른쪽 보라색 자료함을 눌러요. 나중에 다시 펼칠 수 있게요.',
-        ['자료함에 넣기',placeNote],['내려놓기 취소',cancelPickup]);
+        ['자료함에 넣기',placeNote],['집기 취소',cancelPickup]);
     ui['task-main'].focus({preventScroll:true});
   }
 
@@ -572,25 +572,30 @@
       if (video.ended) label = '다시 상영';
       else label = video.currentTime > .1 ? '이어서 재생' : '일루지오 재생';
     }
-    say(detail || (movieURL ? '선택한 영상' : '일루지오 · A·B·C안 차례 상영'),
+    say(detail || (movieURL ? '선택한 영상' : '일루지오 · 2D 본편 90초'),
       video.getAttribute('src') ? [label,toggleFilm] : ['영상 파일 선택',() => movieFile.click()],
       ['영사대로 돌아가기',leaveSeat]);
   }
 
+  let filmStarting = false;   // 영상을 불러오는 동안 한 번 더 눌러도 재생이 끊기지 않게 막는다
   async function toggleFilm() {
-    if (phase !== 'theater-viewing') return;
+    if (phase !== 'theater-viewing' || filmStarting) return;
     if (!video.paused) {
       video.pause();
       showScreening();
       return;
     }
+    filmStarting = true;
     try {
       await video.play();
+      filmStarting = false;
       if (phase !== 'theater-viewing') { video.pause(); return; }
       stage.screening(video);
       showScreening();
-    } catch {
+    } catch (error) {
+      filmStarting = false;
       if (phase !== 'theater-viewing') return;
+      if (error && error.name === 'AbortError') { showScreening(); return; }   // 불러오다 멈춘 것뿐이면 파일 선택으로 넘기지 않는다
       if (video.getAttribute('src') === '/_myroom_illusio.mp4') {
         video.src=bundledMovie;
         await toggleFilm();

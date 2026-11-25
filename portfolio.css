@@ -30,3 +30,5 @@ iframe.portfolio-live{box-sizing:border-box;height:clamp(420px,72dvh,860px)}
   .portfolio-actions a,.portfolio-actions button{padding:10px 12px}
   .portfolio-live{margin:12px 0}
 }
+/* 닫기 단추는 창을 아래로 내려도 위에 붙어 있어 언제든 누를 수 있다 */
+.portfolio-index>.portfolio-close,.portfolio-detail>.portfolio-close{position:sticky;top:0;z-index:5;box-shadow:0 4px 14px #000a}
