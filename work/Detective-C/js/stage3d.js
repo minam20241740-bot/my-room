@@ -567,8 +567,8 @@ window.Stage3D = (function () {
         if (fix.L && fix.R && fix.legL && fix.legR) { fix.restL = fix.legL.rotation.x; fix.restR = fix.legR.rotation.x; a.armFix = fix; }
       }
       if (CHIBI[key]) {   // 사람 모양 친구: 머리를 키우고 팔다리를 고르게 줄여 귀여운 비율로 세운다(뼈 크기만 바꾸고 발을 다시 땅에 맞춘다)
-        const bones = []; inner.traverse(o => { if (o.isBone) { const s = /Head/.test(o.name) ? 1.26 : /Thigh/.test(o.name) ? .8 : /UpperArm/.test(o.name) ? .9 : 0; if (s) bones.push([o, s]); } });
-        bones.forEach(b => b[0].scale.setScalar(b[1])); a.chibi = bones; inner.updateMatrixWorld(true);
+        const bones = []; inner.traverse(o => { if (o.isBone) { const s = /Head/.test(o.name) ? [1.26, 1.26, 1.26] : /Thigh/.test(o.name) ? [1.02, .8, 1.02] : /UpperArm/.test(o.name) ? [1.05, .9, 1.05] : null; if (s) bones.push([o, s]); } });
+        bones.forEach(b => b[0].scale.set(b[1][0], b[1][1], b[1][2])); a.chibi = bones; inner.updateMatrixWorld(true);
         let low = Infinity; inner.traverse(o => { if (o.isSkinnedMesh) { o.skeleton.update(); o.computeBoundingBox(); low = Math.min(low, o.boundingBox.clone().applyMatrix4(o.matrixWorld).min.y); } });
         if (isFinite(low) && Math.abs(low) < .5) inner.position.y -= low;
       }
@@ -744,7 +744,7 @@ window.Stage3D = (function () {
         restoreShoeStance(a);
         if (a.armFix && a.armFix.on) { const f = a.armFix; f.L.rotateZ(f.z); f.R.rotateZ(-f.z); f.L.quaternion.premultiply(f.qL.invert()); f.R.quaternion.premultiply(f.qR.invert()); f.on = false; }   // 지난 프레임에 덧붙인 만큼 되돌린다
         a.mixer.update(dt);
-        if (a.chibi) for (const b of a.chibi) b[0].scale.setScalar(b[1]);
+        if (a.chibi) for (const b of a.chibi) b[0].scale.set(b[1][0], b[1][1], b[1][2]);
         if (a.armFix) {   // 걷거나 달릴 때: 옆으로 벌어진 팔을 몸 쪽으로 모으고, 반대쪽 다리에 맞춰 앞뒤로 흔든다
           const f = a.armFix; f.k += (((a.cur === 'walk' || a.cur === 'run') ? 1 : 0) - f.k) * Math.min(1, dt * 8);
           if (f.k > .001) {
