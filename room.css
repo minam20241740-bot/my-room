@@ -138,3 +138,14 @@ body[data-phase^="theater"] .quest{right:auto;left:30px}
   .zone-card span{font-size:10px}
   .zone-card small{font-size:8px}
 }
+
+/* 가로로 눕힌 휴대폰처럼 화면 높이가 낮을 때: 무대를 화면 높이에 맞추고 대화창을 낮춘다 */
+@media(max-height:560px){
+  .play{min-height:100svh}
+  .dialogue{bottom:10px;left:12px;width:min(520px,calc(100% - 24px));padding:9px 13px 11px}
+  .dialogue p{font-size:.9rem;line-height:1.4;margin-top:3px}
+  .dialogue-actions:has(button:not([hidden])){margin-top:8px}
+  .dialogue-actions button{min-height:36px;font-size:.8rem}
+  .stage-header{top:8px}
+  .quest{top:52px}
+}
