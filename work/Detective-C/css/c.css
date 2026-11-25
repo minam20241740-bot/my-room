@@ -1,0 +1,108 @@
+/* C안 색: 짙은 남색 바탕, 굵은 글씨, 강한 색은 노랑 하나. game.css와 field.css 다음에 읽혀서 같은 이름의 규칙을 덮어쓴다.
+   색 변수: --pn 판, --soft 판 안의 칸, --line 테두리, --mute 흐린 글씨, --yl 강한 색(노랑). 파랑 계열 강조(--bl)는 노랑으로 바꿨다. */
+:root { --bl: #dfff1a; --nv: #080e2a; --yl: #dfff1a; --rd: #ff4057; --line: #46526e; --soft: #141c2c; --pn: #0a0f1a; --mute: #9aa6bd; }
+html, body { background: #050a1c; }
+body { color: #ffffff; font-weight: 700; }
+#stage { background: #0f1a45; }
+
+/* 배경 그림 위에 남색 밤 막을 곱한다. 사무소에서는 사건을 풀수록 옅어져 환해진다(game.js의 tintFor) */
+#tint { position: absolute; inset: 0; background: #0b1118; mix-blend-mode: multiply; opacity: .6; pointer-events: none; transition: opacity .8s ease; }
+
+/* ── 시작, 로딩 ── */
+.btn { background: linear-gradient(#161f33, #0a0f1a); color: #ffffff; border: 2px solid var(--line); box-shadow: 0 6px 0 #020409, 0 16px 24px rgba(0, 0, 0, .4); }
+.btn::before { background: linear-gradient(135deg, transparent 50%, rgba(255, 255, 255, .08) 50%); }
+.btn.sel, .btn.y { background: linear-gradient(#e4ff6e, #dfff1a); color: #05070d; border-color: #f6ffd8; box-shadow: 0 6px 0 #8fb300, 0 16px 24px rgba(0, 0, 0, .4); }
+.nm, .hr { background: var(--pn); color: #ffffff; box-shadow: 0 5px 0 rgba(0, 0, 0, .35); }
+#loading { background: rgba(5, 8, 14, .35); }
+.tip { background: var(--pn); box-shadow: 0 8px 0 rgba(0, 0, 0, .35); }
+.bar { background: rgba(255, 255, 255, .16); box-shadow: none; }
+.bar i { background: linear-gradient(90deg, #a8d400, var(--yl)); }
+.go { color: #ffffff; text-shadow: 0 3px 0 #020409; }
+
+/* ── 사무소 ── */
+.lead { filter: drop-shadow(0 14px 24px rgba(0, 0, 0, .5)); }
+.plate { background: var(--pn); box-shadow: 0 6px 0 rgba(0, 0, 0, .35); }
+.swap { background: #141c2c; border: 2px solid var(--yl); box-shadow: 0 5px 0 rgba(0, 0, 0, .35); }
+.prog { background: rgba(5, 8, 14, .9); box-shadow: 0 6px 0 rgba(0, 0, 0, .35); }
+.prog .pips i { background: var(--soft); border-color: var(--line); }
+.prog .pips i.done { background: var(--yl); border-color: #8fb300; }
+.prog .pips i.now { background: var(--pn); border-color: var(--yl); box-shadow: 0 0 0 4px rgba(223, 255, 26, .3); }
+.top button { background: rgba(5, 8, 14, .9); color: #ffffff; box-shadow: 0 6px 0 rgba(0, 0, 0, .35); }
+.say { background: var(--pn); box-shadow: 0 6px 0 rgba(0, 0, 0, .35); }
+.say::before { border-right-color: var(--pn); }
+.dock button { background: linear-gradient(#161f33, #0a0f1a); border: 2px solid var(--line); box-shadow: 0 6px 0 #020409, 0 14px 22px rgba(0, 0, 0, .35); color: #ffffff; }
+.dock svg [fill="#1a9df5"] { fill: var(--yl); }
+.dock svg [fill="#7fd0ff"] { fill: #eaffa0; }
+.dock svg [fill="#d6ecff"] { fill: #1b2438; }
+.dock svg [fill="#2d4663"] { fill: var(--mute); }
+.dock svg [stroke="#1a9df5"] { stroke: var(--yl); }
+.req { color: #05070d; }
+
+/* ── 이야기(대화 상자) ── */
+.sbox { background: rgba(7, 10, 18, .96); box-shadow: 0 10px 30px rgba(0, 0, 0, .5); }
+.sskip { background: rgba(5, 8, 14, .9); color: #ffffff; box-shadow: 0 6px 0 rgba(0, 0, 0, .35); }
+
+/* ── 팝업 ── */
+#pop { background: rgba(2, 4, 8, .6); }
+.win { background: var(--pn); box-shadow: 0 24px 60px rgba(0, 0, 0, .55); }
+.win h2, .result h1 { background: linear-gradient(100deg, #1c2a6e 0 68%, #2a3f9c 68% 76%, #1c2a6e 76%); color: #ffffff; }
+.win h2 small, .result h1 small { color: var(--yl); opacity: 1; }
+.win .foot button { background: linear-gradient(#161f33, #0f1626); border-color: var(--line); box-shadow: 0 6px 0 #020409; color: #ffffff; }
+.win .foot button.y { background: linear-gradient(#e4ff6e, #dfff1a); border-color: #8fb300; box-shadow: 0 6px 0 #8fb300; color: #05070d; }
+.seg button { color: #ffffff; }
+.seg button.on { background: var(--yl); color: #05070d; border-color: var(--yl); }
+.grid2 button { color: #ffffff; box-shadow: 0 5px 0 #020409; }
+.quote { color: #ffffff; }
+#toast { border: 2px solid var(--yl); }
+#end button { background: var(--yl); color: #05070d; }
+
+/* ── 편성 ── */
+#team, #deduce { background: rgba(2, 4, 8, .55); }
+.need { background: var(--pn); }
+.slot { background: linear-gradient(#10172a, #0a0f1a); box-shadow: 0 10px 24px rgba(0, 0, 0, .4); }
+.slot .nmb { background: #020409; }
+.slot.empty { background: rgba(255, 255, 255, .06); color: var(--mute); box-shadow: none; }
+.wait { background: rgba(5, 8, 14, .9); }
+.wait em { color: var(--mute); }
+.wait em.hint { color: #05070d; }
+.wf span { color: var(--mute); }
+.wf u { color: #05070d; }
+.bt { background: linear-gradient(#161f33, #0f1626); color: #ffffff; border-color: var(--line); box-shadow: 0 6px 0 #020409; }
+.bt.y { background: linear-gradient(#e4ff6e, #dfff1a); color: #05070d; border-color: #8fb300; box-shadow: 0 6px 0 #8fb300; }
+
+/* ── 현장 위의 표시, 안내 말풍선 ── */
+.mk span { background: var(--pn); color: #ffffff; box-shadow: 0 4px 10px rgba(0, 0, 0, .45); }
+.mk i { color: #05070d; }
+.mk.done i { background: #8d9ccf; }
+.tsay { background: var(--pn); border: 4px solid var(--yl); box-shadow: 0 14px 40px rgba(0, 0, 0, .6); }
+.tsay .fc { background-color: var(--soft); }
+.tsay em { color: var(--mute); }
+
+/* ── 결과, 수첩, 추리 ── */
+.result { background: var(--pn); box-shadow: 0 24px 60px rgba(0, 0, 0, .55); }
+.dnote { background: var(--pn); border-top-color: var(--yl); box-shadow: 0 10px 24px rgba(0, 0, 0, .4); }
+.sus { background: linear-gradient(#10172a, #0a0f1a); box-shadow: 0 10px 24px rgba(0, 0, 0, .4); }
+.sus li { background: var(--soft); color: #ffffff; }
+.sus.sel { background: linear-gradient(#e4ff6e, #dfff1a); border-color: #8fb300; color: #05070d; }
+.sus.sel li { background: #f2ffc4; color: #05070d; border-color: #8fb300; }
+.who .wtx { background: var(--pn); }
+.who em, .stp span { color: var(--mute); }
+.lockp { background: rgba(7, 10, 18, .97); border-top-color: var(--yl); box-shadow: 0 14px 36px rgba(0, 0, 0, .5); }
+.lslots i.on { background: var(--pn); }
+.lpad button { background: linear-gradient(#161f33, #0f1626); color: #ffffff; box-shadow: 0 6px 0 #020409; }
+
+/* ── 훈련 화면: 판은 남색, 글씨는 흰색 ── */
+#hud .bgauge, #hud .mem { background: rgba(5, 8, 14, .9); color: #ffffff; box-shadow: 0 8px 20px rgba(0, 0, 0, .45); }
+#hud .bgauge small, #hud .mem u { color: var(--yl); }
+#hud .bgauge .gbar, #hud .hbar { background: rgba(255, 255, 255, .18); }
+#hud .gbar i { background: linear-gradient(90deg, #a8d400, var(--yl)); }
+#hud .hbar i { background: #7ee0b0; }
+#hud .finfo { background: rgba(5, 8, 14, .9); color: #ffffff; border-left-color: var(--yl); }
+#hud .finfo small { color: var(--yl); }
+#hud .fclues span { background: rgba(5, 8, 14, .85); border-color: #46526e; color: #ffffff; }
+#hud .fclues span.done { background: var(--yl); border-color: #8fb300; color: #05070d; }
+#hud .top button { background: rgba(5, 8, 14, .9); color: #ffffff; box-shadow: 0 6px 0 rgba(0, 0, 0, .35); }
+#hud .top button.on { background: var(--yl); color: #05070d; }
+.dmg, .dmg.big { -webkit-text-stroke-color: #05070d; }
+.banner { background: rgba(5, 8, 14, .92); }
+.cutin { background: linear-gradient(100deg, rgba(36, 53, 128, .96) 0 56%, rgba(5, 8, 14, .96) 56%); }

@@ -1,0 +1,66 @@
+{
+  "Shadow_42s": {
+    "master": {
+      "width": 1920,
+      "height": 1120,
+      "fps": "24",
+      "duration": 42.0,
+      "frames": 1008,
+      "audio": "aac",
+      "audioBitrate": 189349,
+      "bytes": 75439053,
+      "sha256": "d311491d3d23fc350b4b40dd8a3a9b8eb701353ab0849c022ea4352703425de6",
+      "audioPacketHash": "SHA256=5c10fb94d2119fd32ca5ad89db912dfb2dea3e6cd8600cd632917939f5434f65"
+    },
+    "bundled": {
+      "width": 1920,
+      "height": 1120,
+      "fps": "24",
+      "duration": 42.0,
+      "frames": 1008,
+      "audio": "aac",
+      "audioBitrate": 189349,
+      "bytes": 75439053,
+      "sha256": "d311491d3d23fc350b4b40dd8a3a9b8eb701353ab0849c022ea4352703425de6",
+      "audioPacketHash": "SHA256=5c10fb94d2119fd32ca5ad89db912dfb2dea3e6cd8600cd632917939f5434f65"
+    },
+    "encoding": "전시 및 방 전광판 공통 H.264 상영본",
+    "poster": {
+      "name": "Shadow_Poster.jpg",
+      "time": 31.875,
+      "sha256": "e1f1887c3fd93b52a2a694872bbbf2167acf7d49f05a2c9b2cd2cc8d868cab73"
+    }
+  },
+  "Illusio_90s": {
+    "master": {
+      "width": 1920,
+      "height": 1080,
+      "fps": "24",
+      "duration": 90.0,
+      "frames": 2160,
+      "audio": "aac",
+      "audioBitrate": 189381,
+      "bytes": 83204909,
+      "sha256": "102d5a8eaff0e32addaa24af304906e80c2284703eecdc2e9550cf8190f18028",
+      "audioPacketHash": "SHA256=51e2c179d0789434472d86127f6524cb973a17eaa540a179c1ab38e7932b8d32"
+    },
+    "bundled": {
+      "width": 1920,
+      "height": 1080,
+      "fps": "24",
+      "duration": 90.0,
+      "frames": 2160,
+      "audio": "aac",
+      "audioBitrate": 189381,
+      "bytes": 12933381,
+      "sha256": "bf398ba883544f1517fd954c8b76aac17df88148183bdab108ad8f266e731d79",
+      "audioPacketHash": "SHA256=51e2c179d0789434472d86127f6524cb973a17eaa540a179c1ab38e7932b8d32"
+    },
+    "encoding": "room encode",
+    "poster": {
+      "name": "Illusio_Poster.jpg",
+      "time": 57.708,
+      "sha256": "363ae8b8d2b3dce9ecd7ba431d5acced6be4088bfd841285f2efb3b773dd0edf"
+    }
+  }
+}

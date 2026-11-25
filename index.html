@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#131521">
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <title>나의 방 · UNKNOWN RE:DRAW ROOM</title>
+  <link rel="stylesheet" href="room.css">
+  <link rel="stylesheet" href="portfolio.css">
+  <script defer src="vendor/three-bundle.js"></script>
+  <script defer src="theater.js"></script>
+  <script>window.RoomHosted={planHref:"assets/Room_Plan.pdf"};</script>
+  <script defer src="gallery.js"></script>
+  <script defer src="gallery-stage.js"></script>
+  <script defer src="scene.js"></script>
+  <script defer src="room.js"></script>
+  <script defer src="portfolio-data.js"></script>
+  <script defer src="portfolio.js"></script>
+</head>
+<body data-phase="cover">
+  <main>
+    <section id="cover" class="cover" aria-label="나의 방 표지">
+      <div class="cover-art">
+        <img src="assets/Site_Cover.png" width="1920" height="1080" alt="나의 방 · UNKNOWN RE:DRAW ROOM. 밤 창가의 책상에서 준희가 잠들어 있다.">
+        <div class="cover-actions" aria-label="표지 메뉴">
+          <button id="wake" class="cover-wake" type="button" aria-label="깨우기" disabled></button>
+          <button id="concept" class="cover-concept" type="button" aria-label="기획 의도" disabled></button>
+          <button id="worlds" class="cover-worlds" type="button" aria-label="작품의 세계" disabled></button>
+        </div>
+      </div>
+      <div class="cover-touch" aria-label="표지 메뉴">
+        <button class="cover-touch-wake" data-cover-action="wake" type="button" disabled>깨우기</button>
+        <button data-cover-action="concept" type="button" disabled>기획 의도</button>
+        <button data-cover-action="worlds" type="button" disabled>작품의 세계</button>
+      </div>
+      <p class="cover-note">마우스 또는 키보드로 시작할 수 있습니다.</p>
+    </section>
+
+    <section id="play" class="play" aria-label="준희의 방" hidden>
+      <div id="viewport" class="viewport">
+        <div id="scene-fallback" class="scene-fallback" hidden></div>
+        <canvas id="room-canvas" aria-label="편집 가능한 3D 방" tabindex="-1"></canvas>
+        <div class="stage-vignette" aria-hidden="true"></div>
+        <span id="wake-cue" class="wake-cue" aria-hidden="true" hidden></span>
+
+        <header class="stage-header">
+          <p class="stage-name">나의 방 <span>UNKNOWN RE:DRAW ROOM</span></p>
+          <div class="stage-tools">
+            <button id="sound" type="button" aria-pressed="false">소리 끄기</button>
+            <button id="gallery-return" type="button" hidden>방 전체 보기</button>
+            <button id="back" type="button">표지</button>
+          </div>
+        </header>
+
+        <div id="loading" class="loading" role="status" hidden><div class="loading-dot"></div><p>준희의 방을 열고 있어요.</p></div>
+
+        <div class="intro-controls">
+          <button id="skip" type="button" hidden>넘기기 <span aria-hidden="true">↗</span></button>
+        </div>
+
+        <div id="title-motion" class="title-motion" hidden aria-hidden="true">
+          <span class="title-top">나의 방</span>
+          <span class="title-bottom">UNKNOWN <b>RE:DRAW</b> ROOM</span>
+        </div>
+
+        <button id="paper" class="scene-target target-paper" type="button" hidden><span class="reticle" aria-hidden="true"></span><span>메모 집기</span></button>
+        <button id="tray" class="scene-target target-tray" type="button" hidden><span class="reticle" aria-hidden="true"></span><span>자료함에 놓기</span></button>
+        <button id="film" class="scene-target target-film" type="button" hidden><span class="reticle" aria-hidden="true"></span><span>필름 릴 집기</span></button>
+        <button id="projector" class="scene-target target-projector" type="button" hidden><span class="reticle" aria-hidden="true"></span><span>영사기에 장착</span></button>
+        <button id="exhibit-target" class="scene-target target-exhibit" type="button" hidden><span class="reticle" aria-hidden="true"></span><span>정리할 물건</span></button>
+        <video id="theater-video" preload="none" playsinline aria-label="일루지오 상영 화면" hidden></video>
+        <input id="theater-file" type="file" accept="video/mp4,video/webm" hidden>
+        <p id="wrong-place" class="wrong-place" aria-live="polite"></p>
+
+        <aside id="dialogue" class="dialogue" hidden aria-label="준희의 안내">
+          <span class="speaker" id="speaker">준희</span>
+          <p id="speech" aria-live="polite"></p>
+          <div class="dialogue-actions">
+            <button id="task-main" type="button" hidden></button>
+            <button id="task-extra" type="button" hidden></button>
+          </div>
+        </aside>
+
+        <div id="quest" class="quest" hidden>
+          <span class="quest-mark" aria-hidden="true"></span>
+          <div><strong id="quest-title">첫 정리</strong><span id="quest-detail">흩어진 기획 메모</span></div>
+          <span id="counter">0 / 1</span>
+        </div>
+        <nav id="gallery" class="gallery" aria-label="작품 자리" hidden>
+          <div class="gallery-head"><strong>작품 자리</strong><span id="gallery-count"></span></div>
+          <div class="gallery-route">
+            <p id="route-description" aria-live="polite"></p>
+            <button id="route-next" class="route-next" aria-describedby="route-description" type="button">짧은 관람 시작</button>
+          </div>
+          <div id="gallery-cards" class="gallery-cards"></div>
+          <button id="gallery-dawn" class="gallery-dawn" type="button" hidden>준희와 창 열기</button>
+        </nav>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="info">
+    <form method="dialog"><button class="dialog-close" aria-label="닫기">닫기</button></form>
+    <h2 id="info-heading"></h2>
+    <div id="info-content"></div>
+  </dialog>
+  <dialog id="work-view" class="work-view">
+    <form method="dialog"><button class="dialog-close" aria-label="닫기">감상 닫기</button></form>
+    <h2 id="work-title"></h2>
+    <div id="work-body"></div>
+  </dialog>
+</body>
+</html>

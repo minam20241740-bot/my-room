@@ -1,0 +1,68 @@
+/* C안 해솔항 월드의 화면 표시(표지 분위기): 검정 판, 흰 테두리, 형광 연두 하나, 비스듬한 판과 사선 띠. 가장자리에 작게 둔다. */
+.w-loc, .w-obj, .w-mini, .w-q, .w-sp, .w-keys, .w-prompt, .w-tags, .w-flash, .w-fade, .w-haz, .w-base { pointer-events: none; }
+.w-haz { position: absolute; height: 18px; background: repeating-linear-gradient(-60deg, var(--lime) 0 12px, transparent 12px 24px); }
+.w-haz.a { left: 0; top: 0; width: 330px; clip-path: polygon(0 0, 100% 0, calc(100% - 18px) 100%, 0 100%); }
+.w-haz.b { right: 40px; bottom: 16px; width: 240px; clip-path: polygon(18px 0, 100% 0, 100% 100%, 0 100%); }
+.w-base { position: absolute; left: 0; right: 0; bottom: 0; height: 6px; background: var(--lime); }
+.w-base::after { content: ''; position: absolute; left: 40px; bottom: 14px; width: 120px; height: 6px; background: var(--lime); box-shadow: 130px 0 0 0 rgba(255, 255, 255, .45); }
+.w-loc { position: absolute; left: 56px; top: 40px; }
+.w-loc small { display: inline-block; font-size: 24px; font-weight: 900; color: #05070d; background: var(--lime); padding: 2px 22px 4px 16px; letter-spacing: .06em; transform: skewX(-10deg); }
+.w-loc b { display: block; margin-top: 4px; font-size: 56px; font-weight: 900; font-style: italic; color: #ffffff; line-height: 1.1; text-shadow: 5px 5px 0 #000000, -2px -2px 0 #000000, 2px -2px 0 #000000, -2px 2px 0 #000000; }
+.w-obj { position: absolute; left: 56px; top: 150px; display: flex; align-items: center; gap: 18px; padding: 12px 40px 12px 14px; min-width: 420px; background: rgba(5, 7, 12, .92); border-left: 12px solid var(--lime); border-bottom: 3px solid #ffffff; clip-path: polygon(0 0, 100% 0, calc(100% - 28px) 100%, 0 100%); }
+.w-obj .arr { width: 74px; height: 74px; border-radius: 50%; background: rgba(223, 255, 26, .1); border: 4px solid var(--lime); display: flex; align-items: center; justify-content: center; transition: transform .08s linear; flex: none; }
+.w-obj .arr svg { width: 40px; height: 40px; fill: var(--lime); }
+.w-obj small { display: block; font-size: 24px; font-weight: 800; color: var(--mute); }
+.w-obj b { display: block; font-size: 34px; font-weight: 900; color: #ffffff; line-height: 1.2; }
+.w-obj em { display: block; font-style: normal; font-size: 26px; font-weight: 900; color: var(--lime); }
+.w-sp { position: absolute; left: 60px; top: 268px; font-size: 26px; font-weight: 800; color: #ffffff; background: rgba(5, 7, 12, .8); padding: 4px 26px 6px 18px; border-left: 8px solid #ffffff; transform: skewX(-10deg); }
+.w-sp i { font-style: normal; color: var(--lime); margin-right: 6px; }
+.w-sp b { color: var(--lime); font-size: 30px; }
+.w-mini { position: absolute; right: 56px; top: 40px; width: 270px; height: 270px; }
+#field .w-mini canvas { position: static; width: 270px; height: 270px; border-radius: 50%; background: #05070d; box-shadow: 0 0 0 4px #ffffff, 0 0 0 9px #05070d, 0 0 0 13px var(--lime); }
+.w-mini u { position: absolute; left: 135px; top: 7px; transform: translate(-50%, -50%) skewX(-10deg); text-decoration: none; background: var(--lime); color: #05070d; font-size: 24px; font-weight: 900; padding: 0 14px; }
+.w-mini span { position: absolute; left: 50%; bottom: -24px; transform: translateX(-50%) skewX(-10deg); white-space: nowrap; background: #05070d; color: #ffffff; font-size: 24px; font-weight: 900; padding: 4px 28px 6px; border: 2px solid #ffffff; border-left: 10px solid var(--lime); }
+.w-q { position: absolute; right: 56px; top: 362px; width: 410px; display: flex; flex-direction: column; gap: 10px; align-items: flex-end; }
+.wq { position: relative; width: 100%; background: rgba(5, 7, 12, .78); padding: 8px 24px 10px 30px; text-align: right; clip-path: polygon(24px 0, 100% 0, 100% 100%, 0 100%); }
+.wq i { position: absolute; left: 0; top: 0; bottom: 0; width: 10px; background: #ffffff; }
+.wq.on i { background: var(--lime); }
+.wq span { display: block; font-size: 28px; font-weight: 900; color: #ffffff; }
+.wq small { display: block; font-size: 24px; font-weight: 700; color: var(--mute); }
+.wq.on { background: rgba(5, 7, 12, .94); }
+.wq.on small { color: var(--lime); }
+.w-party { position: absolute; left: 56px; bottom: 50px; display: flex; flex-direction: column-reverse; gap: 10px; }
+.wp { pointer-events: auto; position: relative; display: flex; align-items: center; gap: 14px; width: 330px; height: 84px; padding: 0 30px 0 16px; background: rgba(5, 7, 12, .9); color: #ffffff; border: 2px solid rgba(255, 255, 255, .7); text-align: left; transform: skewX(-8deg); box-shadow: 6px 6px 0 rgba(0, 0, 0, .6); }
+.wp > * { transform: skewX(8deg); }
+.wp.on { width: 390px; height: 104px; background: var(--lime); color: #05070d; border-color: #05070d; }
+.wp b { position: absolute; left: 0; top: 0; width: 32px; height: 32px; background: #ffffff; color: #05070d; font-size: 24px; text-align: center; line-height: 32px; }
+.wp.on b { background: #05070d; color: var(--lime); }
+.wp .fc { width: 62px; height: 62px; border-radius: 0; border: 3px solid #ffffff; flex: none; background-size: cover; background-position: center; }
+.wp.on .fc { width: 82px; height: 82px; border-color: #05070d; }
+.wp strong { display: block; font-size: 30px; font-weight: 900; }
+.wp small { display: block; font-size: 24px; font-weight: 800; color: var(--lime); }
+.wp.on small { color: #05070d; }
+.wp.empty { opacity: .5; }
+.w-keys { position: absolute; right: 300px; bottom: 34px; display: flex; gap: 16px; font-size: 24px; font-weight: 800; color: #ffffff; background: rgba(5, 7, 12, .8); padding: 6px 24px 8px; transform: skewX(-10deg); }
+.w-keys kbd, .w-prompt kbd { display: inline-block; font-family: inherit; min-width: 36px; text-align: center; padding: 0 10px; margin-right: 8px; background: var(--lime); color: #05070d; font-weight: 900; }
+.w-prompt { position: absolute; left: 50%; bottom: 300px; transform: translateX(-50%) skewX(-10deg) scale(.9); opacity: 0; transition: opacity .12s, transform .12s; white-space: nowrap; background: #05070d; color: #ffffff; font-size: 34px; font-weight: 900; padding: 10px 44px 12px 22px; border: 3px solid #ffffff; border-left: 14px solid var(--lime); box-shadow: 8px 8px 0 #000000; }
+.w-prompt.on { opacity: 1; transform: translateX(-50%) skewX(-10deg) scale(1); }
+.w-prompt kbd { font-size: 32px; min-width: 46px; margin-right: 14px; }
+.w-tags { position: absolute; inset: 0; }
+.w-tag { position: absolute; transform: translate(-50%, -100%); display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.w-tag i { font-style: normal; width: 42px; height: 42px; background: var(--lime); color: #05070d; font-size: 30px; font-weight: 900; line-height: 42px; text-align: center; transform: rotate(45deg); animation: bob 1s ease-in-out infinite; }
+.w-tag span { background: #05070d; color: #ffffff; font-size: 24px; font-weight: 900; padding: 2px 18px 4px; white-space: nowrap; border-left: 8px solid var(--lime); transform: skewX(-10deg); }
+.w-tag.wild span { background: #3a0710; color: #ffffff; border-left-color: var(--rd); border-bottom: 2px solid var(--rd); }
+.w-tag.wild i { background: var(--rd); color: #ffffff; }
+.w-flash { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: repeating-linear-gradient(-60deg, rgba(255, 59, 78, 0) 0 80px, rgba(255, 59, 78, .18) 80px 160px); animation: wflash .95s ease-out forwards; }
+.w-flash span { font-size: 96px; font-weight: 900; font-style: italic; color: #ffffff; -webkit-text-stroke: 12px #000000; paint-order: stroke fill; transform: skewX(-8deg); text-shadow: 10px 10px 0 var(--lime); }
+@keyframes wflash { 0% { opacity: 0; } 15% { opacity: 1; } 100% { opacity: 1; } }
+.w-fade { position: absolute; inset: 0; background: #020408; opacity: 0; transition: opacity .4s; }
+.w-fade.on { opacity: 1; }
+.w-bigmap { display: block; width: 1360px; height: 700px; }
+#pop .ql { border-left: 10px solid var(--lime); padding: 6px 18px 8px; margin: 10px 0; background: rgba(255, 255, 255, .06); }
+#pop .ql.side { border-left-color: #ffffff; }
+#pop .ql b { font-size: 34px; }
+#pop .ql small { margin-left: 14px; font-size: 24px; opacity: .75; }
+#pop .ql p { margin: 4px 0 0; font-size: 28px; }
+#pop .ql-sp { margin-top: 18px; font-weight: 900; color: var(--lime); }
+.noanim .w-prompt, .noanim .w-obj .arr { transition: none; }
+.noanim .w-tag i, .noanim .w-flash { animation: none; }

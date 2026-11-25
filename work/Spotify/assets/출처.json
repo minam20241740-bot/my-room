@@ -1,0 +1,14 @@
+{
+  "visuals": "C:\\Users\\Administrator\\Downloads\\2026작업물초심찾기프로젝트\\output\\20261119_수업제출_검수\\개인작품_최신판_재개봉\\열람\\126\\06_개인작업\\스포티파이_리뉴얼\\02_편집원본\\스포티파이_리뉴얼_1203판.fig",
+  "selected_image_indices": {
+    "1": "zaza",
+    "10": "uber",
+    "20": "koyote",
+    "21": "cool5",
+    "22": "bus",
+    "29": "pop",
+    "76": "whisper"
+  },
+  "audio": "prepare_assets.py에서 직접 합성한 16초 시연 소리. 카탈로그 곡 음원과 무관.",
+  "plan": "recovered-spotify.pdf 16~30쪽 IA 및 기존 App/Desktop/Tab 시안"
+}

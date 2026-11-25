@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ko"><head>
+<meta name="robots" content="noindex, nofollow, noarchive"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>포스터 전시관</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:#0d0b12;font-family:Pretendard,"Noto Sans KR",system-ui,sans-serif;color:#fff}
+.stage{position:fixed;inset:0;perspective:700px;perspective-origin:50% 46%;overflow:hidden}
+.scene{position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d;transition:transform .35s cubic-bezier(.2,.7,.2,1)}
+.pl{position:absolute;left:0;top:0;backface-visibility:hidden}
+.floor{width:720px;height:3200px;margin:-1600px 0 0 -360px;transform:translate3d(0,260px,-1600px) rotateX(90deg);background:repeating-linear-gradient(0deg,#2a1d16 0 118px,#241812 118px 120px),linear-gradient(#3a2a20,#1f150f)}
+.ceil{width:720px;height:3200px;margin:-1600px 0 0 -360px;transform:translate3d(0,-260px,-1600px) rotateX(-90deg);background:repeating-linear-gradient(0deg,#e8e0d2 0 300px,#fff7e0 300px 330px)}
+.wall{width:3200px;height:520px;margin:-260px 0 0 -1600px;background:linear-gradient(#e9e2d6,#d8cfbf)}
+.wl{transform:translate3d(-360px,0,-1600px) rotateY(90deg)}
+.wr{transform:translate3d(360px,0,-1600px) rotateY(-90deg)}
+.we{width:720px;height:520px;margin:-260px 0 0 -360px;transform:translate3d(0,0,-3200px);background:#cfc6b6}
+.base{position:absolute;left:0;right:0;bottom:0;height:34px;background:#8a7860}
+.art{position:absolute;top:60px;background:#111;padding:14px;box-shadow:0 18px 30px rgba(0,0,0,.35);cursor:pointer}
+.art img{display:block;height:100%;width:auto}
+.cap{position:absolute;top:430px;font-size:20px;font-weight:700;color:#3a342a;white-space:nowrap}
+.cap small{display:block;font-weight:500;font-size:15px;color:#6a6252}
+.spot{position:absolute;top:0;height:500px;background:radial-gradient(ellipse at 50% 18%,rgba(255,236,190,.55),rgba(255,236,190,0) 62%);pointer-events:none}
+.hud{position:fixed;left:24px;top:20px;z-index:5;text-shadow:0 2px 8px #000}
+.hud h1{margin:0;font-size:26px}.hud p{margin:6px 0 0;font-size:15px;opacity:.85}
+.pet{position:fixed;top:-30px;width:14px;height:10px;border-radius:70% 0 70% 0;background:#ffc2d6;opacity:.85;z-index:4;animation:fall linear infinite;pointer-events:none}
+@keyframes fall{to{transform:translate3d(120px,115vh,0) rotate(540deg)}}
+.lb{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:9;cursor:pointer}.lb img{max-height:90vh;max-width:90vw}
+.bar{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:5;display:flex;gap:10px}
+.bar button{font:inherit;font-size:16px;padding:10px 20px;border-radius:999px;border:0;background:#fff;color:#111;font-weight:700;cursor:pointer}
+body.nohud .hud,body.nohud .bar{display:none}
+.sheet{position:absolute;inset:0;background:repeating-linear-gradient(135deg,#eceaf2 0 14px,#e2dfea 14px 28px);display:flex;align-items:center;justify-content:center;transition:transform .9s cubic-bezier(.5,0,.2,1),opacity .9s;z-index:2}.sheet b{font-size:90px;color:#a8a3bd}.art.open .sheet{transform:translateY(-105%);opacity:0;pointer-events:none}.say{position:fixed;left:24px;top:84px;z-index:6;display:flex;gap:14px;align-items:flex-start;max-width:min(560px,86vw)}.say img{width:84px;height:84px;border-radius:50%;object-fit:cover;border:4px solid #fff;box-shadow:0 6px 18px rgba(0,0,0,.4);flex:none}.say div{background:#fff;color:#1b1b2a;border-radius:6px 20px 20px 20px;padding:14px 18px;font-size:17px;line-height:1.55;box-shadow:0 8px 22px rgba(0,0,0,.35)}.say b{display:block;font-size:13px;letter-spacing:.14em;color:#6a5bd6;margin-bottom:4px}.say a{display:inline-block;margin-top:8px;padding:7px 16px;border-radius:999px;background:#2f5fd8;color:#fff;text-decoration:none;font-weight:700;font-size:15px}.cnt{position:fixed;right:24px;top:22px;z-index:6;background:rgba(255,255,255,.92);color:#1b1b2a;border-radius:999px;padding:10px 20px;font-weight:800;font-size:18px}body.nohud .say,body.nohud .cnt{display:none}.burst{position:fixed;top:40%;width:16px;height:11px;border-radius:70% 0 70% 0;background:#ffb3cb;z-index:7;pointer-events:none;animation:bur 2.4s cubic-bezier(.2,.7,.3,1) forwards}@keyframes bur{to{transform:translate3d(var(--dx),var(--dy),0) rotate(720deg);opacity:0}}</style></head><body>
+<div class="hud"><h1>포스터 전시관</h1><p>가려진 포스터를 찾아 가림천을 눌러 보세요. 찾은 포스터는 누르면 크게 보입니다.</p></div>
+<div class="say" id="say"><img src="junhee_face.jpg" alt="준희"><div><b>준희</b><span id="sayt"></span></div></div><div class="cnt" id="cnt">찾은 포스터 0 / 4</div>
+<div class="stage"><div class="scene" id="sc">
+ <div class="pl floor"></div><div class="pl ceil"></div>
+ <div class="pl wall wl" id="wl"><div class="base"></div></div>
+ <div class="pl wall wr" id="wr"><div class="base"></div></div>
+ <div class="pl we"></div>
+</div></div>
+<div class="bar"><button id="b1">뒤로</button><button id="b2">앞으로</button></div>
+<div class="lb" id="lb"><img id="lbi" alt=""></div>
+<script>
+const P=[
+ {side:'l',at:800,h:340,src:'p_cherry.jpg',t:'서울 벚꽃 축제',s:'새 디자인 · 2024 축제 포스터'},
+ {side:'r',at:1050,h:340,src:'p_ddp.jpg',t:'DDP 그리드 포스터',s:'새 디자인 · 서울 디자인 워크숍'},
+ {side:'l',at:1600,h:340,src:'p_bluky.jpg',t:'BLUKY',s:'새 디자인 · 브랜드 포스터'},
+ {side:'r',at:1850,h:340,src:'p_akmu.jpg',t:'AKMU DINOSAUR',s:'새 디자인 · 앨범 표지'}
+];
+const ARTS=[];let FOUND=0;const SAY={'서울 벚꽃 축제':'서울 벚꽃 축제 포스터다. 봄 냄새가 나네.','DDP 그리드 포스터':'DDP 포스터. 칸이 딱딱 맞아 있어서 마음에 들어.','BLUKY':'BLUKY. 하늘색이 정말 맑다.','AKMU DINOSAUR':'AKMU 앨범 표지다. 바로 틀어 볼까?'};
+function say(t,link){document.getElementById('sayt').innerHTML=t+(link?'<br><a href="'+link[0]+'">'+link[1]+'</a>':'')}
+function burst(){for(let i=0;i<70;i++){const e=document.createElement('i');e.className='burst';e.style.left=(30+Math.random()*40)+'vw';e.style.setProperty('--dx',(Math.random()*500-250)+'px');e.style.setProperty('--dy',(Math.random()*500-120)+'px');e.style.animationDelay=(Math.random()*.3)+'s';document.body.appendChild(e);setTimeout(()=>e.remove(),3000)}}
+function open_(a,p){a.classList.add('open');FOUND++;document.getElementById('cnt').textContent='찾은 포스터 '+FOUND+' / 4';if(p.t==='서울 벚꽃 축제')burst();say(FOUND===4?'네 장 다 찾았다. 이제 전시를 열 수 있겠어. 마음에 드는 포스터를 눌러 크게 봐.':SAY[p.t],p.t==='AKMU DINOSAUR'?['../Album/index.html','앨범 재생해 보기']:null)}
+say('포스터 네 장이 어디 갔더라. 같이 찾아 줘. 벽에 걸린 가림천을 눌러 보자. W · S 또는 휠로 걸어갈 수 있어.');
+const L=document.getElementById('wl'),R=document.getElementById('wr');
+P.forEach(p=>{const w=p.side==='l'?L:R;const x=p.side==='l'?p.at:3200-p.at;
+ const a=document.createElement('div');a.className='art';a.style.left=(x-150)+'px';a.style.height=p.h+'px';a.innerHTML='<img alt="'+p.t+'" src="'+p.src+'">';
+ a.insertAdjacentHTML('beforeend','<div class="sheet"><b>?</b></div>');a.onclick=()=>{if(!a.classList.contains('open')){open_(a,p)}else{lbi.src=p.src;lb.style.display='flex'}};ARTS.push(a);w.appendChild(a);
+ const c=document.createElement('div');c.className='cap';c.style.left=(x-150)+'px';c.innerHTML=p.t+'<small>'+p.s+'</small>';w.appendChild(c);
+ const sp=document.createElement('div');sp.className='spot';sp.style.left=(x-300)+'px';sp.style.width='600px';w.appendChild(sp)});
+const lb=document.getElementById('lb'),lbi=document.getElementById('lbi');lb.onclick=()=>lb.style.display='none';
+const q=new URLSearchParams(location.search);if(q.get('found')==='all'){document.querySelectorAll('.sheet').forEach(x=>x.parentNode.classList.add('open'))}if(q.get('hud')==='0')document.body.classList.add('nohud');
+let z=+(q.get('z')||0);const MAX=2500;const sc=document.getElementById('sc');
+function go(d){z=Math.max(0,Math.min(MAX,z+d));sc.style.transform='translateZ('+z+'px)'}
+if(q.get('z')!==null){sc.style.transition='none';sc.style.transform='translateZ('+z+'px)'}else go(0);
+addEventListener('wheel',e=>{go(e.deltaY>0?-120:120)},{passive:true});
+addEventListener('keydown',e=>{if(e.key==='w'||e.key==='ArrowUp')go(160);if(e.key==='s'||e.key==='ArrowDown')go(-160)});
+document.getElementById('b1').onclick=()=>go(-300);document.getElementById('b2').onclick=()=>go(300);
+if(q.get('petals')!=='0')for(let i=0;i<26;i++){const e=document.createElement('i');e.className='pet';e.style.left=Math.random()*100+'vw';e.style.animationDuration=(7+Math.random()*7)+'s';e.style.animationDelay=(-Math.random()*12)+'s';e.style.transform='scale('+(.7+Math.random()*.8)+')';document.body.appendChild(e)}
+</script></body></html>

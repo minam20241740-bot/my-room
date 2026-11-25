@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta name="robots" content="noindex, nofollow, noarchive">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>캠퍼스 마켓</title>
+  <link rel="icon" type="image/svg+xml" href="assets/brand/logo-mark.svg">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="header">
+    <div class="container header-bar">
+      <h1 class="brand">
+        <a href="#home" class="brand-link">
+          <img src="assets/brand/logo-mark.svg" width="28" height="28" alt="">
+          <span class="brand-name">캠퍼스 마켓</span>
+        </a>
+      </h1>
+      <nav class="nav" aria-label="주요 메뉴">
+        <a href="#home" class="nav-link">홈</a>
+        <a href="#items" class="nav-link">나눔 물품</a>
+        <a href="#mine" class="nav-link">내 신청</a>
+        <a href="#guide" class="nav-link">이용 안내</a>
+      </nav>
+      <div class="header-actions">
+        <button type="button" class="btn btn-accent btn-sm" id="openRegisterBtn">나눔 등록</button>
+        <span class="user"><span class="avatar" aria-hidden="true">지</span><span class="user-name">김지현님</span></span>
+      </div>
+    </div>
+  </header>
+
+  <div class="notice" id="notice">
+    <div class="container notice-inner">
+      <span class="notice-label">공지 3</span>
+      <ul class="notice-list" id="noticeList">
+        <li>[점검 안내] 9월 11일(금) 18:00–20:00 서비스 점검이 예정되어 있습니다.</li>
+        <li>[운영 안내] 9월 9일(수)–11일(금)은 학생복지위원회 문의 답변이 늦어질 수 있습니다.</li>
+        <li>[이용 안내] 9월 14일(월)까지 학기 초 나눔이 집중됩니다. 약속 시간을 미리 확인해 주세요.</li>
+      </ul>
+      <button type="button" class="notice-btn" id="noticeToggle" aria-expanded="false" aria-controls="noticeList">
+        <span class="notice-toggle-text">펼치기</span>
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><polyline points="6 9 12 15 18 9" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      </button>
+      <button type="button" class="notice-btn" id="noticeClose" aria-label="공지 닫기">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <main>
+    <section id="home" class="hero" aria-labelledby="heroTitle">
+      <img src="assets/extra/hero-wide.jpg" alt="" class="hero-bg">
+      <div class="container hero-inner">
+        <h2 id="heroTitle" class="hero-title">학교 안에서 쓰던 물건을 무료로 주고받는 곳</h2>
+        <p class="hero-desc">나눔자가 정한 장소에서 직접 만나 받습니다.</p>
+        <form class="search" role="search" id="searchForm">
+          <label for="searchInput" class="visually-hidden">물품 검색</label>
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2"/></svg>
+          <input type="search" id="searchInput" placeholder="물건 이름이나 분류로 검색" autocomplete="off">
+        </form>
+      </div>
+    </section>
+
+    <section id="items" class="section container" aria-labelledby="itemsTitle">
+      <div class="chips" role="group" aria-label="분류">
+        <button type="button" class="chip" data-category="all" aria-pressed="true">전체</button>
+        <button type="button" class="chip" data-category="elec" aria-pressed="false">가전제품</button>
+        <button type="button" class="chip" data-category="furniture" aria-pressed="false">가구/소품</button>
+        <button type="button" class="chip" data-category="book" aria-pressed="false">전공서적</button>
+        <button type="button" class="chip" data-category="etc" aria-pressed="false">기타</button>
+      </div>
+      <div class="section-head">
+        <h2 id="itemsTitle" class="section-title">나눔 물품 <span class="count" id="itemCount">0</span>개</h2>
+        <label class="toggle"><input type="checkbox" id="openOnly"> 나눔 중만 보기</label>
+      </div>
+      <div class="item-grid" id="itemGrid"></div>
+      <div class="empty" id="itemEmpty" hidden>
+        <img src="assets/extra/empty-box.jpg" alt="" class="empty-img">
+        <p id="itemEmptyText"></p>
+        <button type="button" class="btn btn-secondary" id="resetFilters">전체 물품 보기</button>
+      </div>
+    </section>
+
+    <section id="mine" class="section container" aria-labelledby="mineTitle">
+      <h2 id="mineTitle" class="section-title">내 신청</h2>
+      <div class="tabs" role="tablist" aria-label="신청 상태" id="mineTabs"></div>
+      <div class="mine-wrap">
+        <table class="mine-table">
+          <thead>
+            <tr><th scope="col">물품</th><th scope="col">나눔자 · 장소</th><th scope="col">수령 시간</th><th scope="col">상태</th><th scope="col"><span class="visually-hidden">취소</span></th></tr>
+          </thead>
+          <tbody id="myList"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="guide" class="section container" aria-labelledby="guideTitle">
+      <h2 id="guideTitle" class="section-title">이용 안내</h2>
+      <div class="guide">
+        <div class="guide-steps">
+          <h3 class="guide-sub">진행 순서</h3>
+          <ol class="steps">
+            <li><strong>신청 및 수락</strong><p>신청이 접수되면 나눔자가 확인 후 한 명을 선택합니다. 시간이 맞지 않으면 반려될 수 있습니다.</p></li>
+            <li><strong>직거래 원칙</strong><p>물품에 표시된 장소에서 직접 만나 학생증을 확인한 뒤 나눔을 진행합니다.</p></li>
+            <li><strong>상태 확인</strong><p>물품 상태는 사진과 다를 수 있습니다. 현장에서 확인하고 마음에 들지 않으면 거절할 수 있습니다.</p></li>
+          </ol>
+        </div>
+        <figure class="guide-photo">
+          <img src="assets/extra/handoff.jpg" alt="천으로 감싼 스탠드를 두 사람이 손으로 주고받는 모습">
+        </figure>
+      </div>
+      <div class="rules">
+        <h3 class="guide-sub">꼭 지켜 주세요</h3>
+        <ul class="rules-list">
+          <li><strong>노쇼 페널티</strong><p>약속 시간에 나타나지 않으면 신청이 자동 취소되며, 이후 이용에 불이익이 생길 수 있습니다.</p></li>
+          <li><strong>무료 원칙</strong><p>나눔은 무료입니다. 어떤 명목으로든 금전을 요구받으면 신고해 주세요.</p></li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <span class="brand-link footer-brand"><img src="assets/brand/logo-mark.svg" width="24" height="24" alt=""><span class="brand-name">캠퍼스 마켓</span></span>
+      <p>학생복지위원회 · 문의 02-000-0000</p>
+      <p class="copyright">© 2026 캠퍼스 마켓</p>
+    </div>
+  </footer>
+
+  <div class="modal" id="detailModal" hidden>
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+      <button type="button" class="modal-close" data-close aria-label="닫기">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      </button>
+
+      <div class="view" id="detailView">
+        <div class="detail-media" id="detailMedia"></div>
+        <div class="modal-body">
+          <span class="badge" id="detailBadge"></span>
+          <h2 class="modal-title" id="detailTitle"></h2>
+          <p class="detail-meta" id="detailMeta"></p>
+          <p class="detail-desc" id="detailDesc"></p>
+          <p class="notice-box" id="detailReason" hidden></p>
+          <button type="button" class="btn btn-primary btn-block" id="showApplyBtn">나눔 신청하기</button>
+          <button type="button" class="btn btn-secondary btn-block" id="goMineFromDetail" hidden>내 신청에서 보기</button>
+        </div>
+      </div>
+
+      <div class="view" id="applyView" hidden>
+        <div class="apply-head">
+          <button type="button" class="icon-btn" id="backToDetail" aria-label="물품 정보로 돌아가기">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+          </button>
+          <div class="apply-thumb" id="applyThumb"></div>
+          <p class="apply-item" id="applyItem"></p>
+        </div>
+        <form class="modal-body" id="applyForm" novalidate>
+          <h2 class="modal-title" id="applyTitle">나눔 신청</h2>
+          <div class="field-row">
+            <div class="field"><label for="applyDate">희망 수령 날짜</label><input type="date" id="applyDate" required></div>
+            <div class="field"><label for="applyTime">희망 수령 시간</label><input type="time" id="applyTime" required></div>
+          </div>
+          <div class="field"><label for="applyName">이름</label><input type="text" id="applyName" value="김지현" autocomplete="name" required></div>
+          <div class="field-row">
+            <div class="field"><label for="applySid">학번</label><input type="text" id="applySid" value="20241234" inputmode="numeric" required></div>
+            <div class="field"><label for="applyPhone">연락처</label><input type="tel" id="applyPhone" value="010-1234-5678" autocomplete="tel" required></div>
+          </div>
+          <label class="check"><input type="checkbox" id="applyAgree"> 약속 시간에 나타나지 않으면 신청이 취소되고 페널티가 부여되는 데 동의합니다.</label>
+          <p class="form-error" id="applyError" role="alert"></p>
+          <button type="submit" class="btn btn-primary btn-block">신청 완료하기</button>
+        </form>
+      </div>
+
+      <div class="view done-view" id="doneView" hidden>
+        <div class="modal-body">
+          <svg class="done-icon" viewBox="0 0 48 48" width="48" height="48" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="#D6FBD9"/><path d="m15 24 6 6 12-12" fill="none" stroke="#003049" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <h2 class="modal-title" id="doneTitle">신청이 완료되었습니다</h2>
+          <p class="done-desc" id="doneDesc"></p>
+          <button type="button" class="btn btn-primary btn-block" id="goMineBtn">내 신청 보기</button>
+          <button type="button" class="btn btn-secondary btn-block" data-close>계속 둘러보기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="registerModal" hidden>
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="registerTitle">
+      <button type="button" class="modal-close" data-close aria-label="닫기">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      </button>
+      <form class="view modal-body" id="registerForm" novalidate>
+        <h2 class="modal-title" id="registerTitle">나눔 등록</h2>
+        <div class="field"><label for="regTitle">물품 이름</label><input type="text" id="regTitle" placeholder="예: 무선 마우스" maxlength="40" required></div>
+        <div class="field"><label for="regCategory">분류</label>
+          <select id="regCategory">
+            <option value="elec">가전제품</option>
+            <option value="furniture">가구/소품</option>
+            <option value="book">전공서적</option>
+            <option value="etc">기타</option>
+          </select>
+        </div>
+        <div class="field"><label for="regDesc">상세 설명</label><textarea id="regDesc" rows="4" placeholder="사용 기간과 상태를 적어 주세요" required></textarea></div>
+        <div class="field"><label for="regPlace">수령 장소</label><input type="text" id="regPlace" placeholder="예: 학생회관 앞" maxlength="30" required></div>
+        <div class="field"><label for="regFile">사진 <span class="optional">(선택)</span></label><input type="file" id="regFile" accept="image/*"></div>
+        <p class="form-error" id="regError" role="alert"></p>
+        <button type="submit" class="btn btn-primary btn-block">등록하기</button>
+      </form>
+      <div class="view done-view" id="regDoneView" hidden>
+        <div class="modal-body">
+          <svg class="done-icon" viewBox="0 0 48 48" width="48" height="48" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="#D6FBD9"/><path d="m15 24 6 6 12-12" fill="none" stroke="#003049" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <h2 class="modal-title" id="regDoneTitle">나눔 물품을 등록했습니다</h2>
+          <p class="done-desc">목록 맨 앞에 추가되었습니다.</p>
+          <button type="button" class="btn btn-primary btn-block" id="showNewItemBtn">등록한 물품 보기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal modal-confirm" id="confirmModal" hidden>
+    <div class="modal-panel confirm-panel" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmMsg">
+      <div class="modal-body">
+        <h2 class="modal-title" id="confirmTitle"></h2>
+        <p class="confirm-msg" id="confirmMsg"></p>
+        <dl class="confirm-summary" id="confirmSummary" hidden></dl>
+        <div class="confirm-actions">
+          <button type="button" class="btn btn-secondary" id="confirmCancel"></button>
+          <button type="button" class="btn btn-primary" id="confirmOk"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,793 @@
+'use strict';
+/* 3D 현장. 도시 거리는 Kenney City Kit(CC0) 조각을 늘어놓아 만들고, 어두운 창고 안, 분수 광장 화방, 달빛 시계탑 안은 여기서 직접 만든다. 인물은 VRM·GLB 모델을 세운다.
+   비스듬히 내려다보는 시점이다. 모델 파일은 주소(http)로 열었을 때만 읽힌다. */
+window.Stage3D = (function () {
+  const T = window.THREE, K = 4.6, RS = 8;   // K: 건물·소품 한 칸의 크기(m), RS: 차도 조각의 크기(m)
+  const ROAD_Z = 0, WALK_Z = -5.3, SHOP_Z = -8.9;   // 차도 가운데, 가게 앞 보도, 건물 줄
+  let renderer, scene, camera, sun, hemi, lamp, lampOf = null, lampPow = 1, city, ware, chest, cabin, doorG, cloud, paintM, tower, tw, shk = 0, cur = 'street', fxg, raf = 0, last = 0, onTick = null, loadP = null;
+  const lib = { sc: {} }, actors = [], fx = [], LAMP = 36;   // LAMP: 말랑불 불빛의 세기
+  let lastShadow = -Infinity;
+  const supportSurfaces = {}, groundRay = new T.Raycaster(), solePoint = new T.Vector3();
+  groundRay.ray.direction.set(0, -1, 0); groundRay.far = .75;
+  const focus = new T.Vector3(), want = new T.Vector3();
+  const CAM = { side: -3.2, up: 10, back: 12.5, fov: 30 };
+  // 카메라 자리. field는 거리를 넓게 보여 주고, battle은 인물이 커 보이게 당긴다(훈련 중에는 field.js가 인물을 따라 움직인다)
+  const CAMS = { field: { side: -3.2, up: 10, back: 12.5 }, battle: { side: -1, up: 6.6, back: 8.6 } };
+  let zk = 1, zt = 1;   // 카메라 거리의 배율(지금 값, 목표 값). 훈련에서 팀과 상대가 멀어지면 field.js가 키운다
+  function camMode(n) { Object.assign(CAM, CAMS[n] || CAMS.field); zk = zt = 1; }
+
+  function ok() {
+    if (!T || !window.GLTFLoader || !window.THREE_VRM || (location.protocol === 'file:' && !window.ArchiveModels)) return false;
+    try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch (e) { return false; }
+  }
+
+  // ── 준비 ──
+  function init(canvas) {
+    if (renderer) return;
+    renderer = new T.WebGLRenderer({ canvas: canvas, antialias: true });
+    fitDrawingBuffer();
+    addEventListener('resize', fitDrawingBuffer);
+    renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap;
+    scene = new T.Scene(); scene.background = new T.Color('#cdeaff'); scene.fog = new T.Fog('#cdeaff', 55, 130);
+    camera = new T.PerspectiveCamera(CAM.fov, 16 / 9, 0.5, 300);
+    hemi = new T.HemisphereLight('#ffffff', '#c3d2e6', 1.9); scene.add(hemi);
+    lamp = new T.PointLight('#ffd08a', 0, 0, 2); lamp.castShadow = true; lamp.shadow.mapSize.set(1024, 1024); lamp.shadow.bias = -0.004;
+    lamp.shadow.camera.near = .2; lamp.shadow.camera.far = 20; lamp.visible = false; scene.add(lamp);   // 어두운 곳에서 친구가 내는 불빛
+    sun = new T.DirectionalLight('#fff1d2', 2.4); sun.castShadow = true;
+    sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0006; sun.shadow.normalBias = 0.04;
+    const sc = sun.shadow.camera; sc.left = -34; sc.right = 34; sc.top = 30; sc.bottom = -30; sc.near = 1; sc.far = 120;
+    scene.add(sun, sun.target);
+    fxg = new T.Group(); scene.add(fxg);
+    resetShadows();
+  }
+
+
+  function resetShadows() {
+    const native = window.GB?.save.graphics === 'native';
+    for (const [light, size] of [[sun, native ? 2048 : 1024], [lamp, native ? 1024 : 512]]) {
+      if (light.shadow.mapSize.x === size) continue;
+      if (light.shadow.map) {
+        light.shadow.map.dispose();
+        light.shadow.map = null;
+      }
+      light.shadow.mapSize.set(size, size);
+    }
+    renderer.shadowMap.autoUpdate = native;
+    renderer.shadowMap.needsUpdate = true;
+    lastShadow = -Infinity;
+  }
+
+  function render(now) {
+    if (!renderer.shadowMap.autoUpdate && now - lastShadow >= 45) {
+      renderer.shadowMap.needsUpdate = true;
+      lastShadow = now;
+    }
+    renderer.render(scene, camera);
+  }
+
+  function fitDrawingBuffer() {
+    if (!renderer) return;
+    const screenScale = Math.min(innerWidth / 1920, innerHeight / 1080) * (window.devicePixelRatio || 1);
+    const scale = Math.max(.4, Math.min(1, screenScale));
+    if (renderer.getPixelRatio() !== scale) renderer.setDrawingBufferSize(1920, 1080, scale);
+  }
+
+  const CITY = {
+    roads: ['road-straight', 'road-crossing', 'road-crossroad', 'light-square', 'light-curved', 'traffic-light', 'road-sign-street', 'construction-cone', 'construction-barrier', 'dumpster'],
+    commercial: ['building-a', 'building-b', 'building-c', 'building-d', 'building-e', 'building-f', 'building-g', 'building-h', 'building-i', 'building-j', 'building-k', 'building-l', 'building-m', 'building-n', 'detail-parasol-a', 'detail-parasol-b']
+  };
+  const CHR = {}; Object.keys(window.GAME.models).forEach(k => { CHR[k] = window.GAME.models[k].file; });   // 모델 파일은 js/data.js의 models에서 정한다
+
+  function load(onProg) {
+    if (loadP) return loadP;
+    const L = new window.GLTFLoader(); const loadAsset = (url, done, progress, fail) => window.ArchiveModels.load(L, url, done, fail); L.register(p => new window.THREE_VRM.VRMLoaderPlugin(p));
+    const jobs = []; let done = 0;
+    const add = (key, url) => jobs.push(new Promise((res, rej) => loadAsset(url, g => { lib[key] = g; done++; if (onProg) onProg(done / jobs.length); res(); }, undefined, rej)));
+    Object.keys(CITY).forEach(kit => CITY[kit].forEach(n => add(kit + '/' + n, 'assets/city/' + kit + '/' + n + '.glb')));
+    Object.keys(CHR).forEach(k => add(k, CHR[k]));
+    const fonts = document.fonts?.load('900 40px Pretendard', '달빛 탐정').catch(() => []);
+    loadP = Promise.all([Promise.all(jobs), fonts]).then(() => { buildCity(); buildWare(); buildCabin(); buildTower(); setScene('street'); });
+    loadP.catch(() => { loadP = null; });
+    return loadP;
+  }
+
+  // ── 도시 거리 ──
+  function piece(key, x, z, rot, s, y) {
+    const o = lib[key].scene.clone(true); o.position.set(x, y || 0, z); o.rotation.y = rot || 0; o.scale.setScalar(s || K);
+    o.traverse(m => { if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } });
+    city.add(o); return o;
+  }
+  function bright(o, k) { o.traverse(m => { if (m.isMesh) { m.material = m.material.clone(); m.material.color.setScalar(k); } }); return o; }
+  function tint(o, color) { o.traverse(m => { if (m.isMesh) { m.material = new T.MeshStandardMaterial({ color: color, roughness: .8 }); } }); return o; }
+  function signTex(text, bg, fg, w, h, moon) {
+    const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d');
+    g.fillStyle = bg; g.fillRect(0, 0, w, h); g.fillStyle = '#ffd92e'; g.fillRect(0, h - 14, w, 14);
+    let tx = w / 2;
+    if (moon) { g.fillStyle = '#ffd92e'; g.beginPath(); g.arc(70, h / 2 - 6, 38, 0, 7); g.fill(); g.fillStyle = bg; g.beginPath(); g.arc(88, h / 2 - 18, 34, 0, 7); g.fill(); tx = w / 2 + 34; }
+    g.fillStyle = fg; g.font = '900 ' + Math.round(h * .5) + 'px Pretendard, "Malgun Gothic", sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text, tx, h / 2 - 6);
+    const t = new T.CanvasTexture(c); t.colorSpace = T.SRGBColorSpace; t.anisotropy = 8; return t;
+  }
+  function awning(x, w, front, color) {
+    const c = document.createElement('canvas'); c.width = 64; c.height = 8; const g = c.getContext('2d'); g.fillStyle = '#ffffff'; g.fillRect(0, 0, 64, 8); g.fillStyle = color; g.fillRect(0, 0, 32, 8);
+    const t = new T.CanvasTexture(c); t.wrapS = T.RepeatWrapping; t.repeat.set(Math.round(w / .7), 1); t.colorSpace = T.SRGBColorSpace; t.magFilter = T.NearestFilter;
+    const m = new T.Mesh(new T.BoxGeometry(w, .07, 1.3), new T.MeshStandardMaterial({ map: t, roughness: .9 })); m.position.set(x, 2.22, front + .58); m.rotation.x = .36; m.castShadow = true; city.add(m);
+    const lip = new T.Mesh(new T.BoxGeometry(w, .22, .05), new T.MeshStandardMaterial({ color: color })); lip.position.set(x, 1.9, front + 1.2); city.add(lip);
+  }
+  function sign(text, x, y, z, w, h, bg, fg, moon) {
+    const m = new T.Mesh(new T.BoxGeometry(w, h, .18), [0, 0, 0, 0, 1, 0].map(f => new T.MeshStandardMaterial(f ? { map: signTex(text, bg, fg, 640, Math.round(640 * h / w), moon), roughness: .6 } : { color: bg })));
+    m.position.set(x, y, z); m.castShadow = true; city.add(m); return m;
+  }
+  function buildCity() {
+    city = new T.Group(); scene.add(city);
+    const ground = new T.Mesh(new T.PlaneGeometry(400, 400), new T.MeshStandardMaterial({ color: '#e3eaf3', roughness: 1 }));
+    ground.rotation.x = -Math.PI / 2; ground.position.y = -0.03; ground.receiveShadow = true; city.add(ground);
+    // 보도 무늬(가게 앞)
+    const pc = document.createElement('canvas'); pc.width = pc.height = 128; const pg = pc.getContext('2d');
+    pg.fillStyle = '#c6d3e2'; pg.fillRect(0, 0, 128, 128); pg.strokeStyle = '#aebfd0'; pg.lineWidth = 4; pg.strokeRect(0, 0, 128, 128);
+    const pt = new T.CanvasTexture(pc); pt.wrapS = pt.wrapT = T.RepeatWrapping; pt.repeat.set(60, 4); pt.colorSpace = T.SRGBColorSpace;
+    const walk = new T.Mesh(new T.PlaneGeometry(RS * 15, 3.4), new T.MeshStandardMaterial({ map: pt, roughness: 1 }));
+    walk.rotation.x = -Math.PI / 2; walk.position.set(RS, 0.02, WALK_Z - .6); walk.receiveShadow = true; city.add(walk);
+    const walk2 = walk.clone(); walk2.position.z = 5.7; city.add(walk2);
+    supportSurfaces.street = [ground, walk, walk2];
+    // 차도: 가운데 건널목, 오른쪽 끝 네거리
+    for (let i = -6; i <= 8; i++) supportSurfaces.street.push(bright(piece('roads/' + (i === -1 ? 'road-crossing' : i === 6 ? 'road-crossroad' : 'road-straight'), i * RS, ROAD_Z, 0, RS), 1.45));
+    // 가게 줄(먼 쪽). 달빛 베이커리는 가운데 넓은 건물이다.
+    const row = ['building-c', 'building-g', 'building-a', 'building-j', 'building-e', 'building-f', 'building-b', 'building-k', 'building-i', 'building-d', 'building-l'];
+    let x = -5.2 * K;
+    row.forEach((b, i) => { const wide = /-[ejk]$/.test(b) ? 1.75 : 1; x += wide * K * .5; piece('commercial/' + b, x, SHOP_Z, 0, K); if (b === 'building-e') lib.bakeryX = x; x += wide * K * .5 + .3; });
+    // 뒤쪽 한 줄 더(멀리 보이는 건물)
+    ['building-m', 'building-n', 'building-h', 'building-m', 'building-n', 'building-h', 'building-m'].forEach((b, i) => piece('commercial/' + b, (-4.6 + i * 1.7) * K, SHOP_Z - K * 1.45, 0, K * 1.5));
+    // 달빛 베이커리: 차양, 간판, 바깥 탁자
+    const bx = lib.bakeryX;
+    const front = SHOP_Z + K * .5;
+    awning(bx - 1.75, 3.5, front, '#ffd92e'); awning(bx + 2.35, 2.1, front, '#1a9df5');
+    sign('달빛 베이커리', bx, 3.35, front + .12, 5.4, 1.1, '#2d4663', '#ffffff', true);
+    const tx = bx + 5.4, tz = WALK_Z - .5;
+    piece('commercial/detail-parasol-a', tx, tz, 0, K * .95);
+    const plate = new T.Mesh(new T.CylinderGeometry(.34, .26, .06, 24), new T.MeshStandardMaterial({ color: '#bfe2ff' })); plate.position.set(tx + .25, .62, tz + .55); plate.castShadow = true; city.add(plate);
+    // 이 현장에서 인물이 서는 자리와 조사할 곳(field.js가 읽는다)
+    lib.sc.street = {
+      ry: Math.PI / 2, start: [[bx - 11, -3.5], [bx - 12.4, -2.6], [bx - 10.8, -4.6], [bx - 13.2, -3.8], [bx - 14, -2.8]], enter: [bx - 6.2, -3.6],
+      look0: [bx - .4, -2.6], look: lx => [bx + .6 + (lx - bx - .6) * .3, -2.6],
+      spots: { floor: { x: bx - 3.4, z: WALK_Z + 1.5 }, window: { x: bx - 1.7, z: WALK_Z - .7 }, plate: { x: tx + .3, z: tz + 1.7 } },
+      battle: { cx: bx + 1.5, cz: 0 }
+    };
+    // 바닥의 끈적한 자국(가게 앞에서 건널목 쪽으로)
+    const goo = new T.MeshStandardMaterial({ color: '#f0b45a', roughness: .25, transparent: true, opacity: .85 });
+    for (let i = 0; i < 9; i++) { const d = new T.Mesh(new T.CircleGeometry(.34 - i * .018, 18), goo); d.rotation.x = -Math.PI / 2; d.scale.set(1, 1.7, 1); d.rotation.z = .5; d.position.set(bx - .4 - i * .78, .05, WALK_Z - .9 + i * .62); city.add(d); }
+    // 거리 소품
+    [-2.6, 3.4].forEach(i => piece('roads/light-square', i * RS, 4.9, Math.PI, K * .9));
+    piece('roads/traffic-light', -RS * .5 + .4, 4.7, Math.PI, K); piece('roads/road-sign-street', -RS * 1.5 - .4, WALK_Z + 1.2, 0, K);
+    piece('roads/dumpster', bx - 12, WALK_Z - 1.2, 0, K * .9); piece('commercial/detail-parasol-b', bx + 10.5, WALK_Z - .5, 0, K * .95);
+    [[2.4], [1.1], [-.2]].forEach((p, i) => piece('roads/construction-cone', bx + 19 + i * .5, p[0], 0, K * .9));
+    sign('솔 탐정 사무소 →', bx - 9.6, 2.9, front + .12, 3.9, .8, '#1a9df5', '#ffffff');
+  }
+
+  // ── 어두운 창고(안) ── 받아 둔 도시 조각에는 실내용이 없어서 벽·선반·통·상자를 여기서 직접 만든다.
+  function canvasTex(w, h, draw, rx, ry) {
+    const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'));
+    const t = new T.CanvasTexture(c); t.colorSpace = T.SRGBColorSpace; t.wrapS = t.wrapT = T.RepeatWrapping; t.repeat.set(rx || 1, ry || 1); t.anisotropy = 8; return t;
+  }
+  // 색만 있는 재질, 상자 모양 하나 놓기(창고와 오두막에서 함께 쓴다)
+  const M = (c, r) => new T.MeshStandardMaterial({ color: c, roughness: r == null ? .9 : r });
+  const B = (g, w, h, d, x, y, z, mat, ry) => { const m = new T.Mesh(new T.BoxGeometry(w, h, d), mat); m.position.set(x, y, z); if (ry) m.rotation.y = ry; m.castShadow = m.receiveShadow = true; g.add(m); return m; };
+  function buildWare() {
+    ware = new T.Group(); ware.visible = false; scene.add(ware);
+    // 돌바닥
+    const ft = canvasTex(256, 256, g => { g.fillStyle = '#9c9ca6'; g.fillRect(0, 0, 256, 256); g.strokeStyle = '#7d7d88'; g.lineWidth = 5; [[0, 0], [128, 0], [-64, 128], [64, 128], [192, 128]].forEach(p => g.strokeRect(p[0], p[1], 128, 128)); }, 14.4, 8);
+    const floor = new T.Mesh(new T.PlaneGeometry(28.8, 16), new T.MeshStandardMaterial({ map: ft, roughness: 1 })); floor.rotation.x = -Math.PI / 2; floor.position.set(0, 0, 1); floor.receiveShadow = true; ware.add(floor); supportSurfaces.warehouse = [floor];
+    // 나무판 벽(뒤, 왼쪽, 오른쪽). 앞쪽 벽은 안이 보이도록 두지 않는다.
+    const wt = canvasTex(128, 128, g => { g.fillStyle = '#9fb4cc'; g.fillRect(0, 0, 128, 128); g.fillStyle = '#8aa2bf'; for (let i = 0; i < 4; i++) g.fillRect(i * 32, 0, 3, 128); }, 14, 1);
+    const wall = new T.MeshStandardMaterial({ map: wt, roughness: 1 }), trim = M('#2d4663'), plank = M('#c8d6e6'), dark = M('#2d4663');
+    B(ware, 29.2, 5.4, .4, 0, 2.7, -7.2, wall); B(ware, .4, 5.4, 16, -14.4, 2.7, 1, wall); B(ware, .4, 5.4, 16, 14.4, 2.7, 1, wall);
+    B(ware, 28.8, .3, .12, 0, .15, -6.95, trim); B(ware, 28.8, .36, .3, 0, 5.1, -6.9, trim);
+    [-8.7, -1.5, 5.6, 9.6].forEach(x => B(ware, .36, 5.2, .36, x, 2.6, -6.85, trim));
+    // 높은 창(달빛이 조금 비친다)과 들어온 문
+    const glass = new T.MeshStandardMaterial({ color: '#24344f', emissive: '#86a9e6', emissiveIntensity: .55 });
+    [-5, 2.1, 7.6].forEach(x => { B(ware, 1.7, 1, .08, x, 3.95, -6.97, glass); B(ware, 1.86, .1, .12, x, 3.95, -6.95, trim); B(ware, .1, 1.16, .12, x, 3.95, -6.95, trim); });
+    B(ware, 1.5, 2.7, .1, -11.3, 1.35, -6.96, dark); B(ware, 1.86, .2, .16, -11.3, 2.8, -6.94, trim); [-12.14, -10.46].forEach(x => B(ware, .18, 2.9, .16, x, 1.45, -6.94, trim));
+    const knob = new T.Mesh(new T.SphereGeometry(.08, 12, 8), M('#e0b040', .4)); knob.position.set(-10.75, 1.25, -6.88); ware.add(knob);
+    // 상자(나무 궤짝)와 통
+    const ct = canvasTex(128, 128, g => { g.fillStyle = '#dfe9f4'; g.fillRect(0, 0, 128, 128); g.strokeStyle = '#ffd92e'; g.lineWidth = 14; g.strokeRect(7, 7, 114, 114); g.lineWidth = 11; g.beginPath(); g.moveTo(14, 14); g.lineTo(114, 114); g.moveTo(114, 14); g.lineTo(14, 114); g.stroke(); });
+    const crateM = new T.MeshStandardMaterial({ map: ct, roughness: .9 });
+    const crate = (x, y, z, s, ry) => B(ware, s, s, s, x, y, z, crateM, ry);
+    const wood = M('#1a9df5'), hoop = M('#2d4663', .5);
+    const barrel = (x, z, r, h) => {
+      const g = new T.Group(); g.position.set(x, 0, z); ware.add(g);
+      const body = new T.Mesh(new T.LatheGeometry([[0, 0], [r * .84, 0], [r, h * .5], [r * .84, h], [0, h]].map(p => new T.Vector2(p[0], p[1])), 18), wood); body.castShadow = body.receiveShadow = true; g.add(body);
+      [.2, .8].forEach(k => { const hp = new T.Mesh(new T.CylinderGeometry(r * .945, r * .945, .09, 18, 1, true), hoop); hp.position.y = h * k; g.add(hp); });
+    };
+    // 선반(뒤쪽 벽, 왼쪽)
+    [-7, -5, -3].forEach(x => [-6.88, -6.14].forEach(z => B(ware, .12, 2.75, .12, x, 1.375, z, trim)));
+    [.75, 1.55, 2.35].forEach(y => B(ware, 4.3, .08, .9, -5, y, -6.5, plank));
+    [[-6.5, .79, .5, .2], [-3.6, .79, .6, 0], [-5, 1.59, .55, .1], [-4.2, 1.59, .42, .4], [-6.4, 2.39, .6, 0], [-3.7, 2.39, .5, .2]].forEach(p => crate(p[0], p[1] + p[2] / 2, -6.5, p[2], p[3]));
+    [[-5.6, .79], [-6.2, 1.59], [-3.3, 1.59], [-4.7, 2.39]].forEach(p => { const j = new T.Mesh(new T.CylinderGeometry(.16, .19, .42, 12), M('#7f9bb8', .5)); j.position.set(p[0], p[1] + .21, -6.5); j.castShadow = true; ware.add(j); });
+    crate(-6.6, .28, -6.5, .56, .1); crate(-3.4, .24, -6.45, .48, .3);
+    // 통 무더기(뒤쪽 벽, 가운데)
+    [[.9, -6.3, .48, 1.15], [2, -6.35, .48, 1.15], [3, -6.2, .48, 1.15], [1.45, -5.65, .44, 1.05], [2.55, -5.6, .44, 1.05], [-13.4, .5, .46, 1.1]].forEach(p => barrel(p[0], p[1], p[2], p[3]));
+    // 상자 더미(오른쪽 벽, 왼쪽 벽)
+    crate(13.3, .65, -2.2, 1.3, 0); crate(13.2, .65, -.8, 1.3, .1); crate(13.3, 1.85, -1.5, 1.1, .35); crate(12.1, .45, -.2, .9, .25);
+    crate(-13.5, .6, -3.2, 1.2, 0); crate(-13.5, .6, -1.9, 1.2, .05); crate(-13.4, 1.7, -2.6, 1, .3);
+    // 구석의 큰 상자(뚜껑이 열린다)
+    const c = new T.Group(); c.position.set(12.2, 0, -5.7); c.rotation.y = -.45; ware.add(c);
+    const cw = M('#2d4663'), gold = new T.MeshStandardMaterial({ color: '#e0b040', roughness: .45, metalness: .3 });
+    B(c, 2, .85, 1.2, 0, .425, 0, cw); [-.72, .72].forEach(px => B(c, .16, .89, 1.24, px, .44, 0, gold));
+    const lid = new T.Group(); lid.position.set(0, .85, -.6); c.add(lid);
+    B(lid, 2.04, .4, 1.24, 0, .2, .6, cw); [-.72, .72].forEach(px => B(lid, .16, .44, 1.28, px, .2, .6, gold)); B(lid, .3, .34, .08, 0, .05, 1.24, gold);
+    const glow = new T.PointLight('#9fe3ff', 0, 9, 2); glow.position.set(0, 1.1, 0); c.add(glow);
+    chest = { lid: lid, glow: glow };
+    lib.sc.warehouse = {
+      dark: true, ry: 0, start: [[-11.3, -5.4], [-12.2, -4.5], [-10.4, -5.7], [-11.6, -3.7], [-12.6, -3.4]], enter: [-8.6, -3.4],
+      look0: [-6, -1.6], look: (lx, lz) => [lx * .55, Math.max(-1.6, lz - .2)], bounds: [-11, 9.9, -5, 1],
+      spots: { p1: { x: -5, z: -6.02, sx: -5.5, sz: -4.9 }, p2: { x: 3.95, z: -5.9, sx: 4.6, sz: -4.8 }, p3: { x: 10.9, z: -.75, sx: 9.8, sz: -.1 } },
+      battle: { cx: -1, cz: -1.6, from: [3.9, -4.8] }, chest: { x: 12.2, z: -5.7, sx: 10.3, sz: -4.5 }
+    };
+  }
+  function openChest() { let t = 0; fx.push({ tick: dt => { t += dt; const k = Math.min(1, t / 1.3), e = k * k * (3 - 2 * k); chest.lid.rotation.x = -1.75 * e; chest.glow.intensity = 16 * e; return k < 1; } }); }
+
+  // ── 분수 광장 화방(바깥) ── 하늘색·흰색·노랑의 도시 광장이다. 분수, 화방 건물, 양옆의 가게는 Kenney City Kit(CC0) 조각과 직접 만든 상자로 세운다.
+  // (장면 이름과 장소 자료의 키는 옛 이름 'cabin', 'pond'를 그대로 쓴다.)
+  function buildCabin() {
+    cabin = new T.Group(); cabin.visible = false; scene.add(cabin); const g = cabin, G = window.GAME;
+    const flat = (geo, color, x, y, z, rough) => { const m = new T.Mesh(geo, M(color, rough)); m.rotation.x = -Math.PI / 2; m.position.set(x, y, z); m.receiveShadow = true; g.add(m); return m; };
+    const solid = (geo, color, x, y, z) => { const m = new T.Mesh(geo, M(color)); m.position.set(x, y, z); m.castShadow = m.receiveShadow = true; g.add(m); return m; };
+    const kit = (key, x, z, rot, s, y) => {   // 도시 조각 하나 놓기
+      const o = lib[key].scene.clone(true); o.position.set(x, y || 0, z); o.rotation.y = rot || 0; o.scale.setScalar(s || K);
+      o.traverse(m => { if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } }); g.add(o); return o;
+    };
+    // 광장 바닥: 흰 타일, 하늘색 줄, 앞쪽 차도
+    const tt = canvasTex(128, 128, c => { c.fillStyle = '#f1f5fa'; c.fillRect(0, 0, 128, 128); c.strokeStyle = '#d3deeb'; c.lineWidth = 4; c.strokeRect(0, 0, 128, 128); }, 50, 50);
+    const plaza = new T.Mesh(new T.PlaneGeometry(200, 200), new T.MeshStandardMaterial({ map: tt, roughness: 1 })); plaza.rotation.x = -Math.PI / 2; plaza.position.y = -.02; plaza.receiveShadow = true; g.add(plaza); supportSurfaces.cabin = [plaza];
+    flat(new T.PlaneGeometry(40, .5), '#1a9df5', 0, .012, -4.9); flat(new T.PlaneGeometry(40, .22), '#ffd92e', 0, .013, -4.45);   // 건물 앞 하늘색·노랑 줄
+    flat(new T.CircleGeometry(1.7, 28), '#cfe6fb', -1, .012, -3.6);
+    for (let i = -4; i <= 4; i++) { const r = lib['roads/road-straight'].scene.clone(true); r.position.set(i * RS, 0, 8.2); r.scale.setScalar(RS); r.traverse(m => { if (m.isMesh) { m.receiveShadow = true; m.material = m.material.clone(); m.material.color.setScalar(1.45); } }); g.add(r); supportSurfaces.cabin.push(r); }
+    // 분수: 흰 돌 테두리, 하늘색 물, 가운데 기둥과 물줄기
+    solid(new T.CylinderGeometry(2.9, 3.05, .5, 40), '#dce8f4', 10, .25, -1).scale.set(1.05, 1, .92);
+    const water = solid(new T.CylinderGeometry(2.55, 2.55, .1, 40), '#6cc4ec', 10, .55, -1); water.scale.set(1.05, 1, .92); water.material = new T.MeshStandardMaterial({ color: '#38aee8', roughness: .15, metalness: .1, emissive: '#1d7fc0', emissiveIntensity: .3 });
+    solid(new T.CylinderGeometry(.34, .5, 1.3, 16), '#dce8f4', 10, .9, -1);
+    solid(new T.CylinderGeometry(1, .34, .2, 20), '#dce8f4', 10, 1.65, -1);
+    const jetM = new T.MeshStandardMaterial({ color: '#dff4ff', emissive: '#9fd8f2', emissiveIntensity: .5, transparent: true, opacity: .75, roughness: .2 });
+    for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2, j = new T.Mesh(new T.SphereGeometry(.12, 8, 6), jetM); j.position.set(10 + Math.cos(a) * 1.05, 1.5 + (i % 2) * .15, -1 + Math.sin(a) * .95); g.add(j); }
+    const top = new T.Mesh(new T.ConeGeometry(.28, 1.2, 10), jetM); top.position.set(10, 2.45, -1); g.add(top);
+    [[8.1, 1.1], [12.2, 1.6], [9, -3]].forEach(p => solid(new T.CylinderGeometry(.34, .34, .05, 14), '#ffd92e', p[0], .5, p[1]));   // 물 위의 노란 부표
+    [[5.4, 2.3], [14.7, 1.4]].forEach(p => { const b = solid(new T.BoxGeometry(2, .12, .6), '#ffffff', p[0], .5, p[1]); b.rotation.y = .2; solid(new T.BoxGeometry(2, .5, .1), '#1a9df5', p[0], .75, p[1] - .3).rotation.y = .2; [-.8, .8].forEach(o => solid(new T.BoxGeometry(.1, .5, .5), '#2d4663', p[0] + o, .25, p[1]).rotation.y = .2); });   // 벤치
+    // 화방 건물: 흰 벽, 하늘색 띠, 노란 차양, 납작한 지붕
+    const wallM = M('#ffffff', .85), bandM = M('#1a9df5', .7), navyM = M('#2d4663', .7), yellowM = M('#ffd92e', .6);
+    B(g, 8.4, 4.6, 5, -3, 2.3, -9, wallM); B(g, 8.6, .5, 5.2, -3, 4.85, -9, bandM); B(g, 8.7, .16, 5.3, -3, 5.18, -9, yellowM);
+    B(g, 8.4, .5, .12, -3, .25, -6.46, navyM);
+    const awn = canvasTex(64, 8, c => { c.fillStyle = '#ffffff'; c.fillRect(0, 0, 64, 8); c.fillStyle = '#ffd92e'; c.fillRect(0, 0, 32, 8); }, 12, 1); awn.magFilter = T.NearestFilter;
+    const aw = new T.Mesh(new T.BoxGeometry(8.2, .07, 1.3), new T.MeshStandardMaterial({ map: awn, roughness: .9 })); aw.position.set(-3, 3.05, -5.9); aw.rotation.x = .34; aw.castShadow = true; g.add(aw);
+    const sg = new T.Mesh(new T.BoxGeometry(5, 1, .16), [0, 0, 0, 0, 1, 0].map(f => new T.MeshStandardMaterial(f ? { map: signTex('분수 광장 화방', '#2d4663', '#ffffff', 640, 128), roughness: .6 } : { color: '#2d4663' }))); sg.position.set(-3, 4.2, -6.4); sg.castShadow = true; g.add(sg);
+    // 양옆의 가게와 뒤쪽 건물(도시 조각)
+    [['commercial/building-c', -11.2], ['commercial/building-g', -16.5], ['commercial/building-b', 5.4], ['commercial/building-k', 11.2]].forEach(p => kit(p[0], p[1], -8.9, 0, K));
+    ['building-m', 'building-n', 'building-h', 'building-m', 'building-n', 'building-h', 'building-m', 'building-n'].forEach((b, i) => kit('commercial/' + b, (-4.4 + i * 1.9) * K, -8.9 - K * 1.5, 0, K * 1.5));
+    // 창문
+    B(g, 1.2, 1, .08, -6.05, 2.1, -6.47, new T.MeshStandardMaterial({ color: '#cfeaff', emissive: '#9fd0ff', emissiveIntensity: .3 }));
+    const trimM = M('#2d4663'); B(g, 1.44, .12, .12, -6.05, 2.64, -6.45, trimM); B(g, 1.44, .12, .12, -6.05, 1.56, -6.45, trimM); [-6.71, -6.05, -5.39].forEach(x => B(g, .12, 1.08, .12, x, 2.1, -6.45, trimM));
+    // 문: 왼쪽 경첩을 축으로 안쪽으로 열린다. 문 뒤는 어둡고, 열리면 구름이 보인다.
+    B(g, 1.66, .16, .14, -1, 2.42, -6.46, trimM); [-1.75, -.25].forEach(x => B(g, .16, 2.42, .14, x, 1.21, -6.46, trimM));
+    const hole = new T.Mesh(new T.PlaneGeometry(1.34, 2.34), new T.MeshBasicMaterial({ color: '#10192b' })); hole.position.set(-1, 1.17, -6.49); g.add(hole);
+    doorG = new T.Group(); doorG.position.set(-1.67, 0, -6.44); g.add(doorG);
+    B(doorG, 1.34, 2.34, .1, .67, 1.17, 0, M('#1a9df5', .5)); B(doorG, .9, .9, .04, .67, 1.5, .06, M('#cfeaff', .3)); B(doorG, .28, .36, .07, 1.08, 1.0, .07, new T.MeshStandardMaterial({ color: '#ffd92e', roughness: .45, metalness: .3 })); B(doorG, .08, .1, .08, 1.08, .98, .08, M('#2d4663'));
+    cloud = new T.Group(); cloud.position.set(-1, 1.2, -6.3); cloud.scale.setScalar(0.001); g.add(cloud);
+    const cm = new T.MeshStandardMaterial({ color: '#ffffff', emissive: '#dfe6f5', emissiveIntensity: .6, roughness: 1 });
+    [[0, 0, 0, .5], [-.4, -.15, .05, .36], [.42, -.1, .05, .38], [-.15, .3, 0, .34], [.22, .28, .02, .3]].forEach(p => { const s = new T.Mesh(new T.IcosahedronGeometry(p[3], 1), cm); s.position.set(p[0], p[1], p[2]); cloud.add(s); });
+    // 벽의 흔적: 마른 얼룩(처음), 물을 뿌리면 드러나는 그림(자물쇠의 순서)
+    const order = (G.cases.find(c => c.scene === 'cabin') || { answer: [] }).answer.map(id => G.symbols.find(s => s.id === id));
+    const paper = c => { c.fillStyle = '#eef3fb'; c.fillRect(0, 0, 460, 280); };
+    const faded = canvasTex(460, 280, c => { paper(c); c.fillStyle = '#e0e9f6'; c.beginPath(); c.arc(100, 130, 52, 0, 7); c.fill(); c.fillRect(196, 104, 78, 60); c.beginPath(); c.arc(366, 146, 44, 0, 7); c.fill(); });
+    const shown = canvasTex(460, 280, c => {
+      paper(c); c.fillStyle = '#3f5fae'; c.font = '900 54px sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
+      order.forEach((s, i) => { c.save(); c.translate(42 + i * 140, 84); c.scale(1.75, 1.75); c.fill(new Path2D(s.d)); c.restore(); if (i) c.fillText('→', 28 + i * 140, 142); });
+    });
+    B(g, 2.6, 1.7, .08, -4.1, 1.65, -6.47, M('#2d4663'));
+    const p1 = new T.Mesh(new T.PlaneGeometry(2.3, 1.4), new T.MeshStandardMaterial({ map: faded, roughness: 1 })); p1.position.set(-4.1, 1.65, -6.42); g.add(p1);
+    paintM = new T.MeshStandardMaterial({ map: shown, roughness: 1, transparent: true, opacity: 0 });
+    const p2 = new T.Mesh(new T.PlaneGeometry(2.3, 1.4), paintM); p2.position.set(-4.1, 1.65, -6.41); g.add(p2);
+    // 거리 소품: 가로등, 표지판, 화분, 신호등, 고깔
+    kit('roads/road-sign-street', -9.4, -5.2, 0, K); kit('roads/light-square', -14, 4.6, Math.PI, K * .9); kit('roads/light-square', 2, 4.6, Math.PI, K * .9); kit('roads/light-square', 16, 4.6, Math.PI, K * .9);
+    kit('roads/traffic-light', 7.4, 6.6, Math.PI, K); kit('commercial/detail-parasol-a', -9.6, -4.2, 0, K * .95); kit('roads/dumpster', 15.6, -5.2, 0, K * .9);
+    [[-7.7, -5.9], [1.7, -5.9], [-12.2, -5.3], [4.2, -5.6]].forEach(p => { solid(new T.BoxGeometry(.9, .6, .6), '#ffffff', p[0], .3, p[1]); solid(new T.IcosahedronGeometry(.5, 1), '#6fc57f', p[0], .85, p[1]).scale.set(1, .8, 1); });
+    [[1.3], [1.8], [2.3]].forEach((p, i) => kit('roads/construction-cone', 17 + i * .5, p[0], 0, K * .9));
+    lib.sc.cabin = {
+      paint: true, ry: Math.PI / 2, start: [[-12, -3.3], [-13.3, -2.5], [-11.8, -4.4], [-14, -3.6], [-14.9, -2.6]], enter: [-7.2, -3.6],
+      look0: [-4.5, -2.8], look: lx => [-1.6 + (lx + 1.6) * .35, -2.8],
+      spots: { wall: { x: -4.1, z: -6.4, sx: -4.9, sz: -4.9 }, door: { x: -1, z: -6.4, sx: -1.6, sz: -5 } },
+      battle: { cx: -1.5, cz: -1.6, span: 3, pond: [7.6, -1.2] }
+    };
+  }
+  function paint(k) { paintM.opacity = k; }
+  function revealPaint() { let t = 0; fx.push({ tick: dt => { t += dt; paintM.opacity = Math.min(1, t / 1.4); return t < 1.4; } }); }
+  function openDoor() {
+    let t = 0; fx.push({ tick: dt => { t += dt; const k = Math.min(1, t / 1.1), e = k * k * (3 - 2 * k); doorG.rotation.y = 1.75 * e;
+      const c = Math.max(0.001, Math.min(1, (t - .7) / .8)); cloud.scale.setScalar(c * (2 - c)); return t < 1.6; } });
+  }
+  function ripple(x, z, color, grow) {   // 땅에 퍼지는 고리(색과 퍼지는 크기를 정할 수 있다)
+    const m = new T.Mesh(new T.RingGeometry(.5, .62, 32), new T.MeshBasicMaterial({ color: color || '#ffffff', transparent: true, opacity: .85, side: T.DoubleSide, depthWrite: false })); m.rotation.x = -Math.PI / 2; m.position.set(x, .08, z); fxg.add(m);
+    let t = 0; const g = grow || 1.6; fx.push({ tick: dt => { t += dt; const k = t / .8; m.scale.setScalar(.5 + k * g); m.material.opacity = .85 * (1 - k); if (k >= 1) { fxg.remove(m); m.material.dispose(); return false; } return true; } });
+  }
+  function bolt(a, b, color) {   // 번개 한 줄(꺾인 가는 막대 여러 개). 0.16초 보인다
+    const pts = [], n = 8, up = new T.Vector3(0, 1, 0), grp = new T.Group(), mat = new T.MeshBasicMaterial({ color: color || '#ffe66b' });
+    for (let i = 0; i <= n; i++) { const k = i / n, j = i === 0 || i === n ? 0 : .45; pts.push(new T.Vector3(a.x + (b.x - a.x) * k + (Math.random() - .5) * j, a.y + (b.y - a.y) * k + (Math.random() - .5) * j, a.z + (b.z - a.z) * k + (Math.random() - .5) * j)); }
+    for (let i = 0; i < n; i++) {
+      const p = pts[i], q = pts[i + 1], d = q.clone().sub(p), len = d.length(), seg = new T.Mesh(new T.CylinderGeometry(.045, .045, len, 5), mat);
+      seg.position.copy(p).add(q).multiplyScalar(.5); seg.quaternion.setFromUnitVectors(up, d.normalize()); grp.add(seg);
+    }
+    fxg.add(grp); let t = 0; fx.push({ tick: dt => { t += dt; if (t > .16) { fxg.remove(grp); return false; } return true; } });
+  }
+
+  // ── 달빛 시계탑(안, 기계실) ── 벽·톱니·전원 장치·시계판을 여기서 직접 만든다. 벽과 테두리 색은 기존 게임의 시계탑 색을 따랐다.
+  function gearMesh(parent, r, teeth, thick, color, x, y, z) {   // 앞(+z)을 보고 서 있는 톱니바퀴. rotation.z로 돈다.
+    const g = new T.Group(), m = new T.MeshStandardMaterial({ color: color, roughness: .5, metalness: .3 }), hole = M('#2d2a45');
+    const disc = new T.Mesh(new T.CylinderGeometry(r * .84, r * .84, thick, 28), m); disc.rotation.x = Math.PI / 2; disc.castShadow = true; g.add(disc);
+    for (let i = 0; i < teeth; i++) { const a = i / teeth * Math.PI * 2, t = new T.Mesh(new T.BoxGeometry(r * .26, r * .2, thick), m); t.position.set(Math.cos(a) * r * .94, Math.sin(a) * r * .94, 0); t.rotation.z = a; t.castShadow = true; g.add(t); }
+    for (let i = 0; i < 4; i++) { const a = i / 4 * Math.PI * 2 + .4, h = new T.Mesh(new T.CylinderGeometry(r * .17, r * .17, thick + .02, 14), hole); h.rotation.x = Math.PI / 2; h.position.set(Math.cos(a) * r * .5, Math.sin(a) * r * .5, 0); g.add(h); }
+    const hub = new T.Mesh(new T.CylinderGeometry(r * .16, r * .16, thick + .12, 14), M('#55586f', .5)); hub.rotation.x = Math.PI / 2; g.add(hub);
+    g.position.set(x, y, z); parent.add(g); g.userData.mat = m; return g;
+  }
+  function buildTower() {
+    tower = new T.Group(); tower.visible = false; scene.add(tower); const g = tower, col = c => new T.Color(c);
+    // 돌바닥, 벽, 보라색 테두리와 기둥, 깔개
+    const ft = canvasTex(256, 256, c => { c.fillStyle = '#e3eaf3'; c.fillRect(0, 0, 256, 256); c.strokeStyle = '#c3d2e6'; c.lineWidth = 5; [[0, 0], [128, 0], [-64, 128], [64, 128], [192, 128]].forEach(p => c.strokeRect(p[0], p[1], 128, 128)); }, 13, 8);
+    const floor = new T.Mesh(new T.PlaneGeometry(25.6, 16), new T.MeshStandardMaterial({ map: ft, roughness: 1 })); floor.rotation.x = -Math.PI / 2; floor.position.set(0, 0, 1); floor.receiveShadow = true; g.add(floor);
+    const wt = canvasTex(128, 128, c => { c.fillStyle = '#eef4fb'; c.fillRect(0, 0, 128, 128); c.fillStyle = '#cfdcec'; c.fillRect(0, 0, 128, 3); c.fillRect(0, 64, 128, 3); c.fillRect(0, 0, 3, 64); c.fillRect(64, 64, 3, 64); }, 12, 4);
+    const wall = new T.MeshStandardMaterial({ map: wt, roughness: 1 }), trim = M('#1a9df5');
+    B(g, 26, 6.6, .4, 0, 3.3, -7.2, wall); B(g, .4, 6.6, 16, -12.8, 3.3, 1, wall); B(g, .4, 6.6, 16, 12.8, 3.3, 1, wall);
+    B(g, 25.6, .34, .14, 0, .17, -6.94, trim); [-10.4, -3.6, 3.6, 10.4].forEach(x => B(g, .5, 6.4, .4, x, 3.2, -6.85, trim));
+    const rug = canvasTex(256, 128, c => { c.fillStyle = '#ffd92e'; c.fillRect(0, 0, 256, 128); c.fillStyle = '#1a9df5'; c.fillRect(10, 10, 236, 108); c.strokeStyle = '#ffffff'; c.lineWidth = 4; c.strokeRect(24, 24, 208, 80); });
+    const rg = new T.Mesh(new T.PlaneGeometry(7, 3.5), new T.MeshStandardMaterial({ map: rug, roughness: 1 })); rg.rotation.x = -Math.PI / 2; rg.position.set(0, .012, -1.6); rg.receiveShadow = true; g.add(rg); supportSurfaces.tower = [floor, rg];
+    // 창(달빛이 돌아오면 밝아진다), 장치를 잇는 축
+    const glass = new T.MeshStandardMaterial({ color: '#27304f', emissive: '#bcd0ff', emissiveIntensity: .12 });
+    [-5.2, 5.2].forEach(x => { B(g, 1, 2.6, .08, x, 3.4, -6.97, glass); B(g, 1.2, .12, .12, x, 4.74, -6.95, trim); B(g, 1.2, .12, .12, x, 2.06, -6.95, trim); B(g, .1, 2.6, .12, x, 3.4, -6.95, trim); });
+    const shaft = new T.Mesh(new T.CylinderGeometry(.09, .09, 15.4, 10), M('#55586f', .5)); shaft.rotation.z = Math.PI / 2; shaft.position.set(0, 1.25, -6.75); g.add(shaft);
+    tw = { dev: {}, moon: 0, on: false, glass: glass, spin: [] };
+    // 어두운 톱니(왼쪽): 덮개 아래 깊은 곳에 있어 캄캄하다. 빛을 비추면 맞물리는 곳이 보인다.
+    const backA = new T.Mesh(new T.PlaneGeometry(3.2, 3), new T.MeshStandardMaterial({ color: '#0b0c14', roughness: 1 })); backA.position.set(-7, 1.6, -6.96); g.add(backA);
+    B(g, 3.6, .3, 1.2, -7, 3.2, -6.5, M('#2d4663')); [-8.7, -5.3].forEach(x => B(g, .2, 3.2, 1.2, x, 1.6, -6.5, M('#2d4663')));
+    const gA = gearMesh(g, .95, 12, .22, '#0f1017', -7.25, 1.3, -6.6), gA2 = gearMesh(g, .5, 8, .2, '#0f1017', -5.95, 1.95, -6.62);
+    const lA = new T.PointLight('#ffd08a', 0, 7, 2); lA.position.set(-7, 1.8, -5.6); g.add(lA);
+    tw.dev.dark = { k: 0, on: false, gears: [[gA, .9], [gA2, -1.7]], mats: [[gA.userData.mat, col('#0f1017'), col('#d9b45a')], [gA2.userData.mat, col('#0f1017'), col('#c9a04a')], [backA.material, col('#0b0c14'), col('#4b4670')]], light: [lA, 9] };
+    // 녹슨 톱니(가운데): 먼지와 녹이 끼어 있다. 물로 씻으면 반짝인다.
+    const gB = gearMesh(g, .95, 12, .22, '#8a4e2a', -.25, 1.3, -6.6), gB2 = gearMesh(g, .5, 8, .2, '#7a4526', 1.05, 1.95, -6.62);
+    gB.userData.mat.roughness = gB2.userData.mat.roughness = 1; gB.userData.mat.metalness = gB2.userData.mat.metalness = 0;
+    tw.dev.rust = { k: 0, on: false, gears: [[gB, .9], [gB2, -1.7]], mats: [[gB.userData.mat, col('#8a4e2a'), col('#d9b45a')], [gB2.userData.mat, col('#7a4526'), col('#c9a04a')]] };
+    // 꺼진 전원(오른쪽): 등이 꺼진 전원 상자. 전기가 통하면 등이 켜지고 옆의 톱니가 돈다.
+    B(g, 1.9, 2.3, .9, 7, 1.15, -6.5, M('#6d6f8c')); B(g, 1.5, .9, .06, 7, 1.55, -6.03, M('#3a3550')); B(g, .12, .6, .12, 7.55, .75, -6, M('#e9506a'));
+    const lampM = new T.MeshStandardMaterial({ color: '#4a4a55', emissive: '#ffe66b', emissiveIntensity: 0 }), lamp2 = new T.Mesh(new T.SphereGeometry(.3, 16, 12), lampM); lamp2.position.set(7, 2.6, -6.5); g.add(lamp2);
+    const gC = gearMesh(g, .5, 8, .2, '#b9975a', 5.6, 1.25, -6.62);
+    const lC = new T.PointLight('#ffe66b', 0, 8, 2); lC.position.set(7, 2.7, -5.9); g.add(lC);
+    tw.dev.power = { k: 0, on: false, gears: [[gC, 1.7]], mats: [[lampM, col('#4a4a55'), col('#fff3b0')]], light: [lC, 8], glow: lampM };
+    // 시계판(가운데 위): 세 장치가 모두 돌면 바늘이 움직인다
+    const face = new T.MeshStandardMaterial({ color: '#f4f0df', emissive: '#cfe0ff', emissiveIntensity: .05 });
+    const dial = new T.Mesh(new T.CylinderGeometry(1.05, 1.05, .1, 40), face); dial.rotation.x = Math.PI / 2; dial.position.set(0, 3.75, -6.9); g.add(dial);
+    const rim = new T.Mesh(new T.TorusGeometry(1.08, .09, 10, 40), trim); rim.position.set(0, 3.75, -6.86); g.add(rim);
+    for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2, t = B(g, .06, i % 3 ? .12 : .22, .04, Math.sin(a) * .88, 3.75 + Math.cos(a) * .88, -6.83, M('#3a3550')); t.rotation.z = -a; }
+    const hand = (len, w) => { const p = new T.Group(); p.position.set(0, 3.75, -6.8); g.add(p); B(p, w, len, .04, 0, len / 2 - .08, 0, M('#3a3550')); return p; };
+    tw.hands = [hand(.82, .07), hand(.55, .1)]; tw.hands[0].rotation.z = -.9; tw.hands[1].rotation.z = 1.2; tw.face = face;
+    tw.spin.push([gearMesh(g, .6, 9, .2, '#c9a04a', -2.1, 3.3, -6.66), 1.3], [gearMesh(g, .42, 7, .2, '#d9b45a', -1.25, 3.95, -6.68), -1.9], [gearMesh(g, .6, 9, .2, '#c9a04a', 2.1, 3.3, -6.66), -1.3]);
+    lib.sc.tower = {
+      devices: true, ry: Math.PI / 2, start: [[-10.5, -2.6], [-11.6, -1.8], [-10.3, -3.7], [-12, -3.1], [-12.2, -.9], [-11, -.6]], enter: [-6.4, -2.8],
+      look0: [-3.4, -2.6], look: lx => [lx * .5, -2.6],
+      spots: { dark: { x: -7, z: -6.2, sx: -7.7, sz: -4.7 }, rust: { x: 0, z: -6.2, sx: -.7, sz: -4.7 }, power: { x: 7, z: -6.2, sx: 6.3, sz: -4.7 } },
+      battle: { cx: -1, cz: -1.4, from: [6.2, -4.4] }, center: [0, -3.6]
+    };
+  }
+  function fix(id, instant) { const d = tw.dev[id]; if (!d) return; d.on = true; if (instant) d.k = 1; }   // 장치 하나가 고쳐진다
+  function towerOn() { tw.on = true; }   // 시계가 다시 돌고 달빛이 돌아온다
+  function towerReset() { Object.keys(tw.dev).forEach(k => { tw.dev[k].on = false; tw.dev[k].k = 0; }); tw.on = false; tw.moon = 0; towerTick(0); }
+  function towerTick(dt) {
+    Object.keys(tw.dev).forEach(key => {
+      const d = tw.dev[key]; if (d.on && d.k < 1) d.k = Math.min(1, d.k + dt / 1.2);
+      d.mats.forEach(m => m[0].color.lerpColors(m[1], m[2], d.k)); if (d.light) d.light[0].intensity = d.light[1] * d.k; if (d.glow) d.glow.emissiveIntensity = 1.6 * d.k;
+      if (d.on) d.gears.forEach(x => { x[0].rotation.z += x[1] * dt * d.k; });
+    });
+    if (tw.on && tw.moon < 1) tw.moon = Math.min(1, tw.moon + dt / 2.2);
+    const k = tw.moon; tw.glass.emissiveIntensity = .12 + .9 * k; tw.face.emissiveIntensity = .05 + .75 * k;
+    if (tw.on) { tw.hands[0].rotation.z -= dt * 1.6; tw.hands[1].rotation.z -= dt * .14; tw.spin.forEach(x => { x[0].rotation.z += x[1] * dt; }); }
+    if (cur === 'tower') { sun.color.lerpColors(TW_WARM, TW_MOON, k); sun.intensity = .8 + 1.5 * k; hemi.intensity = 1 + .35 * k; }
+  }
+  const TW_WARM = new T.Color('#ffe2b0'), TW_MOON = new T.Color('#cfe0ff');
+
+  // ── 현장 바꾸기, 불빛 ──
+  // 현장마다 하늘색, 둘레 빛(위·아래·세기), 해(색·세기)
+  const LIGHT = { street: ['#cdeaff', '#ffffff', '#c3d2e6', 1.9, '#fff1d2', 2.4], cabin: ['#cdeaff', '#ffffff', '#c3d2e6', 1.9, '#fff1d2', 2.4], warehouse: ['#080c16', '#8ea4d8', '#1a2030', .3, null, 0], tower: ['#23263f', '#cdd0f7', '#3a3550', 1, '#ffe2b0', .8] };
+  function setScene(name) {
+    lastShadow = -Infinity;
+    cur = lib.sc[name] ? name : 'street'; const L = LIGHT[cur], dim = cur === 'warehouse' || cur === 'tower';
+    city.visible = cur === 'street'; ware.visible = cur === 'warehouse'; cabin.visible = cur === 'cabin'; tower.visible = cur === 'tower';
+    scene.background.set(L[0]); scene.fog.color.set(L[0]); scene.fog.near = dim ? 28 : 55; scene.fog.far = dim ? 80 : 130;
+    hemi.color.set(L[1]); hemi.groundColor.set(L[2]); hemi.intensity = L[3];
+    sun.visible = !!L[4]; if (L[4]) { sun.color.set(L[4]); sun.intensity = L[5]; }
+    lampOn(null); chest.lid.rotation.x = 0; chest.glow.intensity = 0; doorG.rotation.y = 0; cloud.scale.setScalar(0.001); paintM.opacity = 0; towerReset();
+    return lib.sc[cur];
+  }
+  function lampOn(actor, pow) { lampOf = actor || null; lampPow = pow || 1; lamp.visible = !!actor; if (!actor) lamp.intensity = 0; }
+
+  // ── 인물 ──
+  function soleVertices(holder, height) {
+    holder.updateMatrixWorld(true);
+    const line = new T.Box3().setFromObject(holder, true).min.y + height * .035;
+    const soles = [];
+    holder.traverse(mesh => {
+      if (!mesh.isSkinnedMesh) return;
+      const indices = [];
+      const positions = mesh.geometry.getAttribute('position');
+      for (let i = 0; i < positions.count; i++) {
+        mesh.getVertexPosition(i, solePoint).applyMatrix4(mesh.matrixWorld);
+        if (solePoint.y <= line) indices.push(i);
+      }
+      if (indices.length) soles.push({mesh, indices});
+    });
+    return soles;
+  }
+  // Preserve each imported foot orientation while coordinating the planted sole with actual travel.
+  function initShoeStance(a) {
+    if (!a.soles || !a.soles.length) return null;
+    const T = window.THREE;
+    a.root.updateMatrixWorld(true);
+    const legs = ['L','R'].map(side => {
+      const bone = part => a.root.getObjectByName('J_Bip_' + side + '_' + part);
+      return { thigh: bone('UpperLeg'), shin: bone('LowerLeg'), foot: bone('Foot'), marker: new T.Vector3(), sole:[], count: 0 };
+    });
+    if (legs.some(l => !l.thigh || !l.shin || !l.foot)) return null;
+    const p = new T.Vector3();
+    for (const {mesh,indices} of a.soles) {
+      const joints=mesh.geometry.attributes.skinIndex, weights=mesh.geometry.attributes.skinWeight;
+      for (const i of indices) {
+        let left=0,right=0;
+        for (let k=0;k<4;k++) {
+          const name=mesh.skeleton.bones[joints.getComponent(i,k)]?.name||'';
+          if (/J_Bip_L_(Foot|Toe)/.test(name)) left+=weights.getComponent(i,k);
+          if (/J_Bip_R_(Foot|Toe)/.test(name)) right+=weights.getComponent(i,k);
+        }
+        if (Math.max(left,right)<=.5) continue;
+        const leg=legs[left>right?0:1];
+        mesh.getVertexPosition(i,p).applyMatrix4(mesh.matrixWorld);
+        leg.foot.worldToLocal(p);leg.sole.push(p.clone());leg.marker.add(p);leg.count++;
+      }
+    }
+    if (legs.some(l=>!l.count)) return null;
+    for (const l of legs) l.marker.divideScalar(l.count);
+    return { legs, blend:0, saved:null };
+  }
+
+  function restoreShoeStance(a) {
+    const s=a.shoeStance;
+    if (!s || !s.saved) return;
+    s.legs.forEach((leg,i)=>[leg.thigh,leg.shin,leg.foot].forEach((bone,j)=>bone.quaternion.copy(s.saved[i][j])));
+    s.saved=null;
+  }
+
+  function solveShoeStance(a, dt) {
+    const s=a.shoeStance;
+    if (!s) return;
+    const leaving=!a.syncGait || a.cur!=='walk' || a.lock>0 || a.hop>0 || a.float || a.sink;
+    const dx=a.x-a.motionX,dz=a.z-a.motionZ,travel=Math.hypot(dx,dz);
+    if (leaving || dt<=0 || travel<.00001 || travel>.4) {s.blend=0;for(const l of s.legs){l.anchor=null;}return;}
+    s.blend=Math.min(1,s.blend+dt*7.5);
+    const T=window.THREE,V=()=>new T.Vector3(),Q=()=>new T.Quaternion(),position=b=>b.getWorldPosition(V());
+    const travelDir=V().set(dx/travel,0,dz/travel);
+    const headingDot=travelDir.x*Math.sin(a.ry)+travelDir.z*Math.cos(a.ry);
+    const ease=s.blend*Math.max(0,Math.min(1,(headingDot-.2)/.65));
+    const clip=a.clips.walk,phase=(clip.time/clip.getClip().duration)%1;
+    a.root.updateMatrixWorld(true);
+    const lowest=s.legs.map(l=>{
+      const e=l.foot.matrixWorld.elements;let y=Infinity;
+      for(const v of l.sole)y=Math.min(y,e[1]*v.x+e[5]*v.y+e[9]*v.z+e[13]);
+      return y;
+    });
+    const supportY=Math.min(...lowest);
+    s.saved=s.legs.map(l=>[l.thigh,l.shin,l.foot].map(b=>b.quaternion.clone()));
+    const worldRotation=(b,q)=>{b.quaternion.copy(b.parent.getWorldQuaternion(Q()).invert().multiply(q));b.updateWorldMatrix(false,true);};
+    const aim=(b,from,to)=>{if(from.lengthSq()<1e-12||to.lengthSq()<1e-12)return;worldRotation(b,Q().setFromUnitVectors(from.normalize(),to.normalize()).multiply(b.getWorldQuaternion(Q())));};
+    const targets=s.legs.map((leg,side)=>{
+      const phaseLeg=(phase+(side===0?.5:0)+.11)%1;
+      const swing=Math.min(1,Math.max(0,(phaseLeg-.5)*2));
+      const reach=1.38*(.25-phaseLeg+swing*swing*(3-2*swing));
+      const marker=leg.foot.localToWorld(leg.marker.clone());
+      const current=(marker.x-a.x)*travelDir.x+(marker.z-a.z)*travelDir.z;
+      const ankle=position(leg.foot),desired=ankle.clone().addScaledVector(travelDir,(reach-current)*ease);
+      const roll=Math.pow(Math.max(0,Math.sin(Math.PI*swing)),1.3);
+      desired.y+=(supportY-lowest[side]+.088*roll)*s.blend;
+      if(phaseLeg<.51){
+        if(!leg.anchor){
+          const m=leg.foot.matrixWorld.elements;
+          const base=leg.sole.filter(p=>m[1]*p.x+m[5]*p.y+m[9]*p.z+m[13]<lowest[side]+.010);
+          leg.pivot=base.reduce((p,v)=>p.add(v),V()).divideScalar(base.length||1);
+          leg.anchor=marker.clone().addScaledVector(travelDir,(reach-current)*ease);
+          const offset=leg.foot.localToWorld(leg.pivot.clone()).sub(marker);leg.anchor.add(offset);
+        }
+        const remaining=phaseLeg<.44?1:Math.max(0,1-(phaseLeg-.44)/.07);
+        const planted=ankle.clone();
+        const pivot=leg.foot.localToWorld(leg.pivot.clone());
+        planted.x+=leg.anchor.x-pivot.x;planted.z+=leg.anchor.z-pivot.z;
+        planted.y=desired.y;
+        desired.lerp(planted,remaining);
+      }else leg.anchor=null;
+      const hip=position(leg.thigh),knee=position(leg.shin),up=hip.distanceTo(knee),low=ankle.distanceTo(knee);
+      const reachXZ=Math.hypot(desired.x-hip.x,desired.z-hip.z);
+      const maxDrop=Math.sqrt(Math.max(0,(.985*(up+low))**2-reachXZ**2));
+      return {leg,desired,hip,knee,ankle,up,low,lift:hip.y-maxDrop-desired.y};
+    });
+    const lift=Math.min(.12,Math.max(.085,...targets.map(t=>t.lift)))*s.blend;
+    targets.forEach(({leg,desired,hip,knee,ankle,up,low})=>{
+      desired.y+=lift;
+      const axis=desired.clone().sub(hip),distance=Math.min(up+low-.0001,Math.max(Math.abs(up-low)+.0001,axis.length()));axis.normalize();
+      const bend=knee.clone().sub(hip);bend.addScaledVector(axis,-bend.dot(axis));
+      if (bend.lengthSq()<.000001) bend.copy(travelDir).addScaledVector(axis,-axis.dot(travelDir));
+      bend.normalize();
+      const along=(up*up+distance*distance-low*low)/(2*distance);
+      const kneeTarget=hip.clone().addScaledVector(axis,along).addScaledVector(bend,Math.sqrt(Math.max(0,up*up-along*along)));
+      const orientation=leg.foot.getWorldQuaternion(Q());
+      aim(leg.thigh,knee.sub(hip),kneeTarget.sub(hip));
+      aim(leg.shin,position(leg.foot).sub(position(leg.shin)),desired.sub(position(leg.shin)));
+      worldRotation(leg.foot,orientation);
+      
+    });
+  }
+
+  function plantFeet(a) {
+    if (!a.soles.length || a.sink || a.float) return;
+    groundRay.ray.origin.set(a.x, .4, a.z);
+    const surface = groundRay.intersectObjects(supportSurfaces[cur] || [], true)[0];
+    if (!surface) return;
+    a.root.updateMatrixWorld(true);
+    let lowest = Infinity;
+    for (const {mesh, indices} of a.soles) {
+      for (const i of indices) {
+        mesh.getVertexPosition(i, solePoint).applyMatrix4(mesh.matrixWorld);
+        lowest = Math.min(lowest, solePoint.y - a.root.position.y);
+      }
+    }
+    // 발이 실제 지면 아래로 들어간 만큼만 들어 올린다. 달리기의 체공과 점프 높이는 유지한다.
+    const plantedWalk = a.cur === 'walk' && !a.hop && a.lock <= 0;
+    a.root.position.y += surface.point.y + (plantedWalk ? -lowest : Math.max(0, -lowest)) + .001;
+  }
+
+  // Body gestures cross-fade normally. While the journal is in use, its hinge, pages
+  // and supporting thumb must start at their fitted positions together.
+  function journalGrip(actor) {
+    const record = actor.clips.record;
+    if (!record) return null;
+    const bindings = [];
+    for (const track of record.getClip().tracks) {
+      const name = T.PropertyBinding.parseTrackName(track.name);
+      const thumb = name.propertyName === 'quaternion' && /^J_Bip_L_Thumb[12]$/.test(name.nodeName);
+      const mount = name.propertyName === 'position' && (name.nodeName === 'Book_Hinge' || /수첩_(뒤표지|종이)$/.test(name.nodeName));
+      if (!thumb && !mount) continue;
+      const object = actor.root.getObjectByName(name.nodeName);
+      if (!object) continue;
+      const property = object[name.propertyName];
+      bindings.push({property, saved:property.clone(), sample:track.createInterpolant()});
+    }
+    if (bindings.length !== 5) return null;
+    return {
+      until:0, active:false,
+      apply(time) {
+        for (const b of bindings) {
+          if (!this.active) b.saved.copy(b.property);
+          b.property.fromArray(b.sample.evaluate(time));
+        }
+        this.active = true;
+      },
+      restore() {
+        if (this.active) for (const b of bindings) b.property.copy(b.saved);
+        this.active = false;
+      }
+    };
+  }
+
+  function makeActor(key, height) {
+    const g = lib[key], a = { key: key, x: 0, z: 0, ry: 0, wantRy: 0, speed: 4, anim: 'idle', t: Math.random() * 9, wk: 0, aim: 0, hop: 0, target: null };
+    const holder = new T.Group(); a.root = holder; a.act = () => false;
+    a.syncGait = (key === 'arthur' || key === 'eri')
+      && new URLSearchParams(location.search).get('go') !== 'pose';
+    if (g.userData.vrm) {
+      a.vrm = g.userData.vrm; holder.add(a.vrm.scene);
+      a.vrm.scene.traverse(m => { m.frustumCulled = false; if (m.isMesh) m.castShadow = true; });
+      if (height) a.vrm.scene.scale.setScalar(height);
+    } else {
+      const inner = g.scene; holder.add(inner); inner.rotation.y = (window.GAME.models[key] || {}).front === '+z' ? 0 : Math.PI;   // 기존 모델들은 앞이 -z라 돌려 세운다. 앞이 +z인 모델은 data.js의 models에 front: '+z'를 적는다
+      if (!g.userData.h0) { inner.scale.setScalar(1); inner.updateMatrixWorld(true); const box = new T.Box3().setFromObject(inner); g.userData.h0 = box.max.y - box.min.y; }
+      inner.scale.setScalar((height || g.userData.h0) / g.userData.h0);
+      inner.traverse(m => { if (m.isMesh) { m.castShadow = true; m.frustumCulled = false; } });
+      a.mixer = new T.AnimationMixer(inner); a.clips = {};
+      g.animations.forEach(c => { a.clips[c.name] = a.mixer.clipAction(c); });
+      if (key === 'eri') a.journalGrip = journalGrip(a);
+      if (a.clips.idle) a.clips.idle.play(); a.cur = 'idle';
+      if (key === 'arthur' || key === 'eri') a.soles = soleVertices(holder, height || g.userData.h0);
+      if (a.syncGait && a.soles) a.shoeStance = initShoeStance(a);
+    }
+    a.place = (x, z, ry) => { a.x = x; a.z = z; if (ry != null) a.ry = a.wantRy = ry; a.target = null; a.motionX = x; a.motionZ = z; };
+    // 동작을 바꾼다. once가 참이면 한 번만 재생하고 멈춘다.
+    const swap = (n, once) => {
+      const c = a.clips[n] || a.clips.idle; if (!c) return;
+      if (a.cur === n) { if (once) c.reset().play(); return; }
+      const p = a.clips[a.cur]; c.reset(); c.setLoop(once ? T.LoopOnce : T.LoopRepeat, once ? 1 : Infinity); c.clampWhenFinished = !!once; c.play();
+      if (p && p !== c) c.crossFadeFrom(p, .18, false); a.cur = n;
+    };
+    a.lock = 0;
+    a.play = n => { a.anim = n; if (!a.mixer || a.lock > 0) return; swap(n); };   // 한 번짜리 동작 중이면 끝난 뒤 a.anim으로 돌아간다
+    a.act = n => {   // 한 번만 재생한다(skill, inspect, hit). 그 동작이 없는 모델이면 false를 돌려준다.
+      const c = a.clips && a.clips[n]; if (!c) return false;
+      swap(n, true);
+      if (n === 'record' && a.journalGrip) {
+        a.journalGrip.until = 0;
+        a.journalGrip.apply(0);
+      }
+      a.lock = Math.min(2, Math.max(.3, c.getClip().duration)); return true;
+    };
+    a.endAct = () => {
+      if (a.cur === 'record' && a.journalGrip) a.journalGrip.until = a.t + .18;
+      a.lock = 0; swap(a.anim);
+    };
+    a.face = (x, z) => { a.wantRy = Math.atan2(x - a.x, z - a.z); };
+    a.goto = (x, z, speed) => new Promise(res => { a.target = { x: x, z: z, res: res }; if (speed) a.speed = speed; a.play('walk'); });
+    scene.add(holder); actors.push(a); return a;
+  }
+  function removeActor(a) { const i = actors.indexOf(a); if (i >= 0) actors.splice(i, 1); scene.remove(a.root); if (a.target && a.target.res) a.target.res(); }
+
+  function poseVRM(a, dt) {
+    const h = a.vrm.humanoid, b = n => h.getNormalizedBoneNode(n);
+    a.wk += ((a.anim === 'walk' ? 1 : 0) - a.wk) * Math.min(1, dt * 9);
+    a.aim += ((a.anim === 'use' ? 1 : 0) - a.aim) * Math.min(1, dt * 10);
+    const s = Math.sin(a.t * 9.5) * a.wk, c = Math.cos(a.t * 9.5) * a.wk, br = Math.sin(a.t * 2.1);
+    const set = (n, x, y, z) => { const o = b(n); if (o) o.rotation.set(x, y, z); };
+    set('leftUpperArm', -s * .55, 0, -1.2 + br * .015);
+    set('rightUpperArm', s * .55 * (1 - a.aim) - 1.35 * a.aim, -.25 * a.aim, 1.2 - br * .015 - .15 * a.aim);
+    set('leftLowerArm', 0, -.25 - a.wk * .35, 0); set('rightLowerArm', 0, (.25 + a.wk * .35) * (1 - a.aim), 0);
+    set('leftUpperLeg', -s * .62, 0, 0); set('rightUpperLeg', s * .62, 0, 0);
+    set('leftLowerLeg', Math.max(0, -c) * .9, 0, 0); set('rightLowerLeg', Math.max(0, c) * .9, 0, 0);
+    set('spine', .03 * a.wk + br * .012, 0, 0); set('head', -.02 * a.wk, 0, 0);
+    a.vrm.update(dt);
+  }
+
+  // ── 효과: 표시 고리, 훈련탄, 반짝임 ──
+  function ring(x, z, color) {
+    const g = new T.Group();
+    const r = new T.Mesh(new T.RingGeometry(.62, .8, 40), new T.MeshBasicMaterial({ color: color, transparent: true, opacity: .95, side: T.DoubleSide, depthWrite: false })); r.rotation.x = -Math.PI / 2; r.position.y = .07;
+    const beam = new T.Mesh(new T.CylinderGeometry(.5, .68, 2.6, 28, 1, true), new T.MeshBasicMaterial({ color: color, transparent: true, opacity: .2, side: T.DoubleSide, depthWrite: false })); beam.position.y = 1.3;
+    g.add(r, beam); g.position.set(x, 0, z); fxg.add(g);
+    const f = { t: 0, tick: dt => { f.t += dt; const k = 1 + Math.sin(f.t * 4) * .1; r.scale.set(k, k, 1); beam.material.opacity = .16 + Math.sin(f.t * 4) * .06; return true; }, show: v => { g.visible = v; }, remove: () => { fxg.remove(g); const i = fx.indexOf(f); if (i >= 0) fx.splice(i, 1); } };
+    fx.push(f); return f;
+  }
+  function sparkle(x, z) {   // 숨은 반짝 조각. 빛이 닿기 전에는 보이지 않는다.
+    const g = new T.Group(); g.position.set(x, 0, z); g.visible = false; fxg.add(g);
+    const gem = new T.Mesh(new T.OctahedronGeometry(.17), new T.MeshBasicMaterial({ color: '#fff3a8' })); gem.scale.y = 1.35; g.add(gem);
+    const halo = new T.Mesh(new T.RingGeometry(.3, .4, 28), new T.MeshBasicMaterial({ color: '#ffd92e', transparent: true, opacity: .8, side: T.DoubleSide, depthWrite: false })); halo.rotation.x = -Math.PI / 2; halo.position.y = .04; g.add(halo);
+    const f = { t: 0, tick: dt => { f.t += dt; gem.rotation.y = f.t * 3; gem.position.y = .3 + Math.sin(f.t * 4) * .06; const k = 1 + Math.sin(f.t * 5) * .2; halo.scale.set(k, k, 1); halo.material.opacity = .75 - Math.sin(f.t * 5) * .25; return true; }, show: v => { g.visible = v; }, remove: () => { fxg.remove(g); const i = fx.indexOf(f); if (i >= 0) fx.splice(i, 1); } };
+    fx.push(f); return f;
+  }
+  // 날아가는 것. o.shape: orb(공, 기본) | beam(길쭉한 빛줄기) | card(수첩 쪽지) | drop(물방울) | spark(번쩍이는 조각)
+  const SHAPES = {
+    beam: s => new T.BoxGeometry(s * .5, s * .5, s * 3.4),
+    card: s => new T.BoxGeometry(s * 1.7, s * .12, s * 1.3),
+    drop: s => { const g = new T.SphereGeometry(s, 12, 10); g.scale(.75, 1.35, .75); return g; },
+    spark: s => new T.OctahedronGeometry(s * 1.1)
+  };
+  function shot(from, to, o) {   // from, to: {x,y,z}  o: {color, size, time, arc, shape, trail, onHit}
+    const size = o.size || .16, geo = SHAPES[o.shape] ? SHAPES[o.shape](size) : new T.SphereGeometry(size, 14, 10);
+    const m = new T.Mesh(geo, new T.MeshBasicMaterial({ color: o.color || '#7fd0ff' }));
+    fxg.add(m); const dur = o.time || .35; let t = 0;
+    fx.push({ tick: dt => { t += dt; const k = Math.min(1, t / dur);
+      m.position.set(from.x + (to.x - from.x) * k, from.y + (to.y - from.y) * k + Math.sin(k * Math.PI) * (o.arc || 0), from.z + (to.z - from.z) * k);
+      if (o.shape === 'beam') m.lookAt(to.x, to.y, to.z); else if (o.shape === 'card' || o.shape === 'spark') { m.rotation.y += dt * 14; m.rotation.x += dt * 7; }
+      if (o.trail && dt > 0) puff(m.position, o.color || '#7fd0ff', size * .8);
+      if (k >= 1) { fxg.remove(m); geo.dispose(); if (o.onHit) o.onHit(); return false; } return true; } });
+  }
+  // 날아가는 것 뒤에 남는 꼬리 한 점
+  const puffG = new T.SphereGeometry(1, 8, 6);
+  function puff(p, color, r) {
+    const m = new T.Mesh(puffG, new T.MeshBasicMaterial({ color: color, transparent: true, opacity: .55, depthWrite: false })); m.position.copy(p); m.scale.setScalar(r); fxg.add(m);
+    let t = 0; fx.push({ tick: dt => { t += dt; const k = t / .18; m.scale.setScalar(r * Math.max(.05, 1 - k * .7)); m.material.opacity = .55 * (1 - k); if (k >= 1) { fxg.remove(m); m.material.dispose(); return false; } return true; } });
+  }
+
+  function burst(x, y, z, color, count=8, radius=.09) {
+    const material = new T.MeshBasicMaterial({ color, transparent: true });
+    const mesh = new T.InstancedMesh(puffG, material, count);
+    mesh.instanceMatrix.setUsage(T.DynamicDrawUsage);
+    mesh.frustumCulled = false;
+    const stamp = new T.Matrix4().makeScale(radius, radius, radius);
+    const parts = Array.from({length: count}, (_, index) => {
+      const angle = Math.random() * 6.28, up = Math.random() * 3 + 1.5, speed = Math.random() * 2.5 + 1.2;
+      stamp.setPosition(x, y, z);
+      mesh.setMatrixAt(index, stamp);
+      return {x, y, z, vx: Math.cos(angle) * speed, vy: up, vz: Math.sin(angle) * speed};
+    });
+    fxg.add(mesh);
+    let t = 0;
+    function dispose() { fxg.remove(mesh); mesh.dispose(); material.dispose(); }
+    fx.push({ dispose, tick(dt) {
+      t += dt;
+      if (t > .6) { dispose(); return false; }
+      for (let i = 0; i < count; i++) {
+        const p = parts[i];
+        p.vy -= 9 * dt;
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.z += p.vz * dt;
+        stamp.setPosition(p.x, p.y, p.z);
+        mesh.setMatrixAt(i, stamp);
+      }
+      mesh.instanceMatrix.needsUpdate = true;
+      material.opacity = 1 - t / .6;
+      return true;
+    }});
+  }
+
+  // ── 매 프레임 ──
+  function frame(now) {
+    raf = requestAnimationFrame(frame);
+    const dt = Math.max(0, Math.min(.05, (now - last) / 1000 || 0)); last = now;
+    sim(dt); render(now);
+  }
+  function warp(sec) { for (let t = 0; t < sec; t += 1 / 30) sim(1 / 30); render(performance.now()); }   // 화면 확인용: 시간을 한꺼번에 흘려보낸다
+  function sim(dt) {
+    actors.forEach(a => { a.motionX = a.x; a.motionZ = a.z; });
+    const scale = onTick ? onTick(dt) : 1; if (scale != null) dt *= scale;
+    actors.forEach(a => {
+      a.t += dt;
+      if (a.target) {
+        const dx = a.target.x - a.x, dz = a.target.z - a.z, d = Math.hypot(dx, dz), st = a.speed * dt;
+        if (a.groundPath && dt > 0 && d > 0) {
+          const stride = Math.min(d, st);
+          const oldX = a.x, oldZ = a.z;
+          [a.x, a.z] = a.groundPath(a.x, a.z, dx / d * stride, dz / d * stride);
+          const mx = a.x - oldX, mz = a.z - oldZ;
+          if (Math.hypot(mx, mz) > .001) a.wantRy = Math.atan2(mx, mz);
+          if (Math.hypot(mx, mz) <= .001 || Math.hypot(a.target.x - a.x, a.target.z - a.z) < .02) {
+            const done = a.target.res; a.target = null; a.play('idle'); if (done) done();
+          }
+        } else if (d <= st || d < .02) { a.x = a.target.x; a.z = a.target.z; const r = a.target.res; a.target = null; a.play('idle'); if (r) r(); }
+        else { a.x += dx / d * st; a.z += dz / d * st; a.wantRy = Math.atan2(dx, dz); }
+      }
+      let dr = a.wantRy - a.ry; while (dr > Math.PI) dr -= 6.2832; while (dr < -Math.PI) dr += 6.2832; a.ry += dr * Math.min(1, dt * 12);
+      if (a.hop > 0) a.hop = Math.max(0, a.hop - dt * 2.4);
+      a.pk = Math.max(0, (a.pk || 0) - dt * 7); a.root.scale.setScalar(1 + .25 * a.pk);   // pk: 맞았을 때 움찔하는 정도
+      a.sy = (a.sy || 0) + ((a.sink || 0) - (a.sy || 0)) * Math.min(1, dt * 7);   // sink: 물속에 잠긴 깊이
+      a.root.position.set(a.x, (a.float || 0) + Math.sin(a.hop * Math.PI) * (a.hopH || 0) + (a.float ? Math.sin(a.t * 2.4) * .12 : 0) - a.sy, a.z); a.root.rotation.y = a.ry;
+      if (a.lock > 0) { a.lock -= dt; if (a.lock <= 0) a.endAct(); }
+      if (a.mixer) {
+        const gait = a.syncGait && a.lock <= 0 && (a.cur === 'walk' || a.cur === 'run') ? a.clips[a.cur] : null;
+        if (gait && dt > 0) {
+          const moved = Math.hypot(a.x - a.motionX, a.z - a.motionZ);
+          const pace = a.cur === 'run' ? 3.56 : 1.38;
+          // 접지 구간의 원래 발 이동 속도를 기준으로 실제 전진 거리에 동작을 맞춘다.
+          gait.setEffectiveTimeScale(a.cur === 'walk' ? moved * gait.getClip().duration / (dt * pace) : Math.min(2.3, moved / (dt * pace)));
+        }
+        restoreShoeStance(a);
+        if (a.journalGrip) a.journalGrip.restore();
+        a.mixer.update(dt);
+        if (a.journalGrip) {
+          if (a.cur === 'record') a.journalGrip.apply(a.clips.record.time);
+          else if (a.t < a.journalGrip.until && a.cur === 'idle') a.journalGrip.apply(a.clips.record.getClip().duration);
+        }
+        solveShoeStance(a,dt);
+      } else if (a.vrm) poseVRM(a, dt);
+      if (a.soles) plantFeet(a);
+    });
+    for (let i = fx.length - 1; i >= 0; i--) if (fx[i].tick(dt) === false) fx.splice(i, 1);
+    if (cur === 'tower') towerTick(dt);
+    focus.lerp(want, 1 - Math.exp(-dt * 3.2));
+    shk *= Math.exp(-dt * 8); const jx = dt > 0 ? (Math.random() - .5) * shk : 0, jy = dt > 0 ? (Math.random() - .5) * shk : 0;   // 화면 흔들림
+    zk += (zt - zk) * (1 - Math.exp(-dt * 2.2));
+    camera.position.set(focus.x + CAM.side * zk + jx, CAM.up * zk + jy, focus.z + CAM.back * zk); camera.lookAt(focus.x + .6 + jx, 1 + jy, focus.z - 1.2);
+    sun.position.set(focus.x - 20, 34, focus.z + 16); sun.target.position.set(focus.x, 0, focus.z);
+    if (lampOf) { lamp.position.set(lampOf.x, 2.2, lampOf.z + .1); lamp.intensity += (LAMP * lampPow - lamp.intensity) * Math.min(1, dt * 5); }
+    camera.updateMatrixWorld();
+  }
+  function start(tick) { onTick = tick || null; if (!raf) { last = performance.now(); raf = requestAnimationFrame(frame); } }
+  function stop() { cancelAnimationFrame(raf); raf = 0; onTick = null; }
+  function look(x, z, snap) { want.set(x, 0, z); if (snap) focus.copy(want); }
+  function clear() { actors.slice().forEach(removeActor); fx.forEach(effect => effect.dispose?.()); fx.length = 0; if (fxg) fxg.clear(); if (lamp) lampOn(null); }
+  const v = new T.Vector3();
+  function project(x, y, z) { v.set(x, y, z).project(camera); return { x: (v.x + 1) * 960, y: (1 - v.y) * 540 }; }
+  // 화면에서 누른 곳이 바닥의 어디인지(걸어갈 자리)
+  const ray = new T.Raycaster(), ndc = new T.Vector2(), ground = new T.Plane(new T.Vector3(0, 1, 0), 0), hitP = new T.Vector3();
+  function pick(cx, cy) {
+    const r = renderer.domElement.getBoundingClientRect(); ndc.set((cx - r.left) / r.width * 2 - 1, 1 - (cy - r.top) / r.height * 2);
+    ray.setFromCamera(ndc, camera); return ray.ray.intersectPlane(ground, hitP) ? { x: hitP.x, z: hitP.z } : null;
+  }
+
+  return { ok: ok, init: init, load: load, warp: warp, start: start, stop: stop, look: look, clear: clear, project: project, pick: pick, makeActor: makeActor, removeActor: removeActor, ring: ring, sparkle: sparkle, shot: shot, burst: burst, setScene: setScene, lampOn: lampOn, lampPower: p => { lampPow = p; }, openChest: openChest, paint: paint, revealPaint: revealPaint, openDoor: openDoor, ripple: ripple, bolt: bolt, fix: fix, towerOn: towerOn, camMode: camMode, zoom: (k, snap) => { zt = k; if (snap) zk = k; }, punch: a => { a.pk = 1; }, shake: p => { shk = Math.max(shk, p); }, cam: CAM };
+})();

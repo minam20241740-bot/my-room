@@ -1,0 +1,34 @@
+#portrait-menu{display:none}
+@media(max-width:600px) and (orientation:portrait){
+ body:has(#title.on):not(:has(#pop.on,#card.on,#story.on)) #portrait-menu{
+  display:grid;grid-template-columns:1.3fr 1fr 1.1fr;gap:5px;position:fixed;z-index:3;
+  top:calc(50% + 28.125vw + 6px);left:5px;right:5px;
+ }
+ #portrait-menu button{
+  all:unset;box-sizing:border-box;position:static!important;transform:none!important;width:100%!important;height:auto!important;
+  min-height:46px;text-align:center;border-radius:7px;background:#222c43;color:white;
+  border:1px solid #acb4d2;font:600 16px/1.25 system-ui,sans-serif;cursor:pointer
+ }
+ #portrait-menu button:first-child{background:#ffe069;color:#142135;border-color:#ffe069}
+ #portrait-menu button::before,#portrait-menu button::after,#portrait-menu button i{display:none}
+ #portrait-menu button>span{all:unset;color:inherit;font:inherit}
+ #portrait-menu button:focus-visible{outline:3px solid white;outline-offset:2px}
+ body>#pop{position:fixed;inset:0;z-index:10;padding:8px;width:auto;height:auto}
+ body>#pop .win{width:100%!important;max-width:100%;max-height:calc(100dvh - 16px);box-sizing:border-box;padding:14px;min-width:0}
+ body>#pop .win h2{font:700 23px/1.35 system-ui,sans-serif;letter-spacing:0;margin:0 0 10px}
+ body>#pop .win .body{min-width:0;font:16px/1.5 system-ui,sans-serif;overflow:auto}
+ body>#pop .win .body p{font-size:16px;line-height:1.5}
+ body>#pop .win .foot{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+ body>#pop .win .foot button{width:auto!important;height:auto!important;min-width:0;min-height:44px;font-size:16px;flex:1;padding:6px}
+ body>#pop .win .foot button span{font-size:16px}
+ body>#pop .win .body:has(.settings-section){padding:8px;overflow-x:hidden}
+ body>#pop .settings{max-width:100%;min-width:0;padding:0;display:block}
+ body>#pop .settings-section{width:100%;padding:5px 0}
+ body>#pop .settings-section h3{font-size:18px;margin:6px 0}
+ body>#pop .settings-section .rows{display:grid;grid-template-columns:minmax(0,1fr);gap:5px}
+ body>#pop .settings-section .rows>b{font-size:16px;padding:3px 0 0}
+ body>#pop .settings-section .seg{display:flex;flex-wrap:wrap;gap:5px;min-width:0}
+ body>#pop .settings-section .seg button{height:auto;min-height:42px;min-width:57px;flex:1 1 auto;font-size:15px;padding:5px 8px}
+ body>#pop .settings-section .seg button[aria-pressed=true]{padding-left:8px}
+ body>#pop .settings-section .seg button[aria-pressed=true]::before{display:none}
+}

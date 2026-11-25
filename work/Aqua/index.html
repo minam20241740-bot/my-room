@@ -1,0 +1,8 @@
+<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><base href="../../"><title>아쿠아 · 책 감상</title><style>
+@font-face{font-family:P;src:url('assets/PretendardVariable.woff2')}*{box-sizing:border-box}body{margin:0;background:#152a38;color:#eefafa;font:16px/1.55 P,system-ui,sans-serif}dialog{position:static;border:0;background:transparent;color:inherit;width:min(100%,870px);max-width:100%;padding:14px;margin:0 auto}header,.work-links{display:flex;align-items:center;gap:8px;flex-wrap:wrap}header{justify-content:space-between}h1{font-size:clamp(22px,4vw,32px);margin:0}button{font:inherit;background:#203f4b;color:white;border:1px solid #91bac2;border-radius:7px;padding:.6rem 1rem;cursor:pointer}button:focus-visible{outline:3px solid #9de9ed}.aqua-view{background:radial-gradient(ellipse at bottom,#4c717d,#0c2738);border-radius:9px;margin:12px 0}.aqua-view canvas,.aqua-view img{display:block;width:100%;max-height:65vh;object-fit:contain;touch-action:none}.aqua-view figure{margin:0}.work-links{justify-content:center}p{margin:.6rem 0}</style>
+<dialog open><header>
+<meta name="robots" content="noindex, nofollow, noarchive"><h1>아쿠아 · 책 감상</h1><button id="leave">작품으로 돌아가기</button></header><p>화면을 끌어 책을 드는 손과 옷자락을 다른 각도에서 살펴보세요.</p><div id="model"></div></dialog>
+<script src="vendor/three-bundle.js"></script><script src="gallery.js"></script><script>
+RoomGallery.rotateAqua(document.getElementById('model'),()=>{});
+document.getElementById('leave').onclick=()=>{if(parent===window)location.href=new URL('index.html',document.baseURI);else parent.postMessage({type:'room:return-detail'},location.origin==='null'?'*':location.origin)};
+</script></html>

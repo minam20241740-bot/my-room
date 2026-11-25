@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta name="robots" content="noindex, nofollow, noarchive">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>몽환의 숲 · 도시 구축의 꿈</title>
+  <link rel="stylesheet" href="forest.css">
+</head>
+<body><main>
+  <header><span>몽환의 숲</span><button id="leave">작품으로 돌아가기</button></header>
+  <section id="menu">
+    <img src="title.webp" alt="몽환의 숲 · 도시 구축의 꿈">
+    <div class="menu-actions"><button id="start">새 마을 시작</button><button id="load">마을 이어하기</button></div>
+    <p id="menu-note" role="status"></p>
+  </section>
+  <section id="world" hidden>
+    <div class="bar"><h1>도시 구축의 꿈</h1><button id="save">마을 저장</button><button id="home">타이틀</button></div>
+    <nav id="paths" aria-label="숲과 마을"><button data-view="village" aria-controls="village">도시 건설</button><button data-view="bag" aria-controls="bag">소지품</button><button data-view="dream" aria-controls="dream">몽환의 숲</button><button data-view="night" aria-controls="night">악몽의 숲</button></nav>
+    <div class="vitals" aria-label="꿈구축가의 상태"><span>꿈구축가</span><label>HP <meter id="hp" min="0" max="100"></meter><b id="hp-value"></b></label><label>MP <meter id="mp" min="0" max="100"></meter><b id="mp-value"></b></label></div>
+    <section id="village" class="view">
+      <div class="map" aria-label="숲과 건설 부지">
+        <div class="resources"><button data-gather="wood">나무 모으기</button><button data-gather="stone">돌 모으기</button></div><div id="plots"></div>
+      </div>
+      <div class="inventory"><strong id="wallet"></strong><span id="count"></span></div>
+      <fieldset><legend>건설할 건물</legend><div id="buildings"></div></fieldset>
+      <button id="rest" type="button">마을에서 쉬기</button>
+    </section>
+    <section id="bag" class="view bag-view" aria-labelledby="bag-title" hidden>
+      <div class="portrait"><img src="art/builder.webp" alt="활을 멘 꿈구축가"><span>꿈구축가</span></div>
+      <div class="bag-main"><h2 id="bag-title">소지품</h2><div id="slots" aria-label="소지품 스무 칸"></div><p id="item-info"></p></div>
+    </section>
+    <section id="dream" class="view dream-view" aria-labelledby="dream-title" hidden>
+      <div class="dream-intro"><h2 id="dream-title">몽환의 숲</h2><p>숲에서 깨어나는 능력을 하나 골라 익히세요.</p></div>
+      <div class="skill-panel"><img class="tree" src="art/tree.webp" alt="빛이 뻗어 여러 능력으로 이어지는 스킬 트리"><div id="study"></div></div>
+    </section>
+    <section id="night" class="view night-view" aria-labelledby="night-title" hidden>
+      <div id="encounter"><div class="night-heading"><h2 id="night-title">악몽의 숲</h2><p id="foe-intent"></p></div>
+        <img id="creature" src="art/encounter.webp" alt="">
+        <div id="enemy" hidden><label for="foe-hp">숲속의 몬스터</label><meter id="foe-hp" min="0" max="100"></meter><b id="foe-value"></b></div>
+      </div>
+      <div id="fight-toolbar"><button id="challenge">숲 안으로 들어가기</button><button id="retreat" hidden>마을로 물러나기</button><button id="back-village" hidden>마을로 돌아가기</button></div>
+      <div id="abilities" aria-label="전투 기술"></div><p id="battle-log" role="status"></p>
+    </section>
+    <p id="status" role="status"></p>
+  </section>
+</main><script src="adventure.js"></script><script src="forest.js"></script></body></html>

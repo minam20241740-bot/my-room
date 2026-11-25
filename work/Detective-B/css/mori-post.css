@@ -1,0 +1,57 @@
+#lobby .mori-visitor {
+  position: absolute;
+  top: 272px;
+  left: 48px;
+  width: 370px;
+  min-height: 106px;
+  display: grid;
+  grid-template-columns: 84px 1fr;
+  gap: 13px;
+  align-items: center;
+  padding: 10px 16px 10px 13px;
+  border: 2px solid #aed7fa;
+  border-left: 8px solid #1485c7;
+  border-radius: 13px;
+  background: #f7fbff;
+  color: #163c64;
+  text-align: left;
+  box-shadow: 0 6px 0 #2d466333;
+}
+#lobby .mori-visitor[hidden] { display: none; }
+#lobby .mori-visitor:hover { border-color: #1668ab; }
+#lobby .mori-visitor:focus-visible { outline: 5px solid #123961; outline-offset: 4px; }
+#lobby .mori-visitor img {
+  width: 84px;
+  height: 84px;
+  object-fit: contain;
+  border-radius: 10px;
+  background: #e3f3ff;
+}
+.mori-visitor small, .mori-visitor b { display: block; white-space: nowrap; }
+.mori-visitor small { color: #1a5279; font-size: 24px; font-weight: 700; }
+.mori-visitor b { margin-top: 3px; font-size: 29px; font-weight: 850; line-height: 1.12; }
+.mori-dialogue {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 42px;
+  align-items: center;
+}
+.mori-dialogue img {
+  width: 240px;
+  height: 240px;
+  object-fit: contain;
+  border-radius: 18px;
+  background: radial-gradient(ellipse at 50% 62%, #d5ecff, #edf7ff 73%);
+}
+.mori-dialogue h3 { margin: 0 0 10px; color: #152f52; font-size: 37px; line-height: 1.13; }
+.mori-dialogue p { font-size: 30px; line-height: 1.43; }
+.mori-dialogue .mori-record, .mori-dialogue .mori-notes {
+  margin: 0;
+  padding: 9px 17px;
+  border-left: 5px solid #127bb9;
+  background: #e8f5ff;
+  color: #174f7d;
+  font-size: 25px;
+  font-weight: 700;
+}
+.mori-dialogue .mori-notes { list-style: none; }

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8"><meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>우회선 · PC 게임</title>
+<style>
+body{max-width:37rem;margin:12vh auto;padding:24px;background:#192429;color:#f2f4e7;font:17px/1.6 system-ui}
+h1{line-height:1.2}
+button{padding:.64rem 1.05rem;color:#102b29;background:#95dfc5;border:0;border-radius:6px;font:700 1rem system-ui}
+</style>
+<h1>우회선</h1>
+<p>관제대에서 이어 붙인 신호를 따라 Windows PC 검토본을 엽니다.</p>
+<button type="button" id="launch">우회선 PC 게임 실행</button>
+<p id="status" role="status"></p>
+<script>
+const launch=document.querySelector('#launch'), status=document.querySelector('#status');
+launch.addEventListener('click',async()=>{
+  launch.disabled=true;
+  try {
+    const response=await fetch('/work/Detour/launch',{method:'POST'});
+    status.textContent=response.ok?'우회선을 열었습니다. 게임 창에서 계속하세요.':'현재 이 PC에서 우회선 실행 파일을 찾을 수 없어요.';
+  } catch { status.textContent='나의 방 실행 창을 열어 둔 상태에서 다시 눌러 주세요.'; }
+  finally { launch.disabled=false; }
+});
+</script>

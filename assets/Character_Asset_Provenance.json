@@ -1,0 +1,33 @@
+{
+  "Character_Aqua_Female_Plan.pdf": {
+    "source": "최종 결과물/20261118_졸업전시_개인작품_전병준/06_개인작업/아쿠아/02_여성형/01_Plan/아쿠아_여성형_캐릭터와감상방식_기획검토본_20261110.pdf",
+    "bytes": 2646871,
+    "sha256": "087e962416ccbcda425e13ceb3905e76f5017eb22138775937edb127d2a479ec"
+  },
+  "Shelf_Judy_Training.mp4": {
+    "source": "최종 결과물/20261118_졸업전시_개인작품_전병준/06_개인작업/주디/03_Result/261116_주디_타격과반동_효과음포함.mp4",
+    "bytes": 125489,
+    "sha256": "c0acda7d2cca18064d41074054bd69ec797244fe5ee8035280f2ee7a4860a0d6"
+  },
+  "Shelf_Momoel_Energy.mp4": {
+    "source": "최종 결과물/20261118_졸업전시_개인작품_전병준/06_개인작업/모모엘/05_AE/모모엘_2초_집광_합성.mp4",
+    "bytes": 1585440,
+    "sha256": "9df8b160f96bdf541e6f8f8282e36f85d987c53e67759c73310506fc5d4ddae3"
+  },
+  "Shelf_Judy_Plan.pdf": {
+    "source": "주디_기획.pdf",
+    "pages": 1,
+    "bytes": 594187,
+    "sha256": "8feaf587ba64a8860b429e967eeddad6154b11b2ed3f5d706ec91d818a13a762",
+    "editable_html": "01_Plan/Source/Shelf_Judy_Plan.html",
+    "reference": "최종 결과물/20261118_졸업전시_개인작품_전병준/06_개인작업/주디/01_Plan/주디_기획검토본.html"
+  },
+  "Shelf_Momoel_Plan.pdf": {
+    "source": "나의방_모모엘.pdf",
+    "pages": 1,
+    "bytes": 224479,
+    "sha256": "dcab3c2e3b80afa2b55b862bf0f663d6b4e69a0f60673837dbf3ebe08c32075b",
+    "editable_html": "01_Plan/Source/Shelf_Momoel_Plan.html",
+    "reference": "최종 결과물/20261118_졸업전시_개인작품_전병준/06_개인작업/모모엘/01_Plan/모모엘_기획검토본.html"
+  }
+}

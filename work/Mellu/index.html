@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta name="robots" content="noindex, nofollow, noarchive">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>멜루 — 출장 다녀왔습니다</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <header class="topbar"><a href="#" id="home" aria-label="시작 화면">MELLU<span>돌아오는 항해</span></a><div class="top-actions"><span id="saveStatus" role="status">LOCAL PLAY</span><button id="journalButton">항해 수첩 <kbd>J</kbd></button><button id="soundButton" aria-pressed="false">효과음 꺼짐</button></div></header>
+  <main id="titleScreen" class="title-screen">
+    <div class="title-copy"><p class="eyebrow">URBAN FANTASY · COMEDY RPG</p><p class="edition">멜루의 이상한 출장 기록</p><h1>출장<br>다녀왔습니다<span>.</span></h1><p class="lead">돌아가는 표는 있었는데,<br>돌아가는 길이 사라졌다.</p><div class="start-actions"><button id="newGame" class="primary">첫 항해 시작 <span>↗</span></button><button id="continueGame">이어 하기</button></div><p class="small">이동 WASD / 방향키 · 대화 E / Enter<br>이야기와 전투가 이어지는 플레이 초안 · 임시 캐릭터</p></div>
+    <div class="title-art" aria-hidden="true"><div class="moon"></div><div class="orbital"></div><div class="tower t1"></div><div class="tower t2"></div><div class="tower t3"></div><div class="tower t4"></div><div class="neon-sign">終點<br><span>귀환항</span></div><div class="harbor-line"></div><div class="boat"><i></i><b></b><em></em></div><div class="water"></div><span class="art-caption">마지막 배는 아직 떠나지 않았다.</span></div>
+    <footer class="title-footer"><span>01 / THE WAY HOME</span><span>일상으로 돌아가기 위한, 조금 긴 이야기</span></footer>
+  </main>
+  <main id="playScreen" class="play-screen" hidden>
+    <section class="game-column"><div class="scene-heading"><div><p class="eyebrow" id="chapterLabel"></p><h1 id="sceneTitle"></h1></div><span id="locationTag"></span></div><div class="viewport"><canvas id="world" width="960" height="576" aria-label="항구 탐색 지도"></canvas><div class="map-vignette"></div><div class="map-label"><span class="live-dot"></span><span id="mapMood"></span></div><div id="prompt" class="interact-prompt" hidden></div><div id="cinematic" class="cinematic" hidden><div class="transform-ring"></div><div class="reveal-light" aria-hidden="true"></div><div id="transformFigure" class="transform-figure"><img id="revealPortrait" alt=""></div><p id="cinematicCaption"></p><button id="cinematicNext" class="primary" hidden>계속</button></div></div><div class="under-map"><div class="move-controls" aria-label="이동 조작"><button data-move="up" aria-label="위로">↑</button><button data-move="left" aria-label="왼쪽">←</button><button data-move="down" aria-label="아래로">↓</button><button data-move="right" aria-label="오른쪽">→</button><button id="interactButton">대화 / 조사</button></div></div>
+    <section id="routeGuide" class="route-guide" aria-label="다음 항로" hidden>
+      <div><p id="targetAction"></p><strong id="targetName"></strong><span id="targetDistance"></span></div>
+      <button id="routeButton" type="button" aria-pressed="false">지도에 길 표시</button>
+    </section>
+    <p id="sceneHint" class="scene-hint">가까이 다가가 E로 조사하세요.</p>
+    <section id="dialogue" class="dialogue" hidden aria-label="대화"><div class="speaker-row"><span id="speaker"></span><span id="lineNumber"></span></div><p id="dialogueText" aria-live="polite"></p><figure id="dialogueEvidence" class="dialogue-evidence" hidden><canvas id="snackClue" width="340" height="150" role="img" aria-label="연두색 과육이 담긴 그릇과 붉은 소스"></canvas></figure><div id="choices" class="choices"></div></section>
+    <section id="battle" class="battle" hidden aria-label="전투"><div class="battle-heading"><div><p class="eyebrow">TURN BASED ENCOUNTER</p><h2 id="enemyName"></h2></div><span id="turnNumber"></span></div><div class="enemy-meter"><div id="enemyFill"></div></div><p class="intent" id="enemyIntent"></p><p id="battleLog" aria-live="polite"></p><div class="battle-actions"><button data-action="strike">지팡이 타격 <small>집중 0 · 피해 7</small></button><button data-action="wit">말로 풀기 <small>집중 3 · 피해 12</small></button><button data-action="guard">숨 고르기 <small>피해 감소 · 집중 +4</small></button><button data-action="tea">따뜻한 차 <small>차 1잔 · 체력 +12</small></button></div></section>
+    </section>
+    <aside class="sidebar"><div class="character-card"><canvas id="melluPortrait" width="500" height="500" aria-label="영상 기준으로 재구성한 멜루 상체"></canvas><canvas id="awakenedCard" width="500" height="500" aria-label="개화 의상의 검은여우 멜루" hidden></canvas><div><p class="eyebrow" id="formLabel">검은여우</p><h2>멜루</h2><span id="characterRole">출장 복귀 중</span></div></div><div class="stats"><div><label>체력 <span id="hpValue"></span></label><progress id="hpBar" max="36"></progress></div><div><label>집중 <span id="focusValue"></span></label><progress id="focusBar" max="10"></progress></div><div class="stat-bottom"><span>따뜻한 차 <b id="teaValue"></b></span><span>동행 <b id="bondValue"></b></span></div></div><section class="quest-card"><p class="eyebrow">CURRENT OBJECTIVE</p><h3 id="questTitle"></h3><p id="questText"></p><div id="questSteps"></div></section><section class="bag-card"><p class="eyebrow">POCKETS</p><div id="inventory"></div></section><section class="log-card"><p class="eyebrow">항해 메모</p><ol id="recentLog"></ol></section><button id="saveButton" class="save-button">여기까지 저장</button></aside>
+  </main>
+</div>
+<dialog id="journal"><div class="modal-header"><div><p class="eyebrow">MELLU'S LOGBOOK</p><h2>항해 수첩</h2></div><button id="closeJournal" aria-label="수첩 닫기">닫기 ×</button></div><div id="journalContent"></div></dialog>
+<dialog id="confirmNew"><h2>새 항해를 시작할까요?</h2><p>이 브라우저의 기존 진행 기록이 새 항해로 바뀝니다.</p><div class="choices"><button id="cancelNew">돌아가기</button><button id="confirmNewButton" class="primary">새로 시작</button></div></dialog>
+<div id="toast" role="status" hidden></div>
+<script src="assets/puppet-data.js"></script><script src="assets/puppet-awakened-data.js"></script><script src="assets/portrait.js"></script><script src="assets/portrait-game.js"></script><script src="story.js"></script><script src="game.js"></script>
+</body></html>

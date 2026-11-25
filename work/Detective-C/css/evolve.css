@@ -1,0 +1,46 @@
+/* evolve-and-impact */
+.evo { position: absolute; inset: 0; z-index: 9000; overflow: hidden; display: block; color: #ffffff; animation: evoIn .25s ease-out; }
+.evo.out { opacity: 0; transition: opacity .25s; }
+.evo-bg { position: absolute; inset: 0; background: radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--c) 34%, var(--bg)) 0, var(--bg) 62%); }
+.evo-rays { position: absolute; left: 50%; top: 40%; width: 2600px; height: 2600px; margin: -1300px 0 0 -1300px; opacity: .0;
+  background: repeating-conic-gradient(from 0deg, color-mix(in srgb, var(--c) 70%, #ffffff) 0 5deg, transparent 5deg 15deg);
+  -webkit-mask: radial-gradient(circle, transparent 0 210px, #000 520px, transparent 1250px); mask: radial-gradient(circle, transparent 0 210px, #000 520px, transparent 1250px);
+  animation: evoSpin 9s linear infinite, evoRays 1.9s ease-in forwards; }
+.evo.s2 .evo-rays { opacity: .55; animation: evoSpin 5s linear infinite; }
+.evo-ring { position: absolute; left: 50%; top: 40%; width: 1500px; height: 1500px; margin: -750px 0 0 -750px; border-radius: 50%; border: 10px solid var(--hi); opacity: 0; animation: evoRingIn 1.9s cubic-bezier(.5, 0, .9, .4) forwards; }
+.evo-ring.r1 { animation-delay: .35s; border-color: var(--c); } .evo-ring.r2 { animation-delay: .7s; border-color: #ffffff; }
+.evo.s2 .evo-ring { animation: evoRingOut .7s ease-out forwards; } .evo.s2 .evo-ring.r1 { animation-delay: .08s; } .evo.s2 .evo-ring.r2 { animation-delay: .16s; }
+.evo-pic { position: absolute; left: 50%; top: 40%; width: 560px; height: 560px; margin: -280px 0 0 -280px; }
+.evo-pic i { position: absolute; inset: 0; background: center / contain no-repeat; }
+.evo-old { animation: evoOld 1.9s ease-in forwards; }
+.evo-new { opacity: 0; transform: scale(.2); }
+.evo.s2 .evo-old { opacity: 0; }
+.evo.s2 .evo-new { animation: evoNew .62s cubic-bezier(.2, 1.5, .4, 1) forwards; filter: drop-shadow(0 0 46px color-mix(in srgb, var(--c) 80%, #ffffff)); }
+.evo-flash { position: absolute; inset: 0; background: #ffffff; opacity: 0; pointer-events: none; }
+.evo.s2 .evo-flash { animation: evoFlash .6s ease-out forwards; }
+.evo-sparks { position: absolute; left: 50%; top: 40%; width: 0; height: 0; }
+.evo-sparks span { position: absolute; left: 0; top: 0; width: var(--w); height: var(--w); margin: calc(var(--w) / -2); background: var(--hi); opacity: 0; transform: rotate(var(--r)) translateX(0) rotate(45deg); }
+.evo-sparks span:nth-child(3n) { background: var(--c); } .evo-sparks span:nth-child(4n) { background: #ffffff; border-radius: 50%; }
+.evo.s2 .evo-sparks span { animation: evoSpark var(--t) cubic-bezier(.1, .7, .3, 1) forwards; }
+.evo-cap { position: absolute; left: 0; right: 0; bottom: 168px; text-align: center; opacity: 0; transform: translateY(26px); }
+.evo.s3 .evo-cap { opacity: 1; transform: none; transition: opacity .35s, transform .35s; }
+.evo-cap small { display: inline-block; font-size: 26px; font-weight: 800; letter-spacing: .12em; padding: 6px 26px; border-radius: 999px; color: var(--bg); background: var(--hi); }
+.evo-names { margin: 18px 0 8px; font-size: 76px; font-weight: 900; line-height: 1.2; display: flex; align-items: center; justify-content: center; gap: 34px; }
+.evo-names b:first-child { font-size: 48px; opacity: .72; font-weight: 800; }
+.evo-names span { width: 0; height: 0; border: 16px solid transparent; border-left: 26px solid var(--hi); border-right: 0; }
+.evo-names .to { color: var(--hi); text-shadow: 0 6px 0 rgba(0, 0, 0, .28); }
+.evo-line { margin: 0; font-size: 32px; font-weight: 600; opacity: .92; }
+.evo-ok { position: absolute; left: 50%; bottom: 46px; width: 300px; height: 80px; margin-left: -150px; border: 0; border-radius: 14px; font: inherit; font-size: 32px; font-weight: 800; color: var(--bg); background: var(--hi); box-shadow: 0 7px 0 rgba(0, 0, 0, .3); transform: skewX(-10deg); opacity: 0; pointer-events: none; cursor: pointer; }
+.evo-ok span { display: block; transform: skewX(10deg); }
+.evo.s3 .evo-ok { opacity: 1; pointer-events: auto; transition: opacity .3s .15s; }
+.evo-ok:focus-visible { outline: 5px solid #ffffff; outline-offset: 5px; }
+@keyframes evoIn { from { opacity: 0; } }
+@keyframes evoSpin { to { transform: rotate(360deg); } }
+@keyframes evoRays { 0% { opacity: 0; } 60% { opacity: .25; } 100% { opacity: .8; } }
+@keyframes evoRingIn { 0% { transform: scale(1.25); opacity: 0; } 25% { opacity: .9; } 100% { transform: scale(.12); opacity: 1; } }
+@keyframes evoRingOut { 0% { transform: scale(.12); opacity: 1; } 100% { transform: scale(1.7); opacity: 0; } }
+@keyframes evoOld { 0% { transform: scale(1); filter: none; } 30% { transform: scale(1.04); filter: brightness(1.3); } 45% { transform: scale(.96); } 60% { transform: scale(1.08); filter: brightness(2.2) saturate(.4); } 75% { transform: scale(.94); } 100% { transform: scale(1.16); filter: brightness(0) invert(1); } }
+@keyframes evoNew { 0% { opacity: 0; transform: scale(.2); } 100% { opacity: 1; transform: scale(1.12); } }
+@keyframes evoFlash { 0% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes evoSpark { 0% { opacity: 1; transform: rotate(var(--r)) translateX(60px) rotate(45deg) scale(1.4); } 100% { opacity: 0; transform: rotate(var(--r)) translateX(var(--d)) rotate(225deg) scale(.3); } }
+@media (prefers-reduced-motion: reduce) { .evo-rays, .evo-ring, .evo-sparks span { animation-duration: .01s !important; } }

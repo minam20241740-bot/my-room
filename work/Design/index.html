@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta name="robots" content="noindex, nofollow, noarchive">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>벽과 책장 · 포스터</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div><p class="place">나의 방 · 벽과 책장</p><h1 id="title"></h1></div>
+    <button id="exit-presentation" type="button">정보 함께 보기</button>
+    <button id="return" type="button">방으로 돌아가기</button>
+  </header>
+  <main>
+    <aside>
+      <p id="description"></p>
+      <nav id="variants" aria-label="포스터 선택"></nav>
+      <div class="controls">
+        <label for="zoom">확대 <output id="scale">100%</output></label>
+        <input id="zoom" type="range" min="100" max="240" step="10" value="100">
+        <button id="fit" type="button">전체 보기</button>
+        <button id="title-focus" type="button">제목 보기</button>
+        <button id="schedule-focus" type="button">일정 보기</button>
+        <button id="presentation" type="button">화면 채우기</button>
+      </div>
+      <p id="status" role="status" aria-live="polite"></p>
+    </aside>
+    <section id="wall" tabindex="0" aria-label="포스터 감상 화면">
+      <div id="surface"><img id="poster" alt=""></div>
+    </section>
+  </main>
+  <script src="viewer.js"></script>
+</body>
+</html>

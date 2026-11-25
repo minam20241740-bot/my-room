@@ -1,0 +1,2 @@
+// evolve-and-impact: 예전 게임의 2·3단계 모델을 모델 목록에 더한다
+Object.assign(window.GAME.models, {"malangbul_s2": {"file": "assets/chr/malangbul_s2.glb", "height": 0.7}, "malangbul_s3": {"file": "assets/chr/malangbul_s3.glb", "height": 0.8}, "bangului_s2": {"file": "assets/chr/bangului_s2.glb", "height": 0.7}, "bangului_s3": {"file": "assets/chr/bangului_s3.glb", "height": 0.8}, "mongeul_s2": {"file": "assets/chr/mongeul_s2.glb", "height": 0.7}, "mongeul_s3": {"file": "assets/chr/mongeul_s3.glb", "height": 0.8}});
