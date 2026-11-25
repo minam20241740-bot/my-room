@@ -157,7 +157,7 @@
   }
   /* 실수로 지우지 않게 한 번 묻는다. back은 취소했을 때 돌아갈 화면 */
   function restartAll(back) {
-    const cancel = typeof back === 'function' ? back : null;
+    const cancel = () => { const a = document.activeElement; if (a && a.blur) a.blur(); if (typeof back === 'function') back(); };
     openPop({ title: '처음부터 다시', w: 860, focusFirst: true, body: '<p>의뢰 기록과 친구, 반짝 조각을 모두 지우고 처음 화면으로 돌아갑니다.</p><p>지우면 되돌릴 수 없습니다.</p>',
       buttons: [['취소', cancel], ['처음부터 다시', resetAndReload, 1]], esc: cancel });
   }
