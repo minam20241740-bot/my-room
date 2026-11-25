@@ -424,8 +424,8 @@ window.Field = (function () {
   function hit(v, col) {   // 훈련탄이 맞았다: 숫자가 뜨고 상대가 움찔한다. 큰 것이 맞으면 잠깐 멈추고 고리가 퍼지고 화면이 흔들린다
     if (!B || B.over) return;
     const gain = v / (C.duel.tough || 1); B.stab = Math.min(100, B.stab + gain);
-    S.burst(foe.x, .6, foe.z, col || '#bfe6ff', v >= 10 ? 16 : 5, v >= 10 ? .12 : .07); S.punch(foe);
-    if (v >= 10) { const sum = gain + (B.acc || 0); B.acc = 0; B.accT = .75; pop(foe.x, 1.5, foe.z, '+' + Math.max(1, Math.round(sum)), 'big'); S.shake(.5); S.ripple(foe.x, foe.z, col || '#ffd92e', 2.6); freeze = .08; fx('rays', foe.x, .9, foe.z, col); slashes(foe.x, .9, foe.z, col, 2); spr('star_05', foe.x, .9, foe.z, col || '#ffd92e', 420); spr('magic_03', foe.x, .5, foe.z, col || '#ffd92e', 560, { t: .5 }); } else { B.acc = (B.acc || 0) + gain; spr('spark_03', foe.x, .8, foe.z, col || '#bfe6ff', 150); }   // 작은 것은 battleTick에서 모아서 보인다
+    S.burst(foe.x, .6, foe.z, col || '#bfe6ff', v >= 10 ? 26 : 10, v >= 10 ? .15 : .095); S.punch(foe);
+    if (v >= 10) { const sum = gain + (B.acc || 0); B.acc = 0; B.accT = .75; pop(foe.x, 1.5, foe.z, '+' + Math.max(1, Math.round(sum)), 'big'); S.shake(.7); S.ripple(foe.x, foe.z, col || '#ffd92e', 3.2); freeze = .1; fx('rays', foe.x, .9, foe.z, col); slashes(foe.x, .9, foe.z, col, 2); spr('star_05', foe.x, .9, foe.z, col || '#ffd92e', 420); spr('magic_03', foe.x, .5, foe.z, col || '#ffd92e', 560, { t: .5 }); } else { B.acc = (B.acc || 0) + gain; spr('spark_03', foe.x, .8, foe.z, col || '#bfe6ff', 250); S.ripple(foe.x, foe.z, col || '#bfe6ff', 1.1); }   // 작은 것은 battleTick에서 모아서 보인다
     B.ui.box.classList.remove('hitp'); void B.ui.box.offsetWidth; B.ui.box.classList.add('hitp');
     if (B.stab >= 100) win();
   }
@@ -448,7 +448,7 @@ window.Field = (function () {
   function useCard(c) {
     if (!B || B.over || paused || B.cost < c.cost) return false;
     B.cost -= c.cost; snd(c.id); const who = B.team.find(m => m.key === c.who); cutin(c, c.who === 'huru' ? huru : who && who.a);   // 카드마다 제 소리(js/sound.js에 카드 id와 같은 이름)
-    if (c.id === 'big') { const a = (who || B.team[0]).a; a.face(foe.x, foe.z); S.shot({ x: a.x, y: 1.1, z: a.z }, { x: foe.x, y: .6, z: foe.z }, { color: '#ffd92e', size: .3, shape: 'beam', time: .4, trail: 1, onHit: () => { S.burst(foe.x, .8, foe.z, '#ffd92e', 16, .12); foe.hop = 1; snd('boom'); hit(10, '#ffd92e'); fx('iframe', foe.x, .9, foe.z, '#ffffff', { t: .16 }); slashes(foe.x, .9, foe.z, '#ffd92e', 3);
+    if (c.id === 'big') { const a = (who || B.team[0]).a; a.face(foe.x, foe.z); S.shot({ x: a.x, y: 1.1, z: a.z }, { x: foe.x, y: .6, z: foe.z }, { color: '#ffd92e', size: .3, shape: 'beam', time: .4, trail: 1, onHit: () => { S.burst(foe.x, .8, foe.z, '#ffd92e', 30, .16); S.burst(foe.x, 1.4, foe.z, '#fff6c8', 14, .1); foe.hop = 1; snd('boom'); hit(10, '#ffd92e'); fx('iframe', foe.x, .9, foe.z, '#ffffff', { t: .16 }); slashes(foe.x, .9, foe.z, '#ffd92e', 3);
         S.ripple(foe.x, foe.z, '#ffe7a0', 2.1);
         spr('star_06', foe.x, .82, foe.z, '#fff0aa', 334, { t: .34 });
         freeze = .14; } }); S.ripple(a.x, a.z, '#ffd92e', 2); }
