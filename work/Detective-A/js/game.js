@@ -146,7 +146,27 @@
   function epilogue(done) {   // 마지막 사건을 풀고 난 뒤
     const E = G.epilogue; snd('bell');
     const fr = ['arthur', 'eri'].map(k => 'img/face_' + k + '.png').concat(E.friends.map(k => G.friends[k].img));
-    card('<div class="epi"><div class="moon full"></div><h1>' + E.title + '</h1><p>' + E.line + '</p>' + moons(4) + '<div class="fr">' + fr.map(u => '<i style="background-image:url(' + u + ')"></i>').join('') + '</div><em>눌러서 사무소로</em></div>', 'night', done || (() => {}), 0);
+    card('<div class="epi"><div class="moon full"></div><h1>' + E.title + '</h1><p>' + E.line + '</p>' + moons(4) + '<div class="fr">' + fr.map(u => '<i style="background-image:url(' + u + ')"></i>').join('') + '</div>'
+      + '<div style="position:absolute;left:0;right:0;top:938px;display:flex;gap:28px;justify-content:center">'
+      + '<button type="button" style="' + EPI_BTN + 'background:#ffe9a8;color:#101d42;border:3px solid #ffe9a8">도시로 돌아가기</button>'
+      + '<button type="button" data-restart style="' + EPI_BTN + 'background:rgba(255,255,255,.08);color:#ffffff;border:3px solid rgba(255,255,255,.55)">처음부터 다시</button></div>'
+      + '<em style="top:1026px;font-size:24px">아무 곳이나 눌러도 도시로 돌아갑니다</em></div>', 'night', done || (() => {}), 0);
+    cardEl.querySelector('[data-restart]').onclick = e => { e.stopPropagation(); restartAll(); };
+  }
+  const EPI_BTN = 'font-family:inherit;font-size:30px;font-weight:800;line-height:1;padding:20px 46px;border-radius:14px;cursor:pointer;';
+  /* 처음부터 다시: 사건 기록을 지우고 처음 화면으로 돌아간다(소리·글자 설정은 남긴다) */
+  function resetAndReload() {
+    const keep = {};
+    ['speed', 'sfx', 'bgm', 'fx', 'graphics'].forEach(k => { if (k in DEF) keep[k] = save[k]; });
+    save = Object.assign({}, DEF, { cleared: [], seen: {}, notes: {}, party: [] }, keep);
+    store();
+    location.reload();
+  }
+  /* 실수로 지우지 않게 한 번 묻는다. back은 취소했을 때 돌아갈 화면 */
+  function restartAll(back) {
+    const cancel = typeof back === 'function' ? back : null;
+    openPop({ title: '처음부터 다시', w: 860, focusFirst: true, body: '<p>사건 기록을 모두 지우고 처음 화면으로 돌아갑니다.</p><p>지우면 되돌릴 수 없습니다.</p>',
+      buttons: [['취소', cancel], ['처음부터 다시', resetAndReload, 1]], esc: cancel });
   }
   // 말풍선이 밝힌 곳을 가리지 않게: 밝힌 곳의 위치를 재서 아래(자리가 모자라면 위)에 놓는다. 위치를 못 재면(화면이 숨겨짐) 자료의 자리를 그대로 쓴다
   function autoPlace(say, t) {
@@ -314,6 +334,12 @@
       return;
     }
     if (story.classList.contains('on')) { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); advance(); } return; }
+    /* 장 카드·결말 카드는 Enter·Space로도 닫는다(카드 안 단추에 초점이 있으면 그 단추가 눌린다) */
+    if (cardEl.classList.contains('on')) {
+      const onButton = document.activeElement && document.activeElement.closest && document.activeElement.closest('#card button');
+      if ((e.key === 'Enter' || e.key === ' ') && !onButton) { e.preventDefault(); cardEl.click(); }
+      return;
+    }
     const gsay = document.querySelector('#hud .tsay'); if (gsay && (e.key === ' ' || e.key === 'Enter' || e.key === 'ArrowRight')) { e.preventDefault(); gsay.click(); return; }   // 후루 안내는 자판으로도 넘긴다
     if (cur === 'field' || cur === 'team' || cur === 'deduce') { if (window.Field) window.Field.key(e); return; }
     if (cur === 'title') {
@@ -335,7 +361,7 @@
 
   if (fromCase > 1) save.seen.opening = 1;
 
-  window.GB = { faceUrl: k => (G.friends[k] && G.friends[k].wild) ? G.friends[k].img : 'img/face_' + k + '.png', toTeam: toTeam, openSettings: openSettings, opening: playOpening, snd: snd, music: music, guide: guide, chapter: chapter, epilogue: epilogue, G: G, el: el, stage: stage, show: show, toast: toast, openPop: openPop, closePop: closePop, playStory: playStory, enterLobby: enterLobby, loadFor: loadFor, store: store, nextCase: nextCase, get save() { return save; }, get cur() { return cur; } };
+  window.GB = { faceUrl: k => (G.friends[k] && G.friends[k].wild) ? G.friends[k].img : 'img/face_' + k + '.png', toTeam: toTeam, openSettings: openSettings, opening: playOpening, snd: snd, music: music, guide: guide, chapter: chapter, epilogue: epilogue, restartAll: restartAll, G: G, el: el, stage: stage, show: show, toast: toast, openPop: openPop, closePop: closePop, playStory: playStory, enterLobby: enterLobby, loadFor: loadFor, store: store, nextCase: nextCase, get save() { return save; }, get cur() { return cur; } };
   show('title');
   // 화면 확인용: 주소 끝에 ?go=settings 처럼 붙이면 그 화면에서 시작한다 (eri, story, settings, who, steps, prologue, chapter, epilogue, loading). 도시·사건 화면은 field.js(go=world, team, probe, battle …)
   const goTo = new URLSearchParams(location.search).get('go');

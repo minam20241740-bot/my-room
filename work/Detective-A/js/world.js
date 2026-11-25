@@ -95,7 +95,7 @@ window.World = (function () {
   function drawTrack() {
     const c = GB.nextCase(), w = sv(), q = (Wd.quests || []).find(x => { const s = w.quests[x.id] || 0; return s >= 1 && s < x.steps.length; });
     let h = '<h4>임무</h4>';
-    if (c) h += '<div class="wtm"><small>' + c.chapter.name + ' · 의뢰 ' + pad(c.no) + '</small><b>' + c.title + '</b><p>' + trackLine(c) + '</p></div>'; else h += '<div class="wtm"><b>모든 의뢰를 마쳤다</b><p>도시를 거닐며 남은 일을 살펴보자</p></div>';
+    if (c) h += '<div class="wtm"><small>' + c.chapter.name + ' · 의뢰 ' + pad(c.no) + '</small><b>' + c.title + '</b><p>' + trackLine(c) + '</p></div>'; else h += '<div class="wtm"><b>모든 의뢰를 마쳤다</b><p>도시를 더 둘러보거나, 메뉴(Esc)에서 처음부터 다시 할 수 있다</p></div>';
     if (q) h += '<div class="wtm sub"><small>의뢰</small><b>' + q.title + '</b><p>' + q.steps[w.quests[q.id]].hint + '</p></div>';
     ui.track.innerHTML = h;
   }
@@ -292,7 +292,7 @@ window.World = (function () {
       [['map', '열차 지도', openMap, 'M'], ['quest', '임무', openMissions, 'J'], ['bag', '소지품', openBag, 'I'], ['team', '파티 편성', () => X.openTeam(), ''], ['friend', '친구 도감', openFriends, ''], ['set', '설정', GB.openSettings, '']].forEach(m => {
         el('button', '', g, '<i><svg viewBox="0 0 64 64">' + ICON[m[0]] + '</svg></i><b>' + m[1] + '</b><em>' + m[3] + '</em>').onclick = () => { GB.closePop(); m[2](); };
       });
-    }, buttons: [['소개 다시 보기', () => GB.opening(null)], ['처음 화면으로', () => GB.show('title')], ['닫기', null, 1]] });
+    }, buttons: [['소개 다시 보기', () => GB.opening(null)], ['처음부터 다시', () => GB.restartAll(openMenu)], ['처음 화면으로', () => GB.show('title')], ['닫기', null, 1]] });
   }
   function zoneRows() { return Object.keys(Wd.zones).map(id => Object.assign({ id: id }, Wd.zones[id])); }
   function openMap() {

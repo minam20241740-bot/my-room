@@ -368,7 +368,12 @@ window.World = (function () {
       ws().q[q.id] = 3; if (boss) { boss.f.remove(); S.removeActor(boss.a); boss = null; }
       if (q.reward && q.reward.friend && !nw) ws().bonus += 2;
       applyState(false); ensureNpcs(); snd('stamp'); GB.toast('의뢰 완료: ' + q.title); GB.store(); drawQuests(); drawParty();
-      if (q.end) { ws().ended = 1; GB.store(); setTimeout(() => GB.epilogue(() => { }), 600); return; }
+      /* 결말 카드는 틈 없이 바로 띄운다(진화 장면이 먼저 끼어들어 카드를 덮지 않게). 카드를 닫으면 후루가 남은 할 일을 알려 준다 */
+      if (q.end) {
+        ws().ended = 1; GB.store();
+        GB.epilogue(() => GB.playStory([{ who: 'huru', text: '사건을 모두 풀었어! 부두에 있는 세라가 남은 항구 기록을 알려 준대.' }, { who: 'huru', text: '처음부터 다시 하고 싶으면 Tab 메뉴에서 고를 수 있어.' }], () => { drawQuests(); }));
+        return;
+      }
       const nx = G.quests.find(x => x.id === q.next);
       if (nx && nx.auto) { ws().q[nx.id] = 1; nx.clues.forEach((c, i) => addClueFx(nx, c, i)); GB.playStory(nx.talk, () => { drawQuests(); }); }
     });
@@ -461,7 +466,7 @@ window.World = (function () {
     clearKeys();
     GB.openPop({ title: '메뉴', w: 900, body: b => {
       const g = el('div', 'grid2', b);
-      [['편성', () => { suspend(); saveNow(); window.Field.openTeam(null); }], ['수첩', () => window.Field.openNote()], ['도감', dex], ['의뢰', questLog], ['지도', bigMap], ['설정', () => GB.openSettings()], ['시작 화면으로', () => { saveNow(); suspend(); GB.show('title'); }]]
+      [['편성', () => { suspend(); saveNow(); window.Field.openTeam(null); }], ['수첩', () => window.Field.openNote()], ['도감', dex], ['의뢰', questLog], ['지도', bigMap], ['설정', () => GB.openSettings()], ['처음부터 다시', () => GB.restartAll(menu)], ['시작 화면으로', () => { saveNow(); suspend(); GB.show('title'); }]]
         .forEach(m => { el('button', '', g, m[0]).onclick = () => { GB.closePop(); setTimeout(m[1], 0); }; });
     }, buttons: [['계속', null, 1]] });
   }

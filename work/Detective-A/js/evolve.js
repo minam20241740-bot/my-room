@@ -108,12 +108,14 @@
     var cap = el('div', 'evo-cap', o, '<small>' + e.el + ' · ' + job.to + '단계</small><p class="evo-names"><b>' + a.name + '</b><span></span><b class="to">' + b.name + '</b></p><p class="evo-line">' + (job.last ? '1부를 끝까지 함께해 마지막 모습이 되었다.' : '함께 사건을 풀며 모습이 달라졌다.') + '</p>');
     var ok = el('button', 'evo-ok', o, '<span>확인</span>'); ok.type = 'button';
     snd('open');
-    setTimeout(function () { o.classList.add('s2'); snd('pop'); }, 1900);
+    setTimeout(function () { if (!o.classList.contains('s2')) { o.classList.add('s2'); snd('pop'); } }, 1900);
     setTimeout(function () { o.classList.add('s3'); ok.focus({ preventScroll: true }); }, 2500);
-    var close = function () { if (!o.parentNode) return; o.classList.add('out'); setTimeout(function () { o.remove(); playing = false; try { if (window.EvolveRefresh) window.EvolveRefresh(); } catch (x) {} resume(); if (done) done(); }, 260); };
+    var close = function () { if (!o.parentNode || o.classList.contains('out')) return; o.classList.add('out'); setTimeout(function () { o.remove(); playing = false; try { if (window.EvolveRefresh) window.EvolveRefresh(); } catch (x) {} resume(); if (done) done(); }, 260); };
     ok.onclick = close;
-    o.addEventListener('click', function (ev) { if (ev.target !== ok && o.classList.contains('s3')) close(); });
-    o.addEventListener('keydown', function (ev) { if (o.classList.contains('s3') && (ev.key === 'Enter' || ev.key === ' ' || ev.key === 'Escape')) { ev.preventDefault(); ev.stopPropagation(); close(); } });
+    /* 장면이 다 나오기 전에 누르면 결과로 건너뛰고, 한 번 더 누르면 닫는다 */
+    var skip = function () { if (o.classList.contains('s3')) { close(); return; } if (!o.classList.contains('s2')) snd('pop'); o.classList.add('s2', 's3'); ok.focus({ preventScroll: true }); };
+    o.addEventListener('click', function (ev) { if (ev.target !== ok) skip(); });
+    o.addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ' || ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); skip(); } });
     void cap;
   }
 
