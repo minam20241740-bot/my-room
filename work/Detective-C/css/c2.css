@@ -31,10 +31,10 @@
 .plate b { font-size: 66px; }
 .swap { left: 70px; top: 236px; border-radius: 0; transform: skewX(-12deg); padding: 0 36px; }
 .dock { left: 70px; top: 330px; bottom: auto; flex-direction: column; gap: 6px; }
-.dock button { display: flex; align-items: center; gap: 28px; width: 580px; height: 92px; padding: 0 36px; text-align: left; border-radius: 0; border: 0; border-left: 10px solid var(--yl); box-shadow: none; transform: skewX(-12deg); background: linear-gradient(90deg, rgba(5, 8, 14, .94), rgba(5, 8, 14, .3)); color: #ffffff; transition: background .12s, padding .12s; }
+.dock button { display: flex; align-items: center; gap: 28px; width: 580px; height: 92px; padding: 0 36px; text-align: left; border-radius: 0; border: 0; border-left: 10px solid var(--yl); box-shadow: none; transform: skewX(-12deg); background:rgba(5, 8, 14, .94); color: #ffffff; transition: background .12s, padding .12s; }
 .dock button i { font-style: normal; font-size: 28px; font-weight: 800; color: var(--yl); transform: skewX(12deg); }
 .dock button span { font-size: 40px; font-weight: 900; transform: skewX(12deg); }
-.dock button:hover { padding-left: 62px; background: linear-gradient(90deg, rgba(36, 53, 128, .96), rgba(5, 8, 14, .3)); }
+.dock button:hover { padding-left: 62px; background:rgba(36, 53, 128, .96); }
 .say { left: 700px; top: 120px; }
 .say::before { left: auto; right: -22px; border: 14px solid transparent; border-left: 22px solid var(--pn); border-right: 0; }
 .req { left: -50px; right: -50px; bottom: 34px; width: auto; height: 150px; border-radius: 0; transform: skewX(-8deg); }

@@ -9,9 +9,9 @@ body { color: #ffffff; font-weight: 700; }
 #tint { position: absolute; inset: 0; background: #0b1118; mix-blend-mode: multiply; opacity: .6; pointer-events: none; transition: opacity .8s ease; }
 
 /* ── 시작, 로딩 ── */
-.btn { background: linear-gradient(#161f33, #0a0f1a); color: #ffffff; border: 2px solid var(--line); box-shadow: 0 6px 0 #020409, 0 16px 24px rgba(0, 0, 0, .4); }
-.btn::before { background: linear-gradient(135deg, transparent 50%, rgba(255, 255, 255, .08) 50%); }
-.btn.sel, .btn.y { background: linear-gradient(#e4ff6e, #dfff1a); color: #05070d; border-color: #f6ffd8; box-shadow: 0 6px 0 #8fb300, 0 16px 24px rgba(0, 0, 0, .4); }
+.btn { background:#161f33; color: #ffffff; border: 2px solid var(--line); box-shadow: 0 6px 0 #020409, 0 16px 24px rgba(0, 0, 0, .4); }
+.btn::before { background:none; }
+.btn.sel, .btn.y { background:#e4ff6e; color: #05070d; border-color: #f6ffd8; box-shadow: 0 6px 0 #8fb300, 0 16px 24px rgba(0, 0, 0, .4); }
 .nm, .hr { background: var(--pn); color: #ffffff; box-shadow: 0 5px 0 rgba(0, 0, 0, .35); }
 #loading { background: rgba(5, 8, 14, .35); }
 .tip { background: var(--pn); box-shadow: 0 8px 0 rgba(0, 0, 0, .35); }
@@ -30,7 +30,7 @@ body { color: #ffffff; font-weight: 700; }
 .top button { background: rgba(5, 8, 14, .9); color: #ffffff; box-shadow: 0 6px 0 rgba(0, 0, 0, .35); }
 .say { background: var(--pn); box-shadow: 0 6px 0 rgba(0, 0, 0, .35); }
 .say::before { border-right-color: var(--pn); }
-.dock button { background: linear-gradient(#161f33, #0a0f1a); border: 2px solid var(--line); box-shadow: 0 6px 0 #020409, 0 14px 22px rgba(0, 0, 0, .35); color: #ffffff; }
+.dock button { background:#161f33; border: 2px solid var(--line); box-shadow: 0 6px 0 #020409, 0 14px 22px rgba(0, 0, 0, .35); color: #ffffff; }
 .dock svg [fill="#1a9df5"] { fill: var(--yl); }
 .dock svg [fill="#7fd0ff"] { fill: #eaffa0; }
 .dock svg [fill="#d6ecff"] { fill: #1b2438; }
@@ -45,10 +45,10 @@ body { color: #ffffff; font-weight: 700; }
 /* ── 팝업 ── */
 #pop { background: rgba(2, 4, 8, .6); }
 .win { background: var(--pn); box-shadow: 0 24px 60px rgba(0, 0, 0, .55); }
-.win h2, .result h1 { background: linear-gradient(100deg, #1c2a6e 0 68%, #2a3f9c 68% 76%, #1c2a6e 76%); color: #ffffff; }
+.win h2, .result h1 { background:#1c2a6e; color: #ffffff; }
 .win h2 small, .result h1 small { color: var(--yl); opacity: 1; }
-.win .foot button { background: linear-gradient(#161f33, #0f1626); border-color: var(--line); box-shadow: 0 6px 0 #020409; color: #ffffff; }
-.win .foot button.y { background: linear-gradient(#e4ff6e, #dfff1a); border-color: #8fb300; box-shadow: 0 6px 0 #8fb300; color: #05070d; }
+.win .foot button { background:#161f33; border-color: var(--line); box-shadow: 0 6px 0 #020409; color: #ffffff; }
+.win .foot button.y { background:#e4ff6e; border-color: #8fb300; box-shadow: 0 6px 0 #8fb300; color: #05070d; }
 .seg button { color: #ffffff; }
 .seg button.on { background: var(--yl); color: #05070d; border-color: var(--yl); }
 .grid2 button { color: #ffffff; box-shadow: 0 5px 0 #020409; }
@@ -59,7 +59,7 @@ body { color: #ffffff; font-weight: 700; }
 /* ── 편성 ── */
 #team, #deduce { background: rgba(2, 4, 8, .55); }
 .need { background: var(--pn); }
-.slot { background: linear-gradient(#10172a, #0a0f1a); box-shadow: 0 10px 24px rgba(0, 0, 0, .4); }
+.slot { background:#10172a; box-shadow: 0 10px 24px rgba(0, 0, 0, .4); }
 .slot .nmb { background: #020409; }
 .slot.empty { background: rgba(255, 255, 255, .06); color: var(--mute); box-shadow: none; }
 .wait { background: rgba(5, 8, 14, .9); }
@@ -89,7 +89,7 @@ body { color: #ffffff; font-weight: 700; }
 .who em, .stp span { color: var(--mute); }
 .lockp { background: rgba(7, 10, 18, .97); border-top-color: var(--yl); box-shadow: 0 14px 36px rgba(0, 0, 0, .5); }
 .lslots i.on { background: var(--pn); }
-.lpad button { background: linear-gradient(#161f33, #0f1626); color: #ffffff; box-shadow: 0 6px 0 #020409; }
+.lpad button { background:#161f33; color: #ffffff; box-shadow: 0 6px 0 #020409; }
 
 /* ── 훈련 화면: 판은 남색, 글씨는 흰색 ── */
 #hud .bgauge, #hud .mem { background: rgba(5, 8, 14, .9); color: #ffffff; box-shadow: 0 8px 20px rgba(0, 0, 0, .45); }
