@@ -229,3 +229,10 @@ button.slot:hover { border-color: var(--bl); }
 .mem u { position: absolute; right: 18px; top: 8px; text-decoration: none; font-size: 24px; font-weight: 800; color: var(--bl); }
 .mem.act { box-shadow: 0 0 0 4px var(--yl), 0 6px 16px rgba(20, 60, 120, .2); }
 .noanim .aflash, .noanim .aprompt, .noanim .abtn.rdy { animation: none; }
+
+/* 휴대폰 가로(무대가 0.36배로 줄어드는 화면): 위쪽 단추와 표지 단추를 손가락 크기(약 40px)로 */
+@media (pointer: coarse) and (max-height: 520px) {
+  #hud .top button, .top button { height: 112px; padding: 0 44px; font-size: 38px; }
+  #hud .top { gap: 20px; }
+  .cbtn { min-height: 112px; }
+}

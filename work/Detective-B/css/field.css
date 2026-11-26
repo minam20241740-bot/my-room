@@ -271,3 +271,10 @@ button.slot:hover { border-color: var(--bl); }
 }
 .sus[aria-pressed="true"] .sus-picked { display: block; }
 .sus:focus-visible { outline: 4px solid #fff; outline-offset: 4px; box-shadow: 0 0 0 12px var(--nv); }
+
+/* 휴대폰 가로(무대가 0.36배로 줄어드는 화면): 위쪽 단추와 표지 단추를 손가락 크기(약 40px)로 */
+@media (pointer: coarse) and (max-height: 520px) {
+  #hud .top button, .top button { height: 112px; padding: 0 44px; font-size: 38px; }
+  .top { gap: 20px; }
+  .btn { min-height: 112px; }
+}

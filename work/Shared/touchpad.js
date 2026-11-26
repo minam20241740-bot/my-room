@@ -17,7 +17,8 @@
   .tp{position:fixed;left:0;right:0;bottom:0;z-index:2147483000;pointer-events:none;display:flex;justify-content:space-between;align-items:flex-end;
       padding:0 max(14px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));font-family:Pretendard,system-ui,sans-serif}
   .tp *{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
-  .tp-move{display:grid;grid-template-columns:repeat(3,58px);grid-template-rows:repeat(3,58px);gap:6px;pointer-events:auto}
+  .tp{--tp-cell:58px}
+  .tp-move{display:grid;grid-template-columns:repeat(3,var(--tp-cell));grid-template-rows:repeat(3,var(--tp-cell));gap:6px;pointer-events:auto}
   .tp-move button{border-radius:14px}
   .tp-up{grid-column:2;grid-row:1}.tp-left{grid-column:1;grid-row:2}.tp-down{grid-column:2;grid-row:3}.tp-right{grid-column:3;grid-row:2}
   .tp-acts{display:flex;flex-wrap:wrap-reverse;justify-content:flex-end;gap:8px;max-width:210px;pointer-events:auto}
@@ -25,10 +26,11 @@
       backdrop-filter:blur(4px);box-shadow:0 3px 12px #0008}
   .tp button.on{background:#ffda35;color:#0c1535;border-color:#ffda35}
   .tp-hint{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 6px);z-index:2147482999;font:600 12px/1 Pretendard,system-ui,sans-serif;color:#ffffffb0;background:#0008;padding:5px 10px;border-radius:20px;pointer-events:none;white-space:nowrap}
-  .tp-toggle{position:fixed;left:50%;transform:translateX(-50%);bottom:max(10px,env(safe-area-inset-bottom));z-index:2147483001;pointer-events:auto;min-width:0!important;min-height:36px!important;padding:0 14px!important;font-size:13px!important;border-radius:20px!important;opacity:.85}
+  .tp-toggle{position:fixed;left:max(14px,env(safe-area-inset-left));transform:none;bottom:calc(max(14px,env(safe-area-inset-bottom)) + var(--tp-cell,58px)*3 + 20px);z-index:2147483001;pointer-events:auto;min-width:0!important;min-height:36px!important;padding:0 14px!important;font-size:13px!important;border-radius:20px!important;opacity:.85}
   .tp.tp-off .tp-move,.tp.tp-off .tp-acts{display:none}
-  @media (max-height:480px){.tp-move{grid-template-columns:repeat(3,46px);grid-template-rows:repeat(3,46px);gap:4px}.tp button{min-width:46px;min-height:46px;font-size:13px}.tp-acts{max-width:190px;gap:6px}}
-  @media (orientation:portrait){.tp-move{grid-template-columns:repeat(3,52px);grid-template-rows:repeat(3,52px)}.tp button{min-width:52px;min-height:52px}}
+  .tp.tp-off .tp-toggle{bottom:max(10px,env(safe-area-inset-bottom))}
+  @media (max-height:480px){.tp{--tp-cell:46px}.tp-move{gap:4px}.tp button{min-width:46px;min-height:46px;font-size:13px}.tp-acts{max-width:190px;gap:6px}}
+  @media (orientation:portrait){.tp{--tp-cell:52px}.tp button{min-width:52px;min-height:52px}}
   @media (hover:hover) and (pointer:fine){.tp:not(.tp-force){display:none}}`;
   document.head.appendChild(style);
   const root = document.createElement('div'); root.className = 'tp' + (force ? ' tp-force' : ''); root.setAttribute('role', 'group'); root.setAttribute('aria-label', '화면 조작 패드');
@@ -70,6 +72,7 @@
   if (cfg.hint) { const h = document.createElement('div'); h.className = 'tp-hint'; h.textContent = cfg.hint; document.body.appendChild(h); setTimeout(() => h.remove(), 9000); }
   if (typeof cfg.when === 'function') {   // 작품이 '움직일 수 있는 화면'일 때만 패드를 보인다(전투·대화 화면의 단추를 가리지 않게)
     const tick = () => { let ok = true; try { ok = !!cfg.when(); } catch (e) {} root.style.display = ok ? '' : 'none';
+      if (ok && typeof cfg.actsWhen === 'function') { let a = true; try { a = !!cfg.actsWhen(); } catch (e) {} acts.style.display = a ? '' : 'none'; }
       if (!ok) { for (const [c, t] of timers) { clearTimeout(t.a); clearInterval(t.b); } timers.clear(); for (const c of [...down]) { send('keyup', c, c); down.delete(c); } root.querySelectorAll('.on').forEach(b => b.classList.remove('on')); } };
     setInterval(tick, 250); tick();
   }

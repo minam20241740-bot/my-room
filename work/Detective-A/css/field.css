@@ -526,3 +526,10 @@ button.pcard:hover { border-color: #f3e7c4; }
 .sus:focus-visible { outline: 4px solid #fff; outline-offset: 4px; box-shadow: 0 0 0 12px var(--nv); }
 /* 숨은 동안 꼬리표가 '안정화 N%' 글자와 겹치지 않게 줄을 나눈다 */
 .fpan.dim .fn { flex-wrap: wrap; row-gap: 4px; padding-right: 150px; }
+
+/* 휴대폰 가로(무대가 0.36배로 줄어드는 화면): 둥근 보조 단추와 표지 단추를 손가락 크기(약 40px)로 */
+@media (pointer: coarse) and (max-height: 520px) {
+  #hud .top { gap: 18px; }
+  #hud .top button { width: 112px; height: 112px; font-size: 30px; }
+  .cvbtn { min-height: 112px; }
+}
