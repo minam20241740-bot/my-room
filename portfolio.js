@@ -15,6 +15,25 @@
   const detail = make('dialog', 'portfolio-detail');
   detail.id = 'portfolio-detail';
   document.body.append(index, detail);
+  // 휴대폰에서는 게임·체험을 작은 창이 아니라 화면 전체에 연다(위에 작품 정보·닫기가 늘 붙어 있다)
+  const stage = make('dialog', 'portfolio-stage'); stage.id = 'portfolio-stage'; document.body.append(stage);
+  const touchLike = () => matchMedia('(pointer:coarse)').matches || innerWidth < 760;
+  function closeStage() { const f = stage.querySelector('iframe'); if (f) f.src = 'about:blank'; if (stage.open) stage.close(); stage.replaceChildren(); }
+  function openStage(work, experience) {
+    const bar = make('div', 'stage-bar');
+    const back = make('button', 'stage-back', '← 작품 정보'); back.type = 'button'; back.addEventListener('click', closeStage);
+    const name = make('strong', 'stage-title', work.title);
+    const quit = make('button', 'stage-close', '닫기'); quit.type = 'button'; quit.addEventListener('click', () => { closeStage(); detail.close(); });
+    bar.append(back, name, quit);
+    const frame = make('iframe', 'stage-frame'); frame.src = experience.url; frame.title = work.title + ' 체험'; frame.allow = 'fullscreen; autoplay';
+    stage.replaceChildren(bar, frame);
+    if (work.orient === 'landscape' && innerHeight > innerWidth) { const hint = make('p', 'stage-hint', '휴대폰을 가로로 돌리면 더 크게 볼 수 있어요.'); stage.append(hint); setTimeout(() => hint.remove(), 7000); }
+    stage.showModal(); back.focus({preventScroll: true});
+  }
+  stage.addEventListener('cancel', event => { event.preventDefault(); closeStage(); });
+  const badgeFor = work => work.status === 'wip' ? '진행 중' : work.device === 'pad' ? '휴대폰 조작 패드 지원' : work.device === 'pc' ? '컴퓨터에서 더 편해요' : '';
+  const noteFor = work => [work.status === 'wip' ? '진행 중인 작업입니다. 전시 기간에도 계속 다듬어 이 주소에서 갱신합니다.' : '',
+    work.device === 'pad' ? '휴대폰에서는 화면의 조작 패드로 움직일 수 있습니다. 컴퓨터에서는 키보드가 더 편합니다.' : work.device === 'pc' ? '컴퓨터의 키보드·마우스에 맞춘 작품입니다.' : ''].filter(Boolean);
 
   function releasePlayer() {
     const player = detail.querySelector('.portfolio-live');
@@ -55,6 +74,7 @@
     detail.append(make('p', 'portfolio-kind', titleForStation(work.station)),
       make('h2', '', work.title), make('p', 'portfolio-description', work.description));
     detail.querySelector('h2').id = 'portfolio-work-title';
+    for (const note of noteFor(work)) detail.append(make('p', 'portfolio-note', note));
     if (work.credit) detail.append(make('p', 'portfolio-kind', work.credit));
     const picture = make(work.image ? 'img' : 'div', 'portfolio-art');
     if (work.image) {
@@ -73,6 +93,7 @@
           if (document.body.dataset.phase === 'cover') document.querySelector('#wake').click();
           return;
         }
+        if (experience.type === 'game' && touchLike()) { openStage(work, experience); return; }
         const previous = detail.querySelector('.portfolio-live');
         if (previous) {
           previous.focus();
@@ -89,6 +110,7 @@
         }
         player.tabIndex = 0;
         detail.insertBefore(player, picture);
+        if (experience.type === 'video') { if (experience.loop) player.loop = true; const started = player.play?.(); if (started) started.catch(() => {}); }   // 누르면 바로 재생, 짧은 클립은 반복
         button.setAttribute('aria-expanded','true');
         player.focus({preventScroll:true});
         // 위에 붙어 있는 닫기 단추 바로 아래에 체험 화면이 오게 창을 내린다(닫기가 화면 밖으로 밀려나지 않게)
@@ -127,8 +149,14 @@
     if (!detail.open) releasePlayer();
   });
   window.addEventListener('message', event => {
-    const frame = detail.querySelector('iframe.portfolio-live');
     const sameOrigin = event.origin === location.origin || (location.protocol === 'file:' && event.origin === 'null');
+    const sframe = stage.querySelector('iframe');
+    if (sframe && sameOrigin && event.source === sframe.contentWindow) {
+      if (event.data?.type === 'room:close-work') { closeStage(); detail.close(); }
+      if (event.data?.type === 'room:return-detail') closeStage();
+      return;
+    }
+    const frame = detail.querySelector('iframe.portfolio-live');
     if (!frame || !sameOrigin || event.source !== frame.contentWindow) return;
     if (event.data?.type === 'room:close-work') detail.close();
     if (event.data?.type === 'room:return-detail') {
@@ -148,34 +176,66 @@
       button.append(image);
     }
     button.append(make('span', 'portfolio-kind', work.kind), make('strong', '', work.title));
+    const badge = badgeFor(work); if (badge) button.append(make('span', 'portfolio-badge', badge));
     button.addEventListener('click', () => openWork(work, parentWork));
     return button;
   }
 
+  // 전시가 시작된 뒤의 수정 기록(QR과 주소는 그대로 두고 이 목록만 늘어난다)
+  const PATCHES = [
+    ['11.26', '휴대폰에서 게임·체험을 화면 전체로 열고, 위에 작품 정보·닫기를 늘 붙였습니다.'],
+    ['11.26', '우회선·멜루·탐정 사무소 A·C안에 휴대폰용 조작 패드를 달았습니다.'],
+    ['11.26', '작품 카드에 기기 안내와 진행 중 표시를 넣고, 종류로 보기를 더했습니다.'],
+    ['11.26', '새 작품 「마중」(실사 뮤직비디오, 가편집)을 넣었습니다. 영상은 누르면 바로 재생되고 짧은 클립은 반복됩니다.'],
+    ['11.26', '나의 그림자 영상을 새 버전(손이 튀어나와 바닥을 내려치며 전시실이 무너지는 마무리)으로 바꿨습니다.']
+  ];
   function openIndex() {
     index.replaceChildren(closeButton(index), make('h2', '', '작품의 세계'));
     index.append(make('p', 'portfolio-description', '물건을 정리하면 작품의 입구가 열립니다. 준희의 방에서 이어지는 ' + works.length + '개 작업을 둘러보세요.'));
+    const log = make('details', 'portfolio-notes'); log.append(make('summary', '', '업데이트 기록 · 전시 중에도 이 주소에서 계속 고칩니다'));
+    const items = make('ul'); for (const [day, text] of PATCHES) items.append(make('li', '', day + ' · ' + text)); log.append(items); index.append(log);
+    // 종류로 보기(처음 오는 사람이 '야간 신호실' 같은 방 이름을 몰라도 고를 수 있게)와 방 자리별 보기를 함께 쓴다
+    const GROUPS = {W002: '영상·MV', W004: '영상·MV', W017: '영상·MV', W020: '영상·MV', W023: '영상·MV', W032: '영상·MV', W034: '영상·MV', W037: '영상·MV', W041: '영상·MV',
+      W001: '게임·체험', W003: '게임·체험', W005: '게임·체험', W019: '게임·체험', W025: '게임·체험', W029: '게임·체험', W036: '게임·체험',
+      W006: '3D·캐릭터', W007: '3D·캐릭터', W008: '3D·캐릭터', W009: '3D·캐릭터', W010: '3D·캐릭터', W011: '3D·캐릭터', W012: '3D·캐릭터', W013: '3D·캐릭터', W030: '3D·캐릭터',
+      W014: '디자인·UIUX', W018: '디자인·UIUX', W021: '디자인·UIUX', W031: '디자인·UIUX', W038: '디자인·UIUX', W039: '디자인·UIUX', W040: '디자인·UIUX'};
+    const groupOf = work => GROUPS[work.id] || '기타';
+    const groupNav = make('nav', 'portfolio-filters portfolio-groups'); groupNav.setAttribute('aria-label', '작품 종류별 보기');
     const nav = make('nav', 'portfolio-filters'); nav.setAttribute('aria-label', '작품 자리별 보기');
-    const list = make('div', 'portfolio-grid');
-    const render = station => {
-      list.replaceChildren(...works.filter(work => !station || work.station === station).map(work => card(work)));
-      for (const button of nav.children) button.setAttribute('aria-pressed', String(button.dataset.station === station));
+    const list = make('div', 'portfolio-grid'); let curStation = '', curGroup = '';
+    const render = () => {
+      const shown = works.filter(work => (!curStation || work.station === curStation) && (!curGroup || groupOf(work) === curGroup));
+      list.replaceChildren(...shown.map(work => card(work)));
+      if (!shown.length) list.replaceChildren(make('p', 'portfolio-description', '이 조합에는 작품이 없어요. 다른 종류나 자리를 눌러 보세요.'));
+      for (const button of nav.children) button.setAttribute('aria-pressed', String(button.dataset.station === curStation));
+      for (const button of groupNav.children) button.setAttribute('aria-pressed', String(button.dataset.group === curGroup));
     };
+    for (const group of ['', '영상·MV', '게임·체험', '3D·캐릭터', '디자인·UIUX']) {
+      const button = make('button', '', group ? group + ' ' + works.filter(work => groupOf(work) === group).length : '종류 전체');
+      button.type = 'button'; button.dataset.group = group;
+      button.addEventListener('click', () => { curGroup = group; render(); }); groupNav.append(button);
+    }
     for (const station of ['', ...new Set(works.map(work => work.station))]) {
-      const button = make('button', '', station ? titleForStation(station) : '전체 ' + works.length);
+      const button = make('button', '', station ? titleForStation(station) : '자리 전체');
       button.type = 'button'; button.dataset.station = station;
-      button.addEventListener('click', () => render(station)); nav.append(button);
+      button.addEventListener('click', () => { curStation = station; render(); }); nav.append(button);
     }
     index.querySelector('h2').id = 'portfolio-index-title';
     index.setAttribute('aria-labelledby', 'portfolio-index-title');
-    index.append(nav, list); render(''); index.showModal();
+    index.append(make('p', 'portfolio-filter-label', '종류로 보기'), groupNav, make('p', 'portfolio-filter-label', '방의 자리별로 보기'), nav, list); render(); index.showModal();
   }
-
   document.addEventListener('click', event => {
     if (!event.target.closest('#worlds, [data-cover-action="worlds"]')) return;
     event.preventDefault(); event.stopImmediatePropagation(); openIndex();
   }, true);
 
+  // 표지: 불러오는 동안은 안내 문구를 바꿔서 눌러도 안 되는 단추가 고장난 것처럼 보이지 않게 한다
+  const coverNote = document.querySelector('.cover-note'), coverBox = document.querySelector('.cover-touch');
+  if (coverNote && coverBox) {
+    const covers = [...document.querySelectorAll('[data-cover-action]')];
+    const sync = () => { const ready = covers.every(button => !button.disabled); coverNote.textContent = ready ? '눌러서 시작할 수 있습니다.' : '준희의 방을 불러오는 중이에요…'; };
+    new MutationObserver(sync).observe(coverBox, {attributes: true, subtree: true, attributeFilter: ['disabled']}); sync();
+  }
   const all = make('button', '', '전체 작품 ' + works.length);
   all.id = 'portfolio-open'; all.type = 'button';
   all.addEventListener('click', openIndex);

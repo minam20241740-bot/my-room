@@ -32,3 +32,25 @@ iframe.portfolio-live{box-sizing:border-box;height:clamp(420px,72dvh,860px)}
 }
 /* 닫기 단추는 창을 아래로 내려도 위에 붙어 있어 언제든 누를 수 있다 */
 .portfolio-index>.portfolio-close,.portfolio-detail>.portfolio-close{position:sticky;top:0;z-index:5;box-shadow:0 4px 14px #000a}
+
+/* 진행 중·기기 안내 */
+.portfolio-badge{margin:0 18px;padding:3px 10px;border:1px solid #ffda35;border-radius:20px;color:#ffda35;font-size:13px;line-height:1.5}
+.portfolio-note{margin:10px 0;padding:10px 14px;border-left:4px solid #ffda35;background:#1a2547;color:#dfe7fb;font-size:15px;line-height:1.6;max-width:74ch}
+/* 휴대폰 전체 화면 보기 */
+.portfolio-stage{box-sizing:border-box;width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;margin:0;padding:0;border:0;background:#05070f;color:#f7f8fb;overflow:hidden}
+.portfolio-stage[open]{display:flex;flex-direction:column}
+.portfolio-stage::backdrop{background:#000}
+.stage-bar{display:flex;align-items:center;gap:10px;flex:0 0 auto;padding:max(8px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) 8px max(10px,env(safe-area-inset-left));background:#10172e;border-bottom:1px solid #44577f}
+.stage-title{flex:1;min-width:0;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stage-back,.stage-close{min-height:44px;padding:0 14px;border:1px solid #7182b4;border-radius:7px;background:#273658;color:#f7f8fb;font:inherit;font-size:15px;cursor:pointer;white-space:nowrap}
+.stage-frame{flex:1 1 auto;width:100%;min-height:0;border:0;background:#05070f}
+.stage-hint{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom) + 70px);transform:translateX(-50%);margin:0;padding:8px 14px;border-radius:20px;background:#000c;color:#fff;font-size:14px;pointer-events:none;z-index:3}
+@media(max-height:480px){.stage-bar{padding-top:4px;padding-bottom:4px}.stage-back,.stage-close{min-height:38px}.stage-title{font-size:13px}}
+
+.portfolio-filter-label{margin:18px 0 -14px;font-size:14px;color:#b8c7eb}
+.portfolio-groups{margin-top:22px}
+.portfolio-filters{margin:24px 0}
+
+.portfolio-notes{margin:14px 0 0;max-width:74ch;color:#c7d2ee;font-size:15px}
+.portfolio-notes summary{cursor:pointer;min-height:44px;display:flex;align-items:center;color:#ffda35}
+.portfolio-notes ul{margin:4px 0 0;padding-left:20px;line-height:1.7}
