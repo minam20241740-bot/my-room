@@ -422,6 +422,8 @@
         const cue=ui['wake-cue'];
         cue.style.left=(location?.x ?? ui.viewport.clientWidth*.54)+'px';
         cue.style.top=(location?.y ?? ui.viewport.clientHeight*.39)+'px';
+        ui.viewport.style.setProperty('--hx',cue.style.left);   // 깨어나는 장면의 '앗!' 그림이 준희 머리 위치를 따라가게
+        ui.viewport.style.setProperty('--hy',cue.style.top);
         cue.hidden=false;
         playSound('Wake');
       }
@@ -739,6 +741,11 @@
     coverNarrow.addEventListener('change',posterFocus);
     posterFocus();
   }
+  // 표지에는 시작 동작이 하나뿐이라 그림 어디를 눌러도 시작된다(작은 '깨우기' 칸을 못 찾는 사람 대비)
+  ui.cover.addEventListener('click',(event) => {
+    if (phase!=='cover' || event.target.closest('button,a') || ui.wake.disabled) return;
+    void wake();
+  });
   const warmStage = () => {
     if(phase==='cover'&&!document.hidden) void prepare();
   };

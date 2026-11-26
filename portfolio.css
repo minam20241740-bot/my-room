@@ -56,3 +56,6 @@ iframe.portfolio-live{box-sizing:border-box;height:clamp(420px,72dvh,860px)}
 .portfolio-notes ul{margin:4px 0 0;padding-left:20px;line-height:1.7}
 
 .stage-loader{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);max-width:80vw;padding:12px 18px;border-radius:2px;background:#0e1233;border:2px solid #fff;color:#f7f8fb;font-size:15px;text-align:center;line-height:1.5;pointer-events:none;z-index:2}
+/* 단추 글자는 굵게 */
+.portfolio-filters button{font-weight:700}
+.portfolio-actions :is(a,button){font-weight:800}
