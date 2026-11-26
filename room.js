@@ -139,7 +139,7 @@
       place(p){if(p>.65)show('Organized');},done(){show('Organized');},
       point,hit(){return null;},size(){},onUpdate(){},theaterView(){show('Organized');},
       seatView(){show('Organized');},filmPick(){},filmLoad(){},screening(){},screeningPoster(){},redraw(){},
-      galleryReset(){},visit(){show('Organized');},exhibitMotion(){},
+      galleryReset(){},visit(){show('Organized');},place(){show('Organized');return false;},exhibitMotion(){},
       exhibitPoint(){return {x:ui.viewport.clientWidth*.53,y:ui.viewport.clientHeight*.49};},
       exhibitProgress(progress,day){backdrop.style.filter=day?'brightness(1.36) saturate(.91)':'none';},
       dawnJourney(t){backdrop.style.filter='brightness('+(1+.36*t)+')';}, dawnOverview(){},
@@ -304,14 +304,16 @@
     routeStop+=1;
     save();
   }
+  // 작품의 세계 목록에서 자리나 작품을 고르면 준희가 그 자리 앞으로 옮겨 선다(첫 정리를 마치고 방이 열린 뒤에만)
+  window.RoomJunhee = {go(id) {
+    if(phase!=='result' || !stage?.place || !gallery.objects[id] || id==='Illusio') return false;
+    return stage.place(id);
+  }};
   async function selectExhibit(id) {
     if(phase!=='result') return;
     if(id==='Illusio') return openTheater();
     activeExhibit=id;
-    showPhase('exhibit-walking');
-    say(gallery.objects[id].zone+'으로 가요.');
-    stage.visit(id,0);
-    if(!await animate(reduced.matches?0:2050,t=>stage.visit(id,t))) return;
+    stage.place(id);   // 걷는 동작 없이 선택한 자리 앞으로 바로 옮긴다
     showExhibit();
   }
   function showExhibit() {
@@ -364,10 +366,7 @@
       stage.exhibitProgress(exhibitProgress,dawn);
     }
     if(!['exhibit-ready','exhibit-sorted','exhibit-holding'].includes(phase)) return;
-    showPhase('exhibit-walking');
-    say('방 전체를 다시 볼게요.');
-    if(!await animate(reduced.matches?0:2050,t=>stage.visit(activeExhibit,t,true))) return;
-    stage.galleryReset();
+    stage.galleryReset();   // 준희는 시작 자리로 바로 돌아온다
     stage.done(1);
     showResult(true);
   }

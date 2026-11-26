@@ -520,6 +520,27 @@ window.RoomGalleryStage = ({room, actor, scene, marks, camera, viewport, request
     transitionCamera(station.shot,eased(((returning?1-t:t)-.30)/.70));
     request();
   }
+  // 걷는 동작 없이 준희를 그 자리 앞으로 바로 옮긴다. 준희는 관람자가 지금 어느 자리에 있는지 알려 주는 말이라
+  // 뼈대 움직임(걸음·발 보정)은 쓰지 않고, 서 있는 자세 그대로 위치와 방향만 바꾼다.
+  function place(key) {
+    const station=stations.get(key);
+    if(!station) return false;
+    reset();
+    capturePose();
+    const [x,y]=station.walk;
+    const end=xyz([x,y,0]);
+    const face=xyz(station.position).sub(end);
+    face.y=0;
+    if(face.lengthSq()<1e-10) face.copy(frontToWindow);
+    face.normalize();
+    placeActor(end,face,Math.PI);
+    floorRay.set(new T.Vector3(end.x,.6,end.z),down);   // 작은 단 위의 자리(우회선·그림자)는 발 높이를 맞춘다
+    const hit=floorRay.intersectObjects(raisedFloor,false)[0];
+    if(hit) actor.position.y+=Math.max(0,hit.point.y);
+    transitionCamera(station.shot,1);
+    request();
+    return true;
+  }
   function reset() {
     armReset();
     for(const leg of gaitLegs) if(leg.footRest) leg.foot.quaternion.copy(leg.footRest);
@@ -554,5 +575,5 @@ window.RoomGalleryStage = ({room, actor, scene, marks, camera, viewport, request
     return found;
   }
 
-  return {visit,reset,motion,progress,dawnJourney,dawnOverview,point,stationAt};
+  return {visit,place,reset,motion,progress,dawnJourney,dawnOverview,point,stationAt};
 };

@@ -76,6 +76,7 @@
   }
 
   function openWork(work, parentWork) {
+    if (work.station && work.station !== 'Start') window.RoomJunhee?.go(work.station);   // 작품을 열면 준희가 그 작품의 자리 앞에 서 있다
     releasePlayer();
     detail.replaceChildren(closeButton(detail));
     detail.setAttribute('aria-labelledby', 'portfolio-work-title');
@@ -210,7 +211,9 @@
     ['11.26', '방 안 탐정 책상에서 고른 게임도 휴대폰에서는 화면 전체로 열립니다.'],
     ['11.26', '휴대폰 뒤로 가기 단추가 사이트를 나가지 않고 열린 창을 하나씩 닫습니다.'],
     ['11.26', '용량이 큰 게임은 열기 전에 크기를 알리고 불러오는 동안 안내를 띄웁니다. 영상은 재생 전에 작품 그림이 보입니다.'],
-    ['11.26', '링크를 공유하면 제목과 표지 그림이 미리보기로 보입니다.']
+    ['11.26', '링크를 공유하면 제목과 표지 그림이 미리보기로 보입니다.'],
+    ['11.26', '준희가 걷는 동작 없이, 방의 자리 메뉴와 작품 목록에서 고른 자리 앞으로 바로 옮겨 섭니다. 준희는 지금 어느 자리에서 작품을 보는지 알려 주는 말입니다.'],
+    ['11.26', '3D 방이 정지 그림으로 바뀌던 문제를 고쳤습니다.']
   ];
   function openIndex() {
     index.replaceChildren(closeButton(index), make('h2', '', '작품의 세계'));
@@ -241,7 +244,7 @@
     for (const station of ['', ...new Set(works.map(work => work.station))]) {
       const button = make('button', '', station ? titleForStation(station) : '자리 전체');
       button.type = 'button'; button.dataset.station = station;
-      button.addEventListener('click', () => { curStation = station; render(); }); nav.append(button);
+      button.addEventListener('click', () => { curStation = station; render(); if (station) window.RoomJunhee?.go(station); }); nav.append(button);   // 자리를 고르면 준희도 그 자리 앞으로
     }
     index.querySelector('h2').id = 'portfolio-index-title';
     index.setAttribute('aria-labelledby', 'portfolio-index-title');

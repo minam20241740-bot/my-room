@@ -521,6 +521,7 @@ window.RoomStage = (() => {
       exhibitAt(x,y){return exhibits?.stationAt(x,y);},
       exhibitMotion(part,p,mode){exhibits?.motion(part,p,mode);},
       visit(key,p,returning){exhibits?.visit(key,p,returning);},
+      place(key){return exhibits?.place(key)||false;},
       exhibitPoint(part,target){return exhibits?.point(part,target);},
       exhibitProgress(completed,day){exhibits?.progress(completed,day);},
       dawnJourney(p){exhibits?.dawnJourney(p);}, dawnOverview(){exhibits?.dawnOverview();}};
