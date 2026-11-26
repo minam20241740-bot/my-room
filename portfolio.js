@@ -46,7 +46,7 @@
     if (top === stage) closeStage(); else top.close();
     setTimeout(() => { popping = false; }, 50);
   });
-  window.RoomStage = {touchLike, open: (title, url, orient) => openStage({title, orient}, {url})};   // 방 안 진열대(gallery.js)에서도 같은 전체 화면 보기를 쓴다
+  window.RoomPlayView = {touchLike, open: (title, url, orient) => openStage({title, orient}, {url})};   // 방 안 진열대(gallery.js)에서도 같은 전체 화면 보기를 쓴다
   const badgeFor = work => work.status === 'wip' ? '진행 중' : work.device === 'pad' ? '휴대폰 조작 패드 지원' : work.device === 'pc' ? '컴퓨터에서 더 편해요' : '';
   const noteFor = work => [work.experience?.mb >= 10 ? '처음 열 때 약 ' + work.experience.mb + 'MB를 내려받습니다. 와이파이에서 여는 것을 권합니다.' : '',
     work.status === 'wip' ? '진행 중인 작업입니다. 전시 기간에도 계속 다듬어 이 주소에서 갱신합니다.' : '',
