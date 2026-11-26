@@ -1,9 +1,9 @@
 /* 편성, 현장(3D 위의 화면), 훈련, 결과, 수첩, 추리. 색과 기울기는 game.css와 같다. */
 
 /* ── 공통 버튼 ── */
-.bt { height: 92px; min-width: 270px; padding: 0 40px; border-radius: 14px; font-size: 36px; font-weight: 900; background: linear-gradient(#ffffff, #eceffa); border: 3px solid var(--line); box-shadow: 0 6px 0 var(--line); transform: skewX(-10deg); }
+.bt { height: 92px; min-width: 270px; padding: 0 40px; border-radius: 14px; font-size: 36px; font-weight: 900; background: #eceffa; border: 3px solid var(--line); box-shadow: 0 6px 0 var(--line); transform: skewX(-10deg); }
 .bt span { display: block; transform: skewX(10deg); }
-.bt.y { background: linear-gradient(#ffe08a, #f2c14e); border-color: #c99a2e; box-shadow: 0 6px 0 #c99a2e; }
+.bt.y { background: #f2c14e; border-color: #c99a2e; box-shadow: 0 6px 0 #c99a2e; }
 .bt:active { transform: translateY(5px) skewX(-10deg); box-shadow: none; }
 .bt:disabled { opacity: .45; cursor: default; }
 .fc { display: block; flex: none; width: 76px; height: 76px; border-radius: 50%; border: 4px solid var(--bl); background: #d5dcf2 center / cover no-repeat; overflow: hidden; }
@@ -76,7 +76,7 @@ button.slot:hover { border-color: var(--bl); }
 .bgauge.dim u { display: inline-block; }
 .bgauge.dim .gbar i { filter: grayscale(.8); }
 .gbar { margin-top: 8px; height: 26px; border-radius: 13px; background: #dfe4f6; overflow: hidden; }
-.gbar i { display: block; height: 100%; width: 0; border-radius: 13px; background: linear-gradient(90deg, var(--bl), #9db0f0 70%, var(--yl)); transition: width .2s; }
+.gbar i { display: block; height: 100%; width: 0; border-radius: 13px; background: var(--yl); transition: width .2s; }
 .bteam { position: absolute; left: 40px; bottom: 40px; display: flex; flex-direction: column; gap: 12px; }
 .mem { display: flex; align-items: center; gap: 18px; width: 380px; background: rgba(255, 255, 255, .95); border-radius: 14px; padding: 10px 20px; box-shadow: 0 6px 16px rgba(10, 20, 70, .2); }
 .mem b { display: block; font-size: 30px; font-weight: 800; }
@@ -90,7 +90,7 @@ button.slot:hover { border-color: var(--bl); }
 .bcost i.on { background: var(--bl); border-color: var(--bl); }
 .bcost b { min-width: 60px; text-align: center; background: var(--nv); color: #ffffff; font-size: 34px; font-weight: 900; border-radius: 10px; padding: 0 12px 2px; }
 .bcards { position: absolute; right: 44px; bottom: 40px; display: flex; gap: 16px; }
-.card { position: relative; width: 262px; height: 196px; border-radius: 16px; background: linear-gradient(#ffffff, #eceffa); border: 4px solid var(--yl); box-shadow: 0 8px 0 #c99a2e, 0 14px 22px rgba(10, 20, 70, .25); text-align: left; padding: 14px 16px 0 22px; }
+.card { position: relative; width: 262px; height: 196px; border-radius: 16px; background: #eceffa; border: 4px solid var(--yl); box-shadow: 0 8px 0 #c99a2e, 0 14px 22px rgba(10, 20, 70, .25); text-align: left; padding: 14px 16px 0 22px; }
 .card em { position: absolute; left: -14px; top: -14px; width: 60px; height: 60px; border-radius: 50%; background: var(--nv); color: #ffffff; font-style: normal; font-size: 36px; font-weight: 900; line-height: 54px; text-align: center; border: 3px solid #ffffff; }
 .card .fc { position: absolute; right: 12px; top: 10px; width: 68px; height: 68px; }
 .card small { display: block; margin-left: 34px; font-size: 24px; font-weight: 800; color: var(--bl); }
@@ -133,12 +133,12 @@ button.slot:hover { border-color: var(--bl); }
 .dnote .nrow { flex-direction: column; gap: 4px; font-size: 28px; font-weight: 600; line-height: 1.45; padding: 16px 22px; }
 .dnote .nrow b { width: auto; }
 .dsus { position: absolute; left: 640px; right: 60px; top: 190px; display: flex; gap: 24px; }
-.sus { flex: 1; height: 740px; display: flex; flex-direction: column; justify-content: flex-start; background: linear-gradient(#ffffff, #eceffa); border: 4px solid var(--line); border-radius: 20px; box-shadow: 0 10px 24px rgba(20, 30, 90, .18); padding: 20px 24px; text-align: left; transition: transform .15s; }
+.sus { flex: 1; height: 740px; display: flex; flex-direction: column; justify-content: flex-start; background: #eceffa; border: 4px solid var(--line); border-radius: 20px; box-shadow: 0 10px 24px rgba(20, 30, 90, .18); padding: 20px 24px; text-align: left; transition: transform .15s; }
 .sus .pic { height: 300px; background: #e4e8f7 center / contain no-repeat; border-radius: 14px; }
 .sus b { display: block; margin: 18px 0 10px; font-size: 46px; font-weight: 900; text-align: center; }
 .sus ul { margin: 0; padding: 0; list-style: none; }
 .sus li { background: #ffffff; border: 2px solid var(--line); border-radius: 10px; padding: 10px 16px; margin-bottom: 10px; font-size: 25px; font-weight: 600; line-height: 1.35; }
-.sus.sel { border-color: #c99a2e; background: linear-gradient(#fff3c4, #ffd870); transform: translateY(-14px); }
+.sus.sel { border-color: #c99a2e; background: #ffd870; transform: translateY(-14px); }
 .stamp { float: right; width: 200px; height: 200px; margin: 0 10px 0 30px; border: 10px solid var(--rd); border-radius: 50%; display: flex; align-items: center; justify-content: center; transform: rotate(-14deg); animation: pop .3s ease-out; }
 .stamp span { color: var(--rd); font-size: 64px; font-weight: 900; letter-spacing: .08em; }
 .win .body .big { font-size: 48px; font-weight: 900; }
@@ -255,8 +255,8 @@ button.slot:hover { border-color: var(--bl); }
 .noanim .bigwarn { animation: none; }
 
 /* ── A안 밤 테마(전투 밖과 전투 화면의 판): 남색 반투명 판, 금색 강조 ── */
-.bt { background: linear-gradient(rgba(70, 90, 180, .94), rgba(30, 44, 108, .96)); color: var(--tx); border-color: rgba(242, 193, 78, .6); box-shadow: 0 6px 0 rgba(6, 10, 36, .7); }
-.bt.y { background: linear-gradient(#ffe08a, #f2c14e); color: var(--nv); border-color: #c99a2e; box-shadow: 0 6px 0 #c99a2e; }
+.bt { background: rgba(30, 44, 108, .96); color: var(--tx); border-color: rgba(242, 193, 78, .6); box-shadow: 0 6px 0 rgba(6, 10, 36, .7); }
+.bt.y { background: #f2c14e; color: var(--nv); border-color: #c99a2e; box-shadow: 0 6px 0 #c99a2e; }
 .fc { border-color: var(--yl); background-color: #26356f; }
 .fc.none { border-color: var(--line); background: rgba(255, 255, 255, .08); }
 #team, #deduce { background: rgba(6, 10, 36, .3); }
@@ -297,10 +297,10 @@ button.slot:hover { border-color: var(--yl); }
 .rteam > div { background: rgba(255, 255, 255, .09); border-color: var(--line); }
 .nrow b { color: var(--yl); }
 .dnote { background: var(--pn); border-top-color: var(--yl); color: var(--tx); }
-.sus { background: linear-gradient(rgba(52, 72, 156, .85), rgba(16, 26, 72, .92)); border-color: var(--line); color: var(--tx); box-shadow: 0 10px 24px rgba(4, 8, 30, .45); }
+.sus { background: rgba(16, 26, 72, .92); border-color: var(--line); color: var(--tx); box-shadow: 0 10px 24px rgba(4, 8, 30, .45); }
 .sus .pic { background-color: rgba(255, 255, 255, .1); }
 .sus li { background: rgba(255, 255, 255, .08); border-color: var(--line); }
-.sus.sel { background: linear-gradient(#ffe9a8, #f2c14e); border-color: #c99a2e; color: var(--nv); }
+.sus.sel { background: #f2c14e; border-color: #c99a2e; color: var(--nv); }
 .sus.sel li { background: rgba(255, 255, 255, .55); border-color: #c99a2e; }
 .lockp { background: var(--pn); border-top-color: var(--yl); color: var(--tx); }
 .lockp h3 small { color: var(--yl); }
@@ -362,7 +362,7 @@ button.slot:hover { border-color: var(--yl); }
 .fpan.hitp .gbar { animation: gp .18s ease-out; }
 .thint { left: 1030px; top: 168px; max-width: 760px; font-size: 28px; padding: 8px 32px 10px; }
 .mem .ebar { width: 100%; height: 8px; margin-top: 4px; border-radius: 4px; background: rgba(255, 255, 255, .16); overflow: hidden; }
-.mem .ebar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #5a73e0, #ffd95a); transition: width .2s; }
+.mem .ebar i { display: block; height: 100%; width: 0; background: #ffd95a; transition: width .2s; }
 .mem.rdy .ebar i { animation: blink .9s ease-in-out infinite; }
 .bteam.row .hbar { width: 100%; }
 .bteam.row .mem > div { flex: 1; min-width: 0; }
@@ -444,7 +444,7 @@ button.slot:hover { border-color: var(--yl); }
 
 /* ── 편성(스타레일 편성 화면식): 네 칸 카드, 오른쪽 대기 명단, 둥근 출동 단추. 표지 색(남색·금색) ── */
 .pcards { position: absolute; left: 60px; top: 200px; width: 1270px; height: 720px; display: flex; gap: 22px; }
-.pcard { position: relative; flex: 1; overflow: hidden; border-radius: 22px; border: 2px solid rgba(232, 207, 147, .45); background: linear-gradient(rgba(14, 30, 86, .72), rgba(5, 12, 44, .92)); color: var(--tx); text-align: left; padding: 0; box-shadow: 0 10px 30px rgba(2, 6, 28, .5); }
+.pcard { position: relative; flex: 1; overflow: hidden; border-radius: 22px; border: 2px solid rgba(232, 207, 147, .45); background: rgba(5, 12, 44, .92); color: var(--tx); text-align: left; padding: 0; box-shadow: 0 10px 30px rgba(2, 6, 28, .5); }
 .pcard.plead { border-color: #e8cf93; box-shadow: 0 0 30px rgba(232, 207, 147, .28), 0 10px 30px rgba(2, 6, 28, .5); }
 button.pcard:hover { border-color: #f3e7c4; }
 .pcard .part { position: absolute; left: -6%; right: -6%; top: 14px; bottom: 120px; background: center top / auto 100% no-repeat; }
@@ -476,7 +476,7 @@ button.pcard:hover { border-color: #f3e7c4; }
 .fpan .fw { font-size: 24px; padding: 0 12px 1px 10px; }
 .fpan em { right: 22px; top: 10px; font-size: 24px; color: #e8cf93; }
 .fpan .ftg small { display: none; } .fpan .ftg { margin: 4px 0 2px; } .fpan .ftg i { height: 12px; }
-.fpan .gbar { height: 14px; margin-top: 2px; } .fpan .gbar i { background: linear-gradient(90deg, #4a67c8, #9fb3f0 70%, #e8cf93); }
+.fpan .gbar { height: 14px; margin-top: 2px; } .fpan .gbar i { background: #e8cf93; }
 .bteam.row { left: 470px; bottom: 26px; gap: 12px; }
 .bteam.row .mem { width: 226px; height: 112px; padding: 10px 16px 10px 12px; border-radius: 20px 20px 20px 44px; background: rgba(5, 12, 44, .88); border: 2px solid rgba(232, 207, 147, .4); color: var(--tx); gap: 12px; }
 .mem .ring { position: relative; flex: none; width: 88px; height: 88px; padding: 5px; border-radius: 50%; background: conic-gradient(#e8cf93 var(--e, 0%), rgba(255, 255, 255, .16) 0); }

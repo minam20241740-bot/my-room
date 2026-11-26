@@ -213,7 +213,10 @@
     ['11.26', '용량이 큰 게임은 열기 전에 크기를 알리고 불러오는 동안 안내를 띄웁니다. 영상은 재생 전에 작품 그림이 보입니다.'],
     ['11.26', '링크를 공유하면 제목과 표지 그림이 미리보기로 보입니다.'],
     ['11.26', '준희가 걷는 동작 없이, 방의 자리 메뉴와 작품 목록에서 고른 자리 앞으로 바로 옮겨 섭니다. 준희는 지금 어느 자리에서 작품을 보는지 알려 주는 말입니다.'],
-    ['11.26', '3D 방이 정지 그림으로 바뀌던 문제를 고쳤습니다.']
+    ['11.26', '3D 방이 정지 그림으로 바뀌던 문제를 고쳤습니다.'],
+    ['11.26', '표지를 화면에 꽉 차게 키우고 아래 단추 줄을 없앴습니다. 작품의 세계와 기획 의도는 방 안쪽 위 단추에서 언제든 열립니다.'],
+    ['11.26', '단추·안내창·작품 자리 판을 번지는 색 없이 단색의 각진 모양으로 바꾸고, 탐정 사무소 A·B·C의 단추·카드·막대도 단색으로 맞췄습니다.'],
+    ['11.26', '휴대폰을 가로로 눕히면 표지가 화면 높이에 맞게 커지고, 작품 자리 판이 대화창에 가려지지 않습니다.']
   ];
   function openIndex() {
     index.replaceChildren(closeButton(index), make('h2', '', '작품의 세계'));
@@ -259,13 +262,17 @@
   const coverNote = document.querySelector('.cover-note'), coverBox = document.querySelector('.cover-touch');
   if (coverNote && coverBox) {
     const covers = [...document.querySelectorAll('[data-cover-action]')];
-    const sync = () => { const ready = covers.every(button => !button.disabled); coverNote.textContent = ready ? '눌러서 시작할 수 있습니다.' : '준희의 방을 불러오는 중이에요…'; };
+    const sync = () => { const ready = covers.every(button => !button.disabled); coverNote.textContent = '준희의 방을 불러오는 중이에요…'; coverNote.hidden = ready; };   // 다 불러오면 안내는 사라지고 표지 그림만 남는다
     new MutationObserver(sync).observe(coverBox, {attributes: true, subtree: true, attributeFilter: ['disabled']}); sync();
   }
-  const all = make('button', '', '전체 작품 ' + works.length);
-  all.id = 'portfolio-open'; all.type = 'button';
+  // 방 안 머리말: 작품의 세계(전체 작품)와 기획 의도를 표지가 아니라 안쪽에서 바로 연다
+  const all = make('button', '', '작품의 세계');
+  all.id = 'portfolio-open'; all.type = 'button'; all.title = '전체 작품 ' + works.length + '개 보기';
   all.addEventListener('click', openIndex);
-  document.querySelector('.stage-tools').prepend(all);
+  const intent = make('button', '', '기획 의도');
+  intent.id = 'concept-open'; intent.type = 'button';
+  intent.addEventListener('click', () => document.getElementById('concept')?.click());
+  document.querySelector('.stage-tools').prepend(all, intent);
 
   const original = gallery.renderWork;
   gallery.renderWork = (body, id, onExperience) => {

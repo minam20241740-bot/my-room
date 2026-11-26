@@ -16,7 +16,7 @@ body { color: #ffffff; font-weight: 700; }
 #loading { background: rgba(5, 8, 14, .35); }
 .tip { background: var(--pn); box-shadow: 0 8px 0 rgba(0, 0, 0, .35); }
 .bar { background: rgba(255, 255, 255, .16); box-shadow: none; }
-.bar i { background: linear-gradient(90deg, #a8d400, var(--yl)); }
+.bar i { background: var(--yl); }
 .go { color: #ffffff; text-shadow: 0 3px 0 #020409; }
 
 /* ── 사무소 ── */
@@ -67,8 +67,8 @@ body { color: #ffffff; font-weight: 700; }
 .wait em.hint { color: #05070d; }
 .wf span { color: var(--mute); }
 .wf u { color: #05070d; }
-.bt { background: linear-gradient(#161f33, #0f1626); color: #ffffff; border-color: var(--line); box-shadow: 0 6px 0 #020409; }
-.bt.y { background: linear-gradient(#e4ff6e, #dfff1a); color: #05070d; border-color: #8fb300; box-shadow: 0 6px 0 #8fb300; }
+.bt { background: #0f1626; color: #ffffff; border-color: var(--line); box-shadow: 0 6px 0 #020409; }
+.bt.y { background: #dfff1a; color: #05070d; border-color: #8fb300; box-shadow: 0 6px 0 #8fb300; }
 
 /* ── 현장 위의 표시, 안내 말풍선 ── */
 .mk span { background: var(--pn); color: #ffffff; box-shadow: 0 4px 10px rgba(0, 0, 0, .45); }
@@ -81,9 +81,9 @@ body { color: #ffffff; font-weight: 700; }
 /* ── 결과, 수첩, 추리 ── */
 .result { background: var(--pn); box-shadow: 0 24px 60px rgba(0, 0, 0, .55); }
 .dnote { background: var(--pn); border-top-color: var(--yl); box-shadow: 0 10px 24px rgba(0, 0, 0, .4); }
-.sus { background: linear-gradient(#10172a, #0a0f1a); box-shadow: 0 10px 24px rgba(0, 0, 0, .4); }
+.sus { background: #0a0f1a; box-shadow: 0 10px 24px rgba(0, 0, 0, .4); }
 .sus li { background: var(--soft); color: #ffffff; }
-.sus.sel { background: linear-gradient(#e4ff6e, #dfff1a); border-color: #8fb300; color: #05070d; }
+.sus.sel { background: #dfff1a; border-color: #8fb300; color: #05070d; }
 .sus.sel li { background: #f2ffc4; color: #05070d; border-color: #8fb300; }
 .who .wtx { background: var(--pn); }
 .who em, .stp span { color: var(--mute); }
@@ -95,7 +95,7 @@ body { color: #ffffff; font-weight: 700; }
 #hud .bgauge, #hud .mem { background: rgba(5, 8, 14, .9); color: #ffffff; box-shadow: 0 8px 20px rgba(0, 0, 0, .45); }
 #hud .bgauge small, #hud .mem u { color: var(--yl); }
 #hud .bgauge .gbar, #hud .hbar { background: rgba(255, 255, 255, .18); }
-#hud .gbar i { background: linear-gradient(90deg, #a8d400, var(--yl)); }
+#hud .gbar i { background: var(--yl); }
 #hud .hbar i { background: #7ee0b0; }
 #hud .finfo { background: rgba(5, 8, 14, .9); color: #ffffff; border-left-color: var(--yl); }
 #hud .finfo small { color: var(--yl); }

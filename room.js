@@ -719,7 +719,7 @@
     ui.info.showModal();
   }
 
-  const coverNarrow=window.matchMedia('(max-width:640px)');
+  const coverNarrow=window.matchMedia('(max-width:640px) and (orientation:portrait)');
   for (const [name,action] of [
     ['wake',() => void wake()],
     ['concept',() => openInfo('concept')],

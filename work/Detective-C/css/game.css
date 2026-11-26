@@ -44,7 +44,7 @@ button:focus-visible { outline: 5px solid var(--nv); outline-offset: 4px; }
 .tip b { display: block; font-size: 26px; color: var(--bl); letter-spacing: .08em; margin-bottom: 10px; }
 .tip p { margin: 0; font-size: 38px; font-weight: 700; line-height: 1.4; }
 .bar { position: absolute; left: 360px; right: 360px; top: 880px; height: 18px; border-radius: 9px; background: rgba(255, 255, 255, .8); overflow: hidden; box-shadow: inset 0 0 0 2px #ffffff; }
-.bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--bl), #7fd0ff); border-radius: 9px; transition: width .2s linear; }
+.bar i { display: block; height: 100%; width: 0; background: #7fd0ff; border-radius: 9px; transition: width .2s linear; }
 .go { position: absolute; left: 0; right: 0; top: 930px; text-align: center; font-size: 34px; font-weight: 800; color: var(--nv); letter-spacing: .1em; text-shadow: 0 2px 0 #ffffff; }
 .go.blink { animation: blink 1.2s ease-in-out infinite; }
 @keyframes blink { 50% { opacity: .25; } }
@@ -75,7 +75,7 @@ button:focus-visible { outline: 5px solid var(--nv); outline-offset: 4px; }
 .dock button > div { transform: skewX(10deg); display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 28px; font-weight: 800; }
 .dock svg { width: 62px; height: 62px; }
 .dock button:active, .top button:active { transform: translateY(5px) skewX(-10deg); }
-.req { position: absolute; right: 44px; bottom: 44px; width: 520px; height: 190px; border-radius: 20px; background: linear-gradient(#e4ff6e, #dfff1a); border: 3px solid #f6ffd8; box-shadow: 0 8px 0 #8fb300, 0 18px 28px rgba(16, 70, 160, .26); transform: skewX(-10deg); text-align: left; overflow: hidden; transition: transform .12s; }
+.req { position: absolute; right: 44px; bottom: 44px; width: 520px; height: 190px; border-radius: 20px; background: #dfff1a; border: 3px solid #f6ffd8; box-shadow: 0 8px 0 #8fb300, 0 18px 28px rgba(16, 70, 160, .26); transform: skewX(-10deg); text-align: left; overflow: hidden; transition: transform .12s; }
 .req::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 16px; background: var(--nv); }
 .req::before { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 150px; background: linear-gradient(135deg, transparent 50%, rgba(255, 255, 255, .5) 50%); }
 .req > div { transform: skewX(10deg); padding-left: 56px; position: relative; z-index: 1; }

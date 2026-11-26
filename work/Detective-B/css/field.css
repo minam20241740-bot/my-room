@@ -1,9 +1,9 @@
 /* 편성, 현장(3D 위의 화면), 훈련, 결과, 수첩, 추리. 색과 기울기는 game.css와 같다. */
 
 /* ── 공통 버튼 ── */
-.bt { height: 92px; min-width: 270px; padding: 0 40px; border-radius: 14px; font-size: 36px; font-weight: 900; background: linear-gradient(#ffffff, #e8f4ff); border: 3px solid var(--line); box-shadow: 0 6px 0 var(--line); transform: skewX(-10deg); }
+.bt { height: 92px; min-width: 270px; padding: 0 40px; border-radius: 14px; font-size: 36px; font-weight: 900; background: #e8f4ff; border: 3px solid var(--line); box-shadow: 0 6px 0 var(--line); transform: skewX(-10deg); }
 .bt span { display: block; transform: skewX(10deg); }
-.bt.y { background: linear-gradient(#fff470, #ffd92e); border-color: #e0ae18; box-shadow: 0 6px 0 #e0ae18; }
+.bt.y { background: #ffd92e; border-color: #e0ae18; box-shadow: 0 6px 0 #e0ae18; }
 .bt:active { transform: translateY(5px) skewX(-10deg); box-shadow: none; }
 .bt:disabled { opacity: .45; cursor: default; }
 .fc { display: block; flex: none; width: 76px; height: 76px; border-radius: 50%; border: 4px solid var(--bl); background: #cfe9ff center / cover no-repeat; overflow: hidden; }
@@ -76,7 +76,7 @@ button.slot:hover { border-color: var(--bl); }
 .bgauge.dim u { display: inline-block; }
 .bgauge.dim .gbar i { filter: grayscale(.8); }
 .gbar { margin-top: 8px; height: 26px; border-radius: 13px; background: #d6ecff; overflow: hidden; }
-.gbar i { display: block; height: 100%; width: 0; border-radius: 13px; background: linear-gradient(90deg, var(--bl), #7fd0ff 70%, var(--yl)); transition: width .2s; }
+.gbar i { display: block; height: 100%; width: 0; border-radius: 13px; background: var(--yl); transition: width .2s; }
 .bteam { position: absolute; left: 40px; bottom: 40px; display: flex; flex-direction: column; gap: 12px; }
 .mem { display: flex; align-items: center; gap: 18px; width: 380px; background: rgba(255, 255, 255, .95); border-radius: 14px; padding: 10px 20px; box-shadow: 0 6px 16px rgba(20, 60, 120, .2); }
 .mem b { display: block; font-size: 30px; font-weight: 800; }
@@ -90,7 +90,7 @@ button.slot:hover { border-color: var(--bl); }
 .bcost i.on { background: var(--bl); border-color: var(--bl); }
 .bcost b { min-width: 60px; text-align: center; background: var(--nv); color: #ffffff; font-size: 34px; font-weight: 900; border-radius: 10px; padding: 0 12px 2px; }
 .bcards { position: absolute; right: 44px; bottom: 40px; display: flex; gap: 16px; }
-.card { position: relative; width: 262px; height: 196px; border-radius: 16px; background: linear-gradient(#ffffff, #e8f4ff); border: 4px solid var(--yl); box-shadow: 0 8px 0 #e0ae18, 0 14px 22px rgba(20, 60, 120, .25); text-align: left; padding: 14px 16px 0 22px; }
+.card { position: relative; width: 262px; height: 196px; border-radius: 16px; background: #e8f4ff; border: 4px solid var(--yl); box-shadow: 0 8px 0 #e0ae18, 0 14px 22px rgba(20, 60, 120, .25); text-align: left; padding: 14px 16px 0 22px; }
 .card em { position: absolute; left: -14px; top: -14px; width: 60px; height: 60px; border-radius: 50%; background: var(--nv); color: #ffffff; font-style: normal; font-size: 36px; font-weight: 900; line-height: 54px; text-align: center; border: 3px solid #ffffff; }
 .card .fc { position: absolute; right: 12px; top: 10px; width: 68px; height: 68px; }
 .card small { display: block; margin-left: 34px; font-size: 24px; font-weight: 800; color: var(--bl); }
@@ -148,12 +148,12 @@ button.slot:hover { border-color: var(--bl); }
 .dnote .nrow { flex-direction: column; gap: 4px; font-size: 28px; font-weight: 600; line-height: 1.45; padding: 16px 22px; }
 .dnote .nrow b { width: auto; }
 .dsus { position: absolute; left: 640px; right: 60px; top: 190px; display: flex; gap: 24px; }
-.sus { flex: 1; height: 740px; display: flex; flex-direction: column; justify-content: flex-start; background: linear-gradient(#ffffff, #e8f4ff); border: 4px solid var(--line); border-radius: 20px; box-shadow: 0 10px 24px rgba(20, 80, 180, .18); padding: 20px 24px; text-align: left; transition: transform .15s; }
+.sus { flex: 1; height: 740px; display: flex; flex-direction: column; justify-content: flex-start; background: #e8f4ff; border: 4px solid var(--line); border-radius: 20px; box-shadow: 0 10px 24px rgba(20, 80, 180, .18); padding: 20px 24px; text-align: left; transition: transform .15s; }
 .sus .pic { height: 300px; background: #dff0ff center / contain no-repeat; border-radius: 14px; }
 .sus b { display: block; margin: 18px 0 10px; font-size: 46px; font-weight: 900; text-align: center; }
 .sus ul { margin: 0; padding: 0; list-style: none; }
 .sus li { background: #ffffff; border: 2px solid var(--line); border-radius: 10px; padding: 10px 16px; margin-bottom: 10px; font-size: 25px; font-weight: 600; line-height: 1.35; }
-.sus.sel { border-color: #e0ae18; background: linear-gradient(#fffbd0, #ffe76a); transform: translateY(-14px); }
+.sus.sel { border-color: #e0ae18; background: #ffe76a; transform: translateY(-14px); }
 .stamp { float: right; width: 200px; height: 200px; margin: 0 10px 0 30px; border: 10px solid var(--rd); border-radius: 50%; display: flex; align-items: center; justify-content: center; transform: rotate(-14deg); animation: pop .3s ease-out; }
 .stamp span { color: var(--rd); font-size: 64px; font-weight: 900; letter-spacing: .08em; }
 .win .body .big { font-size: 48px; font-weight: 900; }
