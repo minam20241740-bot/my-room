@@ -212,6 +212,7 @@ window.RoomGallery = (() => {
       for(const [id,title] of cases) {
         const url='work/Detective-'+id+'/index.html';
         const launch=button(list,title,()=>{
+          if(window.RoomStage&&window.RoomStage.touchLike()){window.RoomStage.open('도시의 몬스터와 탐정 사무소 · '+id,url,'landscape');return;}   // 휴대폰은 화면 전체로
           screen.replaceChildren();
           const frame=add(screen,'iframe');
           frame.title=title;

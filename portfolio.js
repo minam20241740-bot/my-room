@@ -23,7 +23,7 @@
     const bar = make('div', 'stage-bar');
     const back = make('button', 'stage-back', '← 작품 정보'); back.type = 'button'; back.addEventListener('click', closeStage);
     const name = make('strong', 'stage-title', work.title);
-    const quit = make('button', 'stage-close', '닫기'); quit.type = 'button'; quit.addEventListener('click', () => { closeStage(); detail.close(); });
+    const quit = make('button', 'stage-close', '닫기'); quit.type = 'button'; quit.addEventListener('click', () => { closeStage(); detail.close(); document.querySelector('#work-view[open]')?.close(); });
     bar.append(back, name, quit);
     const frame = make('iframe', 'stage-frame'); frame.src = experience.url; frame.title = work.title + ' 체험'; frame.allow = 'fullscreen; autoplay';
     stage.replaceChildren(bar, frame);
@@ -31,6 +31,7 @@
     stage.showModal(); back.focus({preventScroll: true});
   }
   stage.addEventListener('cancel', event => { event.preventDefault(); closeStage(); });
+  window.RoomStage = {touchLike, open: (title, url, orient) => openStage({title, orient}, {url})};   // 방 안 진열대(gallery.js)에서도 같은 전체 화면 보기를 쓴다
   const badgeFor = work => work.status === 'wip' ? '진행 중' : work.device === 'pad' ? '휴대폰 조작 패드 지원' : work.device === 'pc' ? '컴퓨터에서 더 편해요' : '';
   const noteFor = work => [work.status === 'wip' ? '진행 중인 작업입니다. 전시 기간에도 계속 다듬어 이 주소에서 갱신합니다.' : '',
     work.device === 'pad' ? '휴대폰에서는 화면의 조작 패드로 움직일 수 있습니다. 컴퓨터에서는 키보드가 더 편합니다.' : work.device === 'pc' ? '컴퓨터의 키보드·마우스에 맞춘 작품입니다.' : ''].filter(Boolean);
@@ -187,7 +188,9 @@
     ['11.26', '우회선·멜루·탐정 사무소 A·C안에 휴대폰용 조작 패드를 달았습니다.'],
     ['11.26', '작품 카드에 기기 안내와 진행 중 표시를 넣고, 종류로 보기를 더했습니다.'],
     ['11.26', '새 작품 「마중」(실사 뮤직비디오, 가편집)을 넣었습니다. 영상은 누르면 바로 재생되고 짧은 클립은 반복됩니다.'],
-    ['11.26', '나의 그림자 영상을 새 버전(손이 튀어나와 바닥을 내려치며 전시실이 무너지는 마무리)으로 바꿨습니다.']
+    ['11.26', '나의 그림자 영상을 새 버전(손이 튀어나와 바닥을 내려치며 전시실이 무너지는 마무리)으로 바꿨습니다.'],
+    ['11.26', '탐정 사무소 A·B·C와 우회선: 휴대폰 가로 화면에서 작았던 단추를 손가락 크기로 키우고, 우회선 글자를 읽을 수 있게 했습니다.'],
+    ['11.26', '방 안 탐정 책상에서 고른 게임도 휴대폰에서는 화면 전체로 열립니다.']
   ];
   function openIndex() {
     index.replaceChildren(closeButton(index), make('h2', '', '작품의 세계'));

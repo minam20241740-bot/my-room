@@ -69,9 +69,11 @@
   root.appendChild(tog);
   let saved = null; try { saved = sessionStorage.getItem('tp-off'); } catch (e) {}
   document.body.appendChild(root); setOff(saved === null ? !!cfg.collapsed : saved === '1');
-  if (cfg.hint) { const h = document.createElement('div'); h.className = 'tp-hint'; h.textContent = cfg.hint; document.body.appendChild(h); setTimeout(() => h.remove(), 9000); }
+  let hinted = false;
+  const showHint = () => { if (hinted || !cfg.hint) return; hinted = true; const h = document.createElement('div'); h.className = 'tp-hint'; h.textContent = cfg.hint; document.body.appendChild(h); setTimeout(() => h.remove(), 9000); };
+  if (typeof cfg.when !== 'function') showHint();   // 조건이 있으면 패드가 처음 나타날 때 안내를 띄운다
   if (typeof cfg.when === 'function') {   // 작품이 '움직일 수 있는 화면'일 때만 패드를 보인다(전투·대화 화면의 단추를 가리지 않게)
-    const tick = () => { let ok = true; try { ok = !!cfg.when(); } catch (e) {} root.style.display = ok ? '' : 'none';
+    const tick = () => { let ok = true; try { ok = !!cfg.when(); } catch (e) {} root.style.display = ok ? '' : 'none'; if (ok) showHint();
       if (ok && typeof cfg.actsWhen === 'function') { let a = true; try { a = !!cfg.actsWhen(); } catch (e) {} acts.style.display = a ? '' : 'none'; }
       if (!ok) { for (const [c, t] of timers) { clearTimeout(t.a); clearInterval(t.b); } timers.clear(); for (const c of [...down]) { send('keyup', c, c); down.delete(c); } root.querySelectorAll('.on').forEach(b => b.classList.remove('on')); } };
     setInterval(tick, 250); tick();
