@@ -26,14 +26,30 @@
     const quit = make('button', 'stage-close', '닫기'); quit.type = 'button'; quit.addEventListener('click', () => { closeStage(); detail.close(); document.querySelector('#work-view[open]')?.close(); });
     bar.append(back, name, quit);
     const frame = make('iframe', 'stage-frame'); frame.src = experience.url; frame.title = work.title + ' 체험'; frame.allow = 'fullscreen; autoplay';
-    stage.replaceChildren(bar, frame);
+    const loader = make('div', 'stage-loader', experience.mb >= 10 ? '불러오는 중이에요 · 처음에는 약 ' + experience.mb + 'MB를 받아 오래 걸릴 수 있어요' : '불러오는 중이에요…'); loader.setAttribute('role', 'status');
+    frame.addEventListener('load', () => loader.remove()); setTimeout(() => loader.remove(), 90000);
+    stage.replaceChildren(bar, frame, loader);
     if (work.orient === 'landscape' && innerHeight > innerWidth) { const hint = make('p', 'stage-hint', '휴대폰을 가로로 돌리면 더 크게 볼 수 있어요.'); stage.append(hint); setTimeout(() => hint.remove(), 7000); }
-    stage.showModal(); back.focus({preventScroll: true});
+    stage.showModal(); pushLayer(); back.focus({preventScroll: true});
   }
   stage.addEventListener('cancel', event => { event.preventDefault(); closeStage(); });
+  // 휴대폰 뒤로 가기: 목록 → 상세 → 전체 화면 순으로 쌓아 두고 뒤로 가면 맨 위 창부터 닫는다
+  let pushed = 0, skipPop = 0, popping = false;
+  const layers = () => [stage, detail, index];
+  const pushLayer = () => { try { history.pushState({roomLayer: ++pushed}, ''); } catch (e) { pushed++; } };
+  const afterClose = () => { if (popping || pushed <= 0) return; pushed--; skipPop++; try { history.back(); } catch (e) { skipPop--; } };
+  for (const dialog of layers()) dialog.addEventListener('close', afterClose);
+  window.addEventListener('popstate', () => {
+    if (skipPop > 0) { skipPop--; return; }
+    const top = layers().find(dialog => dialog.open); if (!top) return;
+    popping = true; pushed = Math.max(0, pushed - 1);
+    if (top === stage) closeStage(); else top.close();
+    setTimeout(() => { popping = false; }, 50);
+  });
   window.RoomStage = {touchLike, open: (title, url, orient) => openStage({title, orient}, {url})};   // 방 안 진열대(gallery.js)에서도 같은 전체 화면 보기를 쓴다
   const badgeFor = work => work.status === 'wip' ? '진행 중' : work.device === 'pad' ? '휴대폰 조작 패드 지원' : work.device === 'pc' ? '컴퓨터에서 더 편해요' : '';
-  const noteFor = work => [work.status === 'wip' ? '진행 중인 작업입니다. 전시 기간에도 계속 다듬어 이 주소에서 갱신합니다.' : '',
+  const noteFor = work => [work.experience?.mb >= 10 ? '처음 열 때 약 ' + work.experience.mb + 'MB를 내려받습니다. 와이파이에서 여는 것을 권합니다.' : '',
+    work.status === 'wip' ? '진행 중인 작업입니다. 전시 기간에도 계속 다듬어 이 주소에서 갱신합니다.' : '',
     work.device === 'pad' ? '휴대폰에서는 화면의 조작 패드로 움직일 수 있습니다. 컴퓨터에서는 키보드가 더 편합니다.' : work.device === 'pc' ? '컴퓨터의 키보드·마우스에 맞춘 작품입니다.' : ''].filter(Boolean);
 
   function releasePlayer() {
@@ -110,6 +126,7 @@
           player.allow = 'fullscreen';
         }
         player.tabIndex = 0;
+        if (experience.type === 'video' && work.image) player.poster = work.image;   // 재생 전 검은 상자 대신 작품 그림
         detail.insertBefore(player, picture);
         if (experience.type === 'video') { if (experience.loop) player.loop = true; const started = player.play?.(); if (started) started.catch(() => {}); }   // 누르면 바로 재생, 짧은 클립은 반복
         button.setAttribute('aria-expanded','true');
@@ -141,7 +158,7 @@
       list.append(...work.related.map(child => card(child, work)));
       related.append(list); detail.append(related);
     }
-    if (!detail.open) detail.showModal();
+    if (!detail.open) { detail.showModal(); pushLayer(); }
     else detail.querySelector('.portfolio-back, .portfolio-close').focus();
     detail.scrollTop = 0;
   }
@@ -190,7 +207,10 @@
     ['11.26', '새 작품 「마중」(실사 뮤직비디오, 가편집)을 넣었습니다. 영상은 누르면 바로 재생되고 짧은 클립은 반복됩니다.'],
     ['11.26', '나의 그림자 영상을 새 버전(손이 튀어나와 바닥을 내려치며 전시실이 무너지는 마무리)으로 바꿨습니다.'],
     ['11.26', '탐정 사무소 A·B·C와 우회선: 휴대폰 가로 화면에서 작았던 단추를 손가락 크기로 키우고, 우회선 글자를 읽을 수 있게 했습니다.'],
-    ['11.26', '방 안 탐정 책상에서 고른 게임도 휴대폰에서는 화면 전체로 열립니다.']
+    ['11.26', '방 안 탐정 책상에서 고른 게임도 휴대폰에서는 화면 전체로 열립니다.'],
+    ['11.26', '휴대폰 뒤로 가기 단추가 사이트를 나가지 않고 열린 창을 하나씩 닫습니다.'],
+    ['11.26', '용량이 큰 게임은 열기 전에 크기를 알리고 불러오는 동안 안내를 띄웁니다. 영상은 재생 전에 작품 그림이 보입니다.'],
+    ['11.26', '링크를 공유하면 제목과 표지 그림이 미리보기로 보입니다.']
   ];
   function openIndex() {
     index.replaceChildren(closeButton(index), make('h2', '', '작품의 세계'));
@@ -225,7 +245,7 @@
     }
     index.querySelector('h2').id = 'portfolio-index-title';
     index.setAttribute('aria-labelledby', 'portfolio-index-title');
-    index.append(make('p', 'portfolio-filter-label', '종류로 보기'), groupNav, make('p', 'portfolio-filter-label', '방의 자리별로 보기'), nav, list); render(); index.showModal();
+    index.append(make('p', 'portfolio-filter-label', '종류로 보기'), groupNav, make('p', 'portfolio-filter-label', '방의 자리별로 보기'), nav, list); render(); index.showModal(); pushLayer();
   }
   document.addEventListener('click', event => {
     if (!event.target.closest('#worlds, [data-cover-action="worlds"]')) return;
