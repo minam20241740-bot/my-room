@@ -218,11 +218,12 @@
     ['11.26', '단추·안내창·작품 자리 판을 번지는 색 없이 단색의 각진 모양으로 바꾸고, 탐정 사무소 A·B·C의 단추·카드·막대도 단색으로 맞췄습니다.'],
     ['11.26', '휴대폰을 가로로 눕히면 표지가 화면 높이에 맞게 커지고, 작품 자리 판이 대화창에 가려지지 않습니다.'],
     ['11.26', '표지는 그림 어디를 눌러도 시작됩니다. 단추 글자를 굵게, 작품 자리 판의 작은 글자를 키웠습니다.'],
-    ['11.26', '준희가 깨어나는 장면에 비스듬한 색 판이 걷히는 전환, 놀람 표시 「앗!」, 표지와 같은 제목 글자 판을 더했습니다. 준희와 3D 장면은 그대로입니다.']
+    ['11.26', '준희가 깨어나는 장면에 비스듬한 색 판이 걷히는 전환, 놀람 표시 「앗!」, 표지와 같은 제목 글자 판을 더했습니다. 준희와 3D 장면은 그대로입니다.'],
+    ['11.26', '탐정 사무소 A안의 화면 단추·창(지도·임무·메뉴 등)을 반투명·둥근 모서리·번지는 그림자 없이 단색의 각진 모양으로 정리했습니다.']
   ];
   function openIndex() {
     index.replaceChildren(closeButton(index), make('h2', '', '작품의 세계'));
-    index.append(make('p', 'portfolio-description', '물건을 정리하면 작품의 입구가 열립니다. 준희의 방에서 이어지는 ' + works.length + '개 작업을 둘러보세요.'));
+    index.append(make('p', 'portfolio-description', '준희의 방에서 이어지는 ' + works.length + '개 작업입니다. 종류나 방의 자리로 골라 볼 수 있어요.'));
     const log = make('details', 'portfolio-notes'); log.append(make('summary', '', '업데이트 기록 · 전시 중에도 이 주소에서 계속 고칩니다'));
     const items = make('ul'); for (const [day, text] of PATCHES) items.append(make('li', '', day + ' · ' + text)); log.append(items); index.append(log);
     // 종류로 보기(처음 오는 사람이 '야간 신호실' 같은 방 이름을 몰라도 고를 수 있게)와 방 자리별 보기를 함께 쓴다
