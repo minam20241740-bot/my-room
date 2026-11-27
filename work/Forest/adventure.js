@@ -32,8 +32,14 @@ const ForestJourney=(()=>{
   const journey=()=>getState().journey;
   const quantity=id=>id==='wood'||id==='stone'?getState()[id]:1;
   const heavy=turn=>turn%3===2;
+  const viewHints={
+    village:'나무와 돌을 모아 건물을 지으세요. 건물 버튼의 숫자는 필요한 나무 / 돌입니다. 세 곳을 모두 지으면 마을이 완성됩니다.',
+    bag:'마을에서 모은 재료와 도구입니다. 칸을 누르면 쓰임새가 나옵니다. 나무와 돌은 건설에 쓰입니다.',
+    dream:'악몽의 숲에서 싸울 때 쓰는 기술을 익히는 곳입니다. 익힌 기술은 악몽의 숲에서 사용할 수 있습니다.',
+    night:'몬스터와 번갈아 공격합니다. 기술로 몬스터의 HP를 0으로 만들면 이기고, 몬스터의 반격으로 내 체력이 0이 되면 집니다. 키보드 1–4로도 기술을 쓸 수 있습니다.'
+  };
   function openView(name){
-    view=name;
+    view=name;el('viewhint').textContent=viewHints[name]||'';
     for(const b of el('paths').children){
       const active=b.dataset.view===view;
       b.setAttribute('aria-pressed',String(active));

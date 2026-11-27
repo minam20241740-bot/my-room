@@ -11,13 +11,16 @@
   <header><span>몽환의 숲</span><button id="leave">작품으로 돌아가기</button></header>
   <section id="menu">
     <img src="title.webp" alt="몽환의 숲 · 도시 구축의 꿈">
+    <p class="menu-goal">나무와 돌을 모아 빈터에 건물을 지어 마을을 만드는 게임입니다. 숲에서 몬스터와 싸워 볼 수도 있습니다.</p>
     <div class="menu-actions"><button id="start">새 마을 시작</button><button id="load">마을 이어하기</button></div>
     <p id="menu-note" role="status"></p>
   </section>
   <section id="world" hidden>
     <div class="bar"><h1>도시 구축의 꿈</h1><button id="save">마을 저장</button><button id="home">타이틀</button></div>
+    <p class="goal">목표: 나무와 돌을 모아 빈터 세 곳에 건물을 지어 마을을 완성하세요. 아래 메뉴에서 소지품을 보고, 기술을 익혀 몬스터와 싸울 수도 있습니다.</p>
     <nav id="paths" aria-label="숲과 마을"><button data-view="village" aria-controls="village">도시 건설</button><button data-view="bag" aria-controls="bag">소지품</button><button data-view="dream" aria-controls="dream">몽환의 숲</button><button data-view="night" aria-controls="night">악몽의 숲</button></nav>
-    <div class="vitals" aria-label="꿈구축가의 상태"><span>꿈구축가</span><label>HP <meter id="hp" min="0" max="100"></meter><b id="hp-value"></b></label><label>MP <meter id="mp" min="0" max="100"></meter><b id="mp-value"></b></label></div>
+    <p id="viewhint"></p>
+    <div class="vitals" aria-label="꿈구축가의 상태"><span>꿈구축가</span><label>체력(HP) <meter id="hp" min="0" max="100"></meter><b id="hp-value"></b></label><label>마력(MP) <meter id="mp" min="0" max="100"></meter><b id="mp-value"></b></label></div>
     <section id="village" class="view">
       <div class="map" aria-label="숲과 건설 부지">
         <div class="resources"><button data-gather="wood">나무 모으기</button><button data-gather="stone">돌 모으기</button></div><div id="plots"></div>
@@ -31,7 +34,7 @@
       <div class="bag-main"><h2 id="bag-title">소지품</h2><div id="slots" aria-label="소지품 스무 칸"></div><p id="item-info"></p></div>
     </section>
     <section id="dream" class="view dream-view" aria-labelledby="dream-title" hidden>
-      <div class="dream-intro"><h2 id="dream-title">몽환의 숲</h2><p>숲에서 깨어나는 능력을 하나 골라 익히세요.</p></div>
+      <div class="dream-intro"><h2 id="dream-title">몽환의 숲</h2><p>악몽의 숲에서 싸울 때 쓰는 기술을 익히는 곳입니다. 기술을 누르면 바로 익힙니다.</p></div>
       <div class="skill-panel"><img class="tree" src="art/tree.webp" alt="빛이 뻗어 여러 능력으로 이어지는 스킬 트리"><div id="study"></div></div>
     </section>
     <section id="night" class="view night-view" aria-labelledby="night-title" hidden>

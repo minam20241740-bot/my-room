@@ -238,6 +238,8 @@
 
   function say(message, primary=null, extra=null) {
     ui.speech.textContent = message;
+    const face = document.getElementById('portrait');   // 말하는 사람이 보이도록 2D 준희 얼굴(잠깸 / 메모 정리 / 안내)
+    if (face) face.src = 'assets/Junhee_face_' + (phase==='find' ? 'wake' : ['lifting','holding','placing','lighting'].includes(phase) ? 'sort' : 'guide') + '.jpg';
     for (const [id, act] of [['task-main',primary],['task-extra',extra]]) {
       const button = ui[id];
       button.hidden = !act;
@@ -687,7 +689,7 @@
   const overview = {
     concept:{
       title:'방을 정리하면, 미래가 보입니다.',
-      text:'준희와 함께 흩어진 작업을 제자리에 두며 지난 작품을 발견합니다. 정리한 물건이 다시 꺼내 볼 세계로 연결됩니다.',
+      text:['제 작품은 흩어져 있었습니다. 어질러진 책상을 정리하듯 하나씩 제자리에 두면서 보여 주는 포트폴리오를 만들었습니다.','준희는 방 주인인 저를 닮은 캐릭터입니다. 물건을 정리할 때마다 그 물건에 얽힌 작품이 열립니다.','방과 준희는 Blender로 만든 3D이고, 웹에서는 three.js로 움직입니다. 전시 기간에도 계속 고쳐 가며 키웁니다.'],
     },
     worlds:{
       title:'작품의 세계',
@@ -699,9 +701,8 @@
     const content = overview[type];
     ui['info-heading'].textContent = content.title;
     const body = ui['info-content'];
-    const paragraph = document.createElement('p');
-    paragraph.textContent = content.text;
-    body.replaceChildren(paragraph);
+    const paragraphs = [].concat(content.text).map(text => { const p = document.createElement('p'); p.textContent = text; return p; });
+    body.replaceChildren(...paragraphs);
     if (content.names) {
       const list = document.createElement('ul');
       for (const name of content.names) {

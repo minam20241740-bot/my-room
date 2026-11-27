@@ -305,7 +305,7 @@ window.Field = (function () {
     foe.goto(cx + 2.6 + (bt.span || 4) * .4, cz + .2);
     S.look(cx + CAMX, cz + CAMZ, false); S.start(tick);
     // near·far: 상대와 지키는 거리, to: 멀어졌을 때 다가서는 거리
-    B = { cx: cx, cz: cz, stab: 0, cost: 3, t: 0, buff: 0, wide: 0, lit: true, pl: true, sp: 0, dive: 0, hold: 0, gt: 6, bt: 3, ba: 2.6, over: false,   // lit: 지금 훈련탄이 닿는가
+    B = { cx: cx, cz: cz, stab: 0, cost: 5, t: 0, buff: 0, wide: 0, lit: true, pl: true, sp: 0, dive: 0, hold: 0, gt: 6, bt: 3, ba: 2.6, over: false,   // lit: 지금 훈련탄이 닿는가
       team: [{ a: lead, key: GB.save.lead, hp: 100, cd: .4, lane: cz - .9, near: 3.4, far: 6.6, to: 5.6 }, { a: mate, key: mateKey(), hp: 100, cd: .8, lane: cz + 1.3, near: 3.4, far: 6.6, to: 5.6 }]
         .concat(pals.map((a, i) => ({ a: a, key: a.key, hp: 100, cd: 1.1 + i * .3, lane: cz + [.2, 2, -2][i], near: 2.6, far: 5, to: 3.6 }))) };
     battleHud();
@@ -336,7 +336,7 @@ window.Field = (function () {
     const cards = el('div', 'bcards', hud);
     // 후루의 카드는 늘 있고, 나머지는 함께 온 인물의 카드만 나온다
     B.cards = G.cards.filter(c => (c.who === 'huru' || B.team.some(m => m.key === c.who)) && (!c.gate || c.gate === C.duel.gate)).map((c, i) => {
-      const b = el('button', 'card', cards, '<em>' + c.cost + '</em>' + face(c.who) + '<small>' + nameOf(c.who) + '</small><b>' + c.name + '</b><span>' + c.text + '</span><kbd>' + (i + 1) + '</kbd>');
+      const b = el('button', 'card', cards, '<em>' + c.cost + '</em>' + face(c.who) + '<small>' + nameOf(c.who) + '</small><b>' + c.name + '</b><span>' + c.text + '</span><kbd class="kb-only">' + (i + 1) + '</kbd>');
       el('i', 'card-status', b, '코스트 부족');
       b.onclick = () => useCard(c);
       return { c, el: b };
@@ -371,7 +371,7 @@ window.Field = (function () {
     const first = !B.camSet; B.camSet = true;   // 훈련이 시작하는 첫 순간에는 카메라를 바로 맞춘다
     S.look((x0 + x1) / 2 + CAMX, B.cz + CAMZ, first); S.zoom(Math.max(1, Math.min(1.7, (x1 - x0 + 6) / 10.3)), first);   // 팀과 상대가 모두 들어오게 거리를 맞춘다(10.3은 기본 거리에서 보이는 가로 폭 m)
     B.accT = (B.accT || 0) - d; if (B.accT <= 0 && B.acc >= .5) { pop(foe.x, 1.5, foe.z, '+' + Math.max(1, Math.round(B.acc))); B.acc = 0; B.accT = .75; }   // 숫자가 떠 있는 시간(.7초)보다 길게 잡아 두 개가 겹쳐 보이지 않게 한다
-    B.t += d; B.cost = Math.min(10, B.cost + d / 1.8); if (B.buff > 0) B.buff -= d; if (B.wide > 0) B.wide -= d;
+    B.t += d; B.cost = Math.min(10, B.cost + d / 1.2); if (B.buff > 0) B.buff -= d; if (B.wide > 0) B.wide -= d;
     // 어두운 현장: 상대가 불빛 안에 있어야 훈련탄이 닿는다
     if (D.gate === 'light' && lightPal) {
       B.lit = dist(lightPal, foe.x, foe.z) < (B.wide > 0 ? 10 : 4); S.lampPower(B.wide > 0 ? 2.4 : 1);

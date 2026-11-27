@@ -93,11 +93,11 @@ window.GAME = {
     action: [
       ['.bgauge', '위쪽 막대가 끝까지 차면 %s 안정돼. 쓰러뜨리는 게 아니야.', 'left:530px;top:190px'],
       ['.bteam', '탐정 둘의 집중이야. 공격을 맞으면 줄어. 둘 다 0이 되면 다시 도전해야 해.', 'left:480px;bottom:60px'],
-      ['.akeys', '움직이기는 WASD나 방향키. 피하기, 타격, 교대, 결정적 추리는 이 단추나 적힌 키로 해.', 'right:60px;bottom:330px']
+      ['.akeys', (window.DeviceHint && window.DeviceHint.touch) ? '왼쪽 ▲◀▶▼ 단추로 움직여. 피하기, 타격, 교대, 결정적 추리는 이 단추를 눌러.' : '움직이기는 WASD나 방향키. 피하기, 타격, 교대, 결정적 추리는 이 단추나 적힌 키로 해.', 'right:60px;bottom:330px']
     ],
     // 첫 훈련에서 직접 해 보는 순서의 한 줄들(field.js의 actTut)
     actStep: {
-      move: '방향키나 WASD로 움직여 봐.',
+      move: (window.DeviceHint && window.DeviceHint.touch) ? '왼쪽 ▲◀▶▼ 단추로 움직여 봐.' : '방향키나 WASD로 움직여 봐.',
       dodge: '붉은 범위가 뜨면 그 밖으로 피해.',
       dodge2: '맞아도 괜찮아. 한 번 더 피해 보자.',
       strike: '빈틈이야. 타격을 눌러 봐.',

@@ -278,3 +278,7 @@ button.slot:hover { border-color: var(--bl); }
   .top { gap: 20px; }
   .btn { min-height: 112px; }
 }
+
+
+/* 폰: 로비의 아서·에리 교대 단추가 너무 작아 손가락으로 누르기 어려워 키운다 */
+html.dv-touch #lobby .swap { height: 84px; padding: 0 40px; font-size: 32px; border-radius: 42px; }

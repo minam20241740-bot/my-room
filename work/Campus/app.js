@@ -1,4 +1,13 @@
-var ME = "김지현";
+var NAME_KEY = "Portfolio.CampusMarket.Name";
+var DEFAULT_NAME = "방문자";
+function loadName() {
+  try {
+    var n = localStorage.getItem(NAME_KEY);
+    if (n && n.trim()) return n.trim().slice(0, 12);
+  } catch (error) {}
+  return DEFAULT_NAME;
+}
+var ME = loadName();
 
 var CATEGORY_NAMES = { elec: "가전제품", furniture: "가구/소품", book: "전공서적", etc: "기타" };
 
@@ -6,6 +15,7 @@ var itemsData = [
   { id: 1, title: "LED 스탠드 (흰색)", category: "elec", giver: "박성우", place: "정문 카페 앞", postedAt: "2026-09-15T01:00:00+09:00", status: "open", image: "assets/stand.jpg", alt: "책상 위에 불이 켜진 흰색 LED 스탠드", desc: "밝기 3단계 조절되는 책상용 스탠드입니다. 1년 정도 사용했고 작동에는 전혀 문제가 없습니다. 자취방 정리하면서 내놓아요." },
   { id: 2, title: "3단 책꽂이", category: "furniture", giver: "만두언니", place: "후문 편의점 앞", postedAt: "2026-09-14T23:30:00+09:00", status: "open", image: "assets/shelf.jpg", alt: "나무 무늬 3단 책꽂이", desc: "원목 무늬 3단 책꽂이입니다. 모서리에 생활 기스가 조금 있습니다." },
   { id: 3, title: "클립형 스탠드", category: "elec", giver: "최민재", place: "녹양역 3번 출구", postedAt: "2026-09-14T20:00:00+09:00", status: "open", image: null, alt: "", desc: "침대 프레임에 끼워 쓰는 클립형 독서등입니다. USB 전원입니다." },
+  { id: 90, kind: "want", title: "전자레인지 구합니다", category: "elec", giver: "이서연", place: "기숙사 2동 로비", postedAt: "2026-09-14T22:00:00+09:00", status: "open", image: null, alt: "", desc: "자취방에서 쓸 소형 전자레인지를 무료로 받고 싶습니다. 작동만 되면 괜찮습니다." },
   { id: 4, title: "접이식 테이블", category: "furniture", giver: "정유진", place: "기숙사 1동 로비", postedAt: "2026-09-13T10:00:00+09:00", status: "hold", image: "assets/table.jpg", alt: "방 안에 펼쳐 둔 어두운 상판의 접이식 테이블", desc: "캠핑 겸용 접이식 테이블입니다. 상판 60x40 크기입니다." }
 ];
 
@@ -16,6 +26,15 @@ var myApplications = [
   { itemId: null, item: "USB 선풍기", giver: "만두언니", place: "정문 카페 앞", time: "2026-08-28 17:00", status: "expired" }
 ];
 
+var DEMO_ITEM_IDS = [1, 2, 3, 4, 90];
+function isDemoItem(item) { return DEMO_ITEM_IDS.indexOf(item.id) !== -1; }
+function isMine(item) {
+  if (item.mine === true) return true;
+  if (item.mine === undefined && DEMO_ITEM_IDS.indexOf(item.id) === -1 && item.giver === "\uae40\uc9c0\ud604") return true;
+  return false;
+}
+function isWant(item) { return item.kind === "want"; }
+
 var STATUS = {
   wait: { label: "수락 대기", cls: "badge-wait" },
   ready: { label: "수령 예정", cls: "badge-ready" },
@@ -25,7 +44,7 @@ var STATUS = {
 };
 var TAB_ORDER = ["all", "wait", "ready", "done", "expired", "canceled"];
 
-var state = { category: "all", query: "", openOnly: false, mineTab: "all", newItemId: null, newAppRef: null, applyItemId: null };
+var state = { category: "all", kind: "all", query: "", openOnly: false, mineTab: "all", newItemId: null, newAppRef: null, applyItemId: null };
 
 var storageKey = "Portfolio.CampusMarket.V1";
 var registerPending = false;
@@ -39,6 +58,8 @@ function readCatalog() {
     saved.items.forEach(function (item) {
       if (!item || !Number.isSafeInteger(item.id) || item.id < 1 || ids[item.id]
           || !Object.prototype.hasOwnProperty.call(CATEGORY_NAMES, item.category)
+          || !(item.kind === undefined || item.kind === "give" || item.kind === "want")
+          || !(item.mine === undefined || typeof item.mine === "boolean")
           || !["open", "hold"].includes(item.status)
           || !["title", "giver", "place", "desc", "postedAt"].every(function (key) { return typeof item[key] === "string"; })
           || !Number.isFinite(Date.parse(item.postedAt))
@@ -160,7 +181,7 @@ $("noticeClose").addEventListener("click", function () { notice.hidden = true; }
 /* Item list */
 function matchesQuery(item, q) {
   if (!q) return true;
-  var hay = (item.title + " " + CATEGORY_NAMES[item.category] + " " + item.place).toLowerCase();
+  var hay = (item.title + " " + CATEGORY_NAMES[item.category] + " " + item.place + (isWant(item) ? " 구합니다" : " 나눔")).toLowerCase();
   return hay.indexOf(q) !== -1;
 }
 
@@ -168,21 +189,24 @@ function renderItems() {
   var q = state.query.trim().toLowerCase();
   var list = itemsData.filter(function (item) {
     if (state.category !== "all" && item.category !== state.category) return false;
+    if (state.kind !== "all" && (isWant(item) ? "want" : "give") !== state.kind) return false;
     if (state.openOnly && item.status !== "open") return false;
     return matchesQuery(item, q);
   });
 
   $("itemCount").textContent = list.length;
+  $("itemsTitleText").textContent = state.kind === "want" ? "구합니다" : state.kind === "give" ? "나눔 물품" : "올라온 글";
   $("itemGrid").innerHTML = list.map(function (item) {
     var hold = item.status === "hold";
-    var badge = hold ? '<span class="badge badge-hold">예약됨</span>' : '<span class="badge badge-open">나눔 중</span>';
+    var want = isWant(item);
+    var badge = want ? '<span class="badge badge-want">구합니다</span>' : hold ? '<span class="badge badge-hold">예약됨</span>' : '<span class="badge badge-open">나눔 중</span>';
     var cls = "card" + (hold ? " is-hold" : "") + (item.id === state.newItemId ? " is-new" : "");
     return '<article class="' + cls + '">' +
-      '<div class="card-photo">' + badge + photoHtml(item) + '</div>' +
+      '<div class="card-photo">' + badge + (isDemoItem(item) ? '<span class="demo-tag">예시</span>' : '') + photoHtml(item) + '</div>' +
       '<div class="card-body">' +
         '<h3 class="card-title"><button type="button" class="card-link" data-id="' + item.id + '">' + escapeHtml(item.title) + '</button></h3>' +
         '<p class="card-meta">' + escapeHtml(item.place) + ' · ' + relativeTime(item.postedAt) + '</p>' +
-        (item.giver === ME ? '<p class="card-mine">내가 올린 물품</p>' : '') +
+        (isMine(item) ? '<p class="card-mine">' + (want ? '내가 올린 글' : '내가 올린 물품') + '</p>' : '') +
       '</div>' +
     '</article>';
   }).join("");
@@ -192,9 +216,10 @@ function renderItems() {
   empty.hidden = list.length > 0;
   if (!list.length) {
     var text;
-    if (q) text = "“" + state.query.trim() + "”에 맞는 물품이 없습니다. 다른 이름이나 분류로 검색해 보세요.";
-    else if (state.category !== "all") text = CATEGORY_NAMES[state.category] + " 분류에 올라온 물품이 아직 없습니다.";
-    else text = "지금 나눔 중인 물품이 없습니다.";
+    if (q) text = "“" + state.query.trim() + "”에 맞는 글이 없습니다. 다른 이름이나 분류로 검색해 보세요.";
+    else if (state.kind === "want") text = "아직 올라온 구합니다 글이 없습니다. 위의 ‘구합니다 등록’으로 첫 글을 올려 보세요.";
+    else if (state.category !== "all") text = CATEGORY_NAMES[state.category] + " 분류에 올라온 글이 아직 없습니다.";
+    else text = "지금 올라온 글이 없습니다.";
     $("itemEmptyText").textContent = text;
   }
 }
@@ -205,7 +230,17 @@ $("searchForm").addEventListener("submit", function (e) {
 });
 $("searchInput").addEventListener("input", function () { state.query = this.value; renderItems(); });
 
-var chips = document.querySelectorAll(".chip");
+var kindChips = document.querySelectorAll(".chip[data-kind]");
+kindChips.forEach(function (chip) {
+  chip.addEventListener("click", function () {
+    kindChips.forEach(function (c) { c.setAttribute("aria-pressed", "false"); });
+    chip.setAttribute("aria-pressed", "true");
+    state.kind = chip.getAttribute("data-kind");
+    renderItems();
+  });
+});
+
+var chips = document.querySelectorAll(".chip[data-category]");
 chips.forEach(function (chip) {
   chip.addEventListener("click", function () {
     chips.forEach(function (c) { c.setAttribute("aria-pressed", "false"); });
@@ -217,8 +252,9 @@ chips.forEach(function (chip) {
 $("openOnly").addEventListener("change", function () { state.openOnly = this.checked; renderItems(); });
 
 function resetFilters() {
-  state.category = "all"; state.query = ""; state.openOnly = false;
+  state.category = "all"; state.kind = "all"; state.query = ""; state.openOnly = false;
   $("searchInput").value = ""; $("openOnly").checked = false;
+  kindChips.forEach(function (c) { c.setAttribute("aria-pressed", c.getAttribute("data-kind") === "all" ? "true" : "false"); });
   chips.forEach(function (c) { c.setAttribute("aria-pressed", c.getAttribute("data-category") === "all" ? "true" : "false"); });
   renderItems();
 }
@@ -294,7 +330,8 @@ $("confirmCancel").addEventListener("click", function () { confirmAction = null;
 function applyDirty() {
   if ($("applyView").hidden) return false;
   if ($("applyDate").value || $("applyTime").value || $("applyAgree").checked) return true;
-  return ["applyName", "applySid", "applyPhone"].some(function (id) { return $(id).value !== $(id).defaultValue; });
+  if ($("applyName").value !== ME) return true;
+  return ["applySid", "applyPhone"].some(function (id) { return $(id).value !== $(id).defaultValue; });
 }
 
 function registerDirty() {
@@ -354,23 +391,27 @@ function openDetail(id, trigger) {
   currentItem = item;
   $("detailMedia").innerHTML = photoHtml(item);
   var hold = item.status === "hold";
+  var want = isWant(item);
+  var mine = isMine(item);
   var badge = $("detailBadge");
-  badge.className = "badge " + (hold ? "badge-hold" : "badge-open");
-  badge.textContent = hold ? "예약됨" : "나눔 중";
+  badge.className = "badge " + (want ? "badge-want" : hold ? "badge-hold" : "badge-open");
+  badge.textContent = want ? "구합니다" : hold ? "예약됨" : "나눔 중";
   $("detailTitle").textContent = item.title;
-  $("detailMeta").textContent = "나눔자 " + item.giver + " · " + item.place + " · " + relativeTime(item.postedAt);
+  $("detailMeta").textContent = (want ? "작성자 " : "나눔자 ") + item.giver + " · " + item.place + " · " + relativeTime(item.postedAt) + (isDemoItem(item) ? " · 예시 데이터" : "");
   $("detailDesc").textContent = item.desc;
 
   var reason = "";
   var applied = activeApplicationFor(item);
-  if (hold) reason = "다른 분이 먼저 예약한 물품이라 신청할 수 없습니다.";
-  else if (item.giver === ME) reason = "내가 올린 물품이라 신청할 수 없습니다.";
+  if (want) reason = mine ? "내가 올린 구합니다 글입니다." : "무료로 받을 물건을 찾는 글입니다. 나눔 제안 기능은 준비 중입니다.";
+  else if (hold) reason = "다른 분이 먼저 예약한 물품이라 신청할 수 없습니다.";
+  else if (mine) reason = "내가 올린 물품이라 신청할 수 없습니다.";
   else if (applied) reason = "이미 신청한 물품입니다. 진행 상태는 내 신청에서 볼 수 있습니다.";
 
   $("detailReason").hidden = !reason;
   $("detailReason").textContent = reason;
-  $("showApplyBtn").hidden = !!reason;
-  $("goMineFromDetail").hidden = !applied || hold || item.giver === ME;
+  $("showApplyBtn").hidden = want || !!reason;
+  $("proposeBtn").hidden = !want || mine;
+  $("goMineFromDetail").hidden = want || !applied || hold || mine;
 
   showView(detailModal, "detailView", "detailTitle");
   openModal(detailModal, trigger);
@@ -403,6 +444,7 @@ var APPLY_FIELDS = ["applyDate", "applyTime", "applyName", "applySid", "applyPho
 
 function resetApplyForm() {
   $("applyForm").reset();
+  $("applyName").value = ME;
   $("applyDate").setAttribute("min", todayString());
   $("applyError").textContent = "";
   APPLY_FIELDS.forEach(function (id) { $(id).removeAttribute("aria-invalid"); });
@@ -425,7 +467,7 @@ function validateApply() {
   if (!time) return fail(err, "applyTime", "희망 수령 시간을 선택해 주세요.");
   if (new Date(date + "T" + time) <= new Date()) return fail(err, "applyTime", "희망 수령 시간은 지금 이후로 선택해 주세요.");
   if (!$("applyName").value.trim()) return fail(err, "applyName", "이름을 입력해 주세요.");
-  if (!/^\d{8,10}$/.test($("applySid").value.trim())) return fail(err, "applySid", "학번은 숫자 8~10자리로 입력해 주세요.");
+  if (!/^[\d-]{4,14}$/.test($("applySid").value.trim())) return fail(err, "applySid", "학번은 숫자 4자리 이상으로 입력해 주세요. 예시 값이어도 됩니다.");
   if (!/^01\d-?\d{3,4}-?\d{4}$/.test($("applyPhone").value.trim())) return fail(err, "applyPhone", "연락처를 010-1234-5678 형식으로 입력해 주세요.");
   if (!$("applyAgree").checked) return fail(err, "applyAgree", "노쇼 페널티 안내에 동의해 주세요.");
   return true;
@@ -434,7 +476,7 @@ function validateApply() {
 $("applyForm").addEventListener("submit", function (e) {
   e.preventDefault();
   if (!currentItem) return;
-  if (currentItem.status === "hold" || currentItem.giver === ME || activeApplicationFor(currentItem)) {
+  if (isWant(currentItem) || currentItem.status === "hold" || isMine(currentItem) || activeApplicationFor(currentItem)) {
     $("applyError").textContent = "이 물품은 신청할 수 없습니다. 물품 정보로 돌아가 이유를 확인해 주세요.";
     return;
   }
@@ -482,14 +524,64 @@ function goToMine() {
   if (title) { title.setAttribute("tabindex", "-1"); title.focus({ preventScroll: true }); }
 }
 
-/* Register */
-$("openRegisterBtn").addEventListener("click", function () {
-  $("registerForm").reset();
-  $("regError").textContent = "";
-  ["regTitle", "regDesc", "regPlace"].forEach(function (id) { $(id).removeAttribute("aria-invalid"); });
-  showView(registerModal, "registerForm", "registerTitle");
-  openModal(registerModal, this, $("regTitle"));
+/* Name shown in the header and used for posts and applications */
+function showName() {
+  $("userName").textContent = ME + "님";
+  $("avatar").textContent = ME.charAt(0);
+  $("nameBtn").setAttribute("aria-label", "이름 바꾸기 (지금 이름: " + ME + ")");
+}
+function saveName(name) {
+  ME = name;
+  try { localStorage.setItem(NAME_KEY, name); } catch (error) {}
+  showName();
+}
+var nameModal = $("nameModal");
+$("nameBtn").addEventListener("click", function () {
+  $("nameInput").value = ME;
+  $("nameError").textContent = "";
+  $("nameInput").removeAttribute("aria-invalid");
+  openModal(nameModal, this, $("nameInput"));
+  $("nameInput").select();
 });
+$("nameForm").addEventListener("submit", function (e) {
+  e.preventDefault();
+  var name = $("nameInput").value.trim();
+  if (!name) return fail($("nameError"), "nameInput", "이름을 입력해 주세요.");
+  saveName(name);
+  closeTop();
+  showToast("이름을 “" + name + "”(으)로 바꿨습니다.");
+});
+
+/* Register: 나눔 (give) or 구합니다 (want) */
+function regKind() {
+  var r = document.querySelector('input[name="regKind"]:checked');
+  return r && r.value === "want" ? "want" : "give";
+}
+function applyRegKind() {
+  var want = regKind() === "want";
+  $("registerTitle").textContent = want ? "구합니다 등록" : "나눔 등록";
+  $("regTitleLabel").textContent = want ? "구하는 물건" : "물품 이름";
+  $("regPlaceLabel").textContent = want ? "받고 싶은 장소" : "수령 장소";
+  $("regTitle").setAttribute("placeholder", want ? "예: 소형 전자레인지" : "예: 무선 마우스");
+  $("regDesc").setAttribute("placeholder", want ? "어떤 물건이 필요한지, 언제까지 필요한지 적어 주세요" : "사용 기간과 상태를 적어 주세요");
+  $("regPlace").setAttribute("placeholder", want ? "예: 기숙사 로비" : "예: 학생회관 앞");
+  $("regKindHint").textContent = want ? "무료로 받고 싶은 물건을 적습니다. 돈 거래는 하지 않습니다." : "내가 가진 물건을 무료로 나눕니다.";
+}
+document.querySelectorAll('input[name="regKind"]').forEach(function (r) { r.addEventListener("change", applyRegKind); });
+
+function openRegister(kind, trigger) {
+  $("registerForm").reset();
+  var radio = document.querySelector('input[name="regKind"][value="' + kind + '"]');
+  if (radio) radio.checked = true;
+  $("regName").value = ME;
+  applyRegKind();
+  $("regError").textContent = "";
+  ["regTitle", "regDesc", "regPlace", "regName"].forEach(function (id) { $(id).removeAttribute("aria-invalid"); });
+  showView(registerModal, "registerForm", "registerTitle");
+  openModal(registerModal, trigger, $("regTitle"));
+}
+$("openRegisterBtn").addEventListener("click", function () { openRegister("give", this); });
+$("openWantBtn").addEventListener("click", function () { openRegister("want", this); });
 
 $("registerForm").addEventListener("submit", function (e) {
   e.preventDefault();
@@ -499,25 +591,31 @@ $("registerForm").addEventListener("submit", function (e) {
   var title = $("regTitle").value.trim();
   var desc = $("regDesc").value.trim();
   var place = $("regPlace").value.trim();
-  if (!title) return fail(err, "regTitle", "물품 이름을 입력해 주세요.");
+  var name = $("regName").value.trim();
+  var kind = regKind();
+  var want = kind === "want";
+  if (!title) return fail(err, "regTitle", want ? "구하는 물건을 입력해 주세요." : "물품 이름을 입력해 주세요.");
   if (!desc) return fail(err, "regDesc", "상세 설명을 입력해 주세요.");
-  if (!place) return fail(err, "regPlace", "수령 장소를 입력해 주세요.");
+  if (!place) return fail(err, "regPlace", want ? "받고 싶은 장소를 입력해 주세요." : "수령 장소를 입력해 주세요.");
+  if (!name) return fail(err, "regName", "이름을 입력해 주세요.");
 
   var file = $("regFile").files && $("regFile").files[0];
   askConfirm({
     title: "등록 내용 확인",
-    message: "아래 내용으로 나눔 물품을 등록합니다.",
+    message: want ? "아래 내용으로 구합니다 글을 등록합니다." : "아래 내용으로 나눔 물품을 등록합니다.",
     summary: [
-      ["물품 이름", title],
+      ["종류", want ? "구합니다" : "나눔"],
+      [want ? "구하는 물건" : "물품 이름", title],
       ["분류", CATEGORY_NAMES[$("regCategory").value]],
-      ["수령 장소", place],
+      [want ? "받고 싶은 장소" : "수령 장소", place],
+      ["이름", name],
       ["사진", file ? file.name : "없음 (목록에 \"사진 없음\"으로 표시)"]
     ],
     okText: "등록하기", cancelText: "수정하기"
-  }, function () { submitRegister(title, desc, place, file); });
+  }, function () { submitRegister(title, desc, place, file, kind, name); });
 });
 
-async function submitRegister(title, desc, place, file) {
+async function submitRegister(title, desc, place, file, kind, name) {
   if (registerPending) return;
   registerPending = true;
   var submit = $("registerForm").querySelector("button[type=submit]");
@@ -527,7 +625,7 @@ async function submitRegister(title, desc, place, file) {
     var photo = await readPhoto(file);
     var maxId = itemsData.reduce(function (m, it) { return Math.max(m, it.id); }, 0);
     var item = {
-      id: maxId + 1, title: title, category: category, giver: ME, place: place,
+      id: maxId + 1, kind: kind, mine: true, title: title, category: category, giver: name, place: place,
       postedAt: new Date().toISOString(), status: "open",
       image: photo, alt: title, desc: desc
     };
@@ -538,7 +636,9 @@ async function submitRegister(title, desc, place, file) {
     }
     itemsData = nextItems;
     state.newItemId = item.id;
+    if (name !== ME) saveName(name);
     renderItems();
+    $("regDoneTitle").textContent = kind === "want" ? "구합니다 글을 등록했습니다" : "나눔 물품을 등록했습니다";
     $("regDoneView").querySelector(".done-desc").textContent = "목록 맨 앞에 추가하고 이 기기에 저장했습니다.";
     showView(registerModal, "regDoneView", "regDoneTitle");
     $("showNewItemBtn").focus();
@@ -586,7 +686,7 @@ function renderMine() {
     var cancel = (a.status === "wait" || a.status === "ready")
       ? '<button type="button" class="btn-cancel" data-index="' + idx + '">신청 취소</button>' : "";
     return '<tr class="mine-row' + (a === state.newAppRef ? " is-new" : "") + '">' +
-      '<td class="c-item"><span class="mine-item">' + escapeHtml(a.item) + '</span></td>' +
+      '<td class="c-item"><span class="mine-item">' + escapeHtml(a.item) + '</span>' + (a.itemId === null ? ' <span class="demo-tag demo-tag-inline">예시</span>' : '') + '</td>' +
       '<td class="c-where mine-sub">' + escapeHtml(a.giver) + ' · ' + escapeHtml(a.place) + '</td>' +
       '<td class="c-time mine-sub">' + formatPickup(a.time) + '</td>' +
       '<td class="c-status"><span class="badge ' + s.cls + '">' + s.label + '</span></td>' +
@@ -660,6 +760,8 @@ if ("IntersectionObserver" in window) {
 setCurrent("home");
 
 var storageMessage = readCatalog();
+showName();
+applyRegKind();
 renderItems();
 renderMine();
 if (storageMessage) showToast(storageMessage);

@@ -11,7 +11,7 @@
 <div class="app">
   <header class="topbar"><a href="#" id="home" aria-label="시작 화면">MELLU<span>돌아오는 항해</span></a><div class="top-actions"><span id="saveStatus" role="status">LOCAL PLAY</span><button id="journalButton">항해 수첩 <kbd>J</kbd></button><button id="soundButton" aria-pressed="false">효과음 꺼짐</button></div></header>
   <main id="titleScreen" class="title-screen">
-    <div class="title-copy"><p class="eyebrow">URBAN FANTASY · COMEDY RPG</p><p class="edition">멜루의 이상한 출장 기록</p><h1>출장<br>다녀왔습니다<span>.</span></h1><p class="lead">돌아가는 표는 있었는데,<br>돌아가는 길이 사라졌다.</p><div class="start-actions"><button id="newGame" class="primary">첫 항해 시작 <span>↗</span></button><button id="continueGame">이어 하기</button></div><p class="small">이동 WASD / 방향키 · 대화 E / Enter<br>이야기와 전투가 이어지는 플레이 초안 · 임시 캐릭터</p></div>
+    <div class="title-copy"><p class="eyebrow">URBAN FANTASY · COMEDY RPG</p><p class="edition">멜루의 이상한 출장 기록</p><h1>출장<br>다녀왔습니다<span>.</span></h1><p class="lead">돌아가는 표는 있었는데,<br>돌아가는 길이 사라졌다.</p><div class="start-actions"><button id="newGame" class="primary">첫 항해 시작 <span>↗</span></button><button id="continueGame">이어 하기</button></div><p id="bootNote" role="status" style="margin:12px 0 0;color:#8fb1b9;font-size:13px">불러오는 중입니다…</p><p class="small">조작: 컴퓨터는 WASD·방향키로 이동하고 E 또는 Enter로 대화합니다. 휴대폰은 화면 아래 화살표와 ‘대화 / 조사’ 단추를 누르세요.<br>이야기와 전투가 이어지는 플레이 초안 · 임시 캐릭터</p></div>
     <div class="title-art" aria-hidden="true"><div class="moon"></div><div class="orbital"></div><div class="tower t1"></div><div class="tower t2"></div><div class="tower t3"></div><div class="tower t4"></div><div class="neon-sign">終點<br><span>귀환항</span></div><div class="harbor-line"></div><div class="boat"><i></i><b></b><em></em></div><div class="water"></div><span class="art-caption">마지막 배는 아직 떠나지 않았다.</span></div>
     <footer class="title-footer"><span>01 / THE WAY HOME</span><span>일상으로 돌아가기 위한, 조금 긴 이야기</span></footer>
   </main>
@@ -31,5 +31,5 @@
 <dialog id="journal"><div class="modal-header"><div><p class="eyebrow">MELLU'S LOGBOOK</p><h2>항해 수첩</h2></div><button id="closeJournal" aria-label="수첩 닫기">닫기 ×</button></div><div id="journalContent"></div></dialog>
 <dialog id="confirmNew"><h2>새 항해를 시작할까요?</h2><p>이 브라우저의 기존 진행 기록이 새 항해로 바뀝니다.</p><div class="choices"><button id="cancelNew">돌아가기</button><button id="confirmNewButton" class="primary">새로 시작</button></div></dialog>
 <div id="toast" role="status" hidden></div>
-<script src="assets/puppet-data.js"></script><script src="assets/puppet-awakened-data.js"></script><script src="assets/portrait.js"></script><script src="assets/portrait-game.js"></script><script src="story.js"></script><script src="game.js"></script>
+<script src="assets/puppet-data.js"></script><script src="assets/puppet-awakened-data.js"></script><script src="assets/portrait.js"></script><script src="assets/portrait-game.js"></script><script src="story.js"></script><script src="game.js"></script><script>document.getElementById('bootNote')&&document.getElementById('bootNote').remove()</script>
 </body></html>

@@ -26,6 +26,7 @@ function render(){
     b.replaceChildren();
     if(id!==null){const icon=document.createElement('img');icon.src='building-'+id+'.webp';icon.alt='';b.append(icon)}
     b.append(['서쪽','가운데','동쪽'][i]+' · '+(id===null?'빈터':catalog[id].name));
+    const hint=document.createElement('small');hint.textContent=id===null?'건물을 고른 뒤 누르세요':'건설 완료';b.append(hint);
     b.dataset.built=String(id!==null);
   }
 }

@@ -18,7 +18,7 @@ window.Snd = (function () {
   function apply() { if (!ctx) return; sfxG.gain.value = LV[lv.sfx] * .9; bgmG.gain.value = LV[lv.bgm] * .5; }
   function unlock() {
     if (!ensure()) return;
-    if (ctx.state === 'suspended') ctx.resume().then(() => { if (want && song !== want) music(want); });
+    if (ctx.state !== 'running') { const r = ctx.resume(); if (r && r.then) r.then(() => { if (want && song !== want) music(want); }, () => {}); }   // suspended뿐 아니라 폰에서 전화나 앱 전환 뒤 생기는 interrupted도 다시 켠다
     else if (want && song !== want) music(want);
   }
 
@@ -151,6 +151,8 @@ window.Snd = (function () {
 
   // 처음 누를 때 소리를 켜고, 단추를 누를 때마다 톡 소리를 낸다
   addEventListener('pointerdown', unlock, true); addEventListener('keydown', unlock, true);
+  addEventListener('pointerup', unlock, true); addEventListener('touchend', unlock, true);   // 폰(특히 iOS)은 손을 뗄 때의 터치만 소리를 켜 주는 경우가 있다
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && ctx && ctx.state !== 'running') unlock(); });
   addEventListener('click', e => { unlock(); if (e.target.closest && e.target.closest('button')) play('tap'); }, true);
 
   // 확인용: 소리를 들리지 않게 따로 만들어 길이와 크기를 잰다(가장 큰 값 peak, 평균 rms, 소리가 끝나는 때 sec)

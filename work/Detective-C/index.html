@@ -27,6 +27,7 @@
     <div id="toast"></div>
   </div>
 </div>
+<script src="../Shared/detective-device.js"></script>
 <script src="js/data.js"></script>
 <script src="js/world_data.js"></script>
 <script src="../Shared/three-bundle.js"></script>
@@ -43,5 +44,5 @@
 <script src="js/world.js"></script>
 <script src="js/evolve.js"></script>
 <script src="../Shared/portrait-menu.js"></script>
-<script>window.TouchPadConfig={move:'wasd',buttons:[{label:'행동',code:'KeyF',key:'f'},{label:'달리기',code:'ShiftLeft',key:'Shift',hold:true,toggle:true},{label:'아서',code:'Digit1',key:'1'},{label:'에리',code:'Digit2',key:'2'},{label:'메뉴',code:'Tab',key:'Tab'}],hint:'왼쪽 패드로 이동, 행동 단추로 조사·대화',when:()=>{const f=document.getElementById('field');return !!f&&f.classList.contains('on')&&!!document.querySelector('#hud .w-mini,#hud .akeys')&&!document.querySelector('#pop.on,#story.on,#card.on')},actsWhen:()=>!!document.querySelector('#hud .w-mini')&&!document.querySelector('#hud .akeys')};</script><script src="../Shared/touchpad.js"></script>
+<script>window.TouchPadConfig={move:'wasd',buttons:[{label:'행동',code:'KeyF',key:'f'},{label:'달리기',code:'ShiftLeft',key:'Shift',hold:true,toggle:true},{label:'아서',code:'Digit1',key:'1'},{label:'에리',code:'Digit2',key:'2'},{label:'친구',code:'Digit3',key:'3'},{label:'메뉴',code:'Tab',key:'Tab'}],hint:'왼쪽 단추로 걷고, 왼쪽 위 화살표 쪽으로 가서 "행동"을 눌러요',hintMs:14000,hintWhen:()=>!document.querySelector('#hud .tsay'),when:()=>{const f=document.getElementById('field');return !!f&&f.classList.contains('on')&&!!document.querySelector('#hud .w-mini,#hud .akeys')&&!document.querySelector('#pop.on,#story.on,#card.on')},actsWhen:()=>!!document.querySelector('#hud .w-mini')&&!document.querySelector('#hud .akeys')};</script><script src="../Shared/touchpad.js"></script>
 </html>

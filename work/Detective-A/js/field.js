@@ -333,7 +333,7 @@ window.Field = (function () {
     const cards = el('div', 'bcards', hud);
     // 후루의 카드는 늘 있고, 나머지는 함께 온 인물의 카드만 나온다
     B.cards = G.cards.filter(c => (c.who === 'huru' || B.team.some(m => m.key === c.who)) && (!c.gate || c.gate === C.duel.gate)).map((c, i) => {
-      const b = el('button', 'card', cards, '<em>' + c.cost + '</em>' + face(c.who) + '<small>' + nameOf(c.who) + '</small><b>' + c.name + '</b><span>' + c.text + '</span><kbd>' + (i + 1) + '</kbd>');
+      const b = el('button', 'card', cards, '<em>' + c.cost + '</em>' + face(c.who) + '<small>' + nameOf(c.who) + '</small><b>' + c.name + '</b><span>' + c.text + '</span><kbd class="kb-only">' + (i + 1) + '</kbd>');
       b.onclick = () => useCard(c); return { c: c, el: b };
     });
     B.ui = { box: hud.querySelector('.bgauge'), bar: hud.querySelector('.gbar i'), pct: hud.querySelector('.bgauge em'), pips: cost.querySelectorAll('i'), num: cost.querySelector('b') };
@@ -510,7 +510,7 @@ window.Field = (function () {
       team: list.map((a, i) => ({ a: a, key: a.key, hp: 100, en: 0, home: [a.x, a.z], spin: 0 })), order: [] };
     B.order = B.team.map((m, i) => i).concat(-1);
     turnHud();
-    const nm = D.name + iga(D.name), begin = () => { drawTurn(); later(.4, turnBegin); };
+    const nm = D.name + iga(D.name), begin = () => { drawTurn(); later(.3, turnBegin); };
     if (!skipTut && !GB.save.seen.g_turn) { GB.save.seen.g_turn = 1; GB.store(); paused = true; drawTurn(); GB.guide(hud, G.guide.turn.map(x => [x[0], x[1].replace('%s', nm).replace('%w', B.weak), x[2]]), () => { paused = false; begin(); }); } else begin();
   }
   function turnHud() {
@@ -527,8 +527,8 @@ window.Field = (function () {
     B.team.forEach(m => { m.el = el('div', 'mem', tm, face(m.key) + '<div><b>' + nameOf(m.key) + '</b><div class="hbar"><i></i></div><div class="ebar"><i></i></div></div><span class="hp"></span>'); });
     const act = el('div', 'tact', hud);
     el('div', 'tpts', act, '<small>SP</small><span>' + '<i></i>'.repeat(PTS_MAX) + '</span>');
-    ACTS.forEach((a, i) => { const b = el('button', 'tbtn ' + a.cls, act, '<b>' + a.name + '</b><small>' + a.sub + '</small><kbd>' + (i + 1) + '</kbd>'); b.onclick = () => turnAct(a.id); a.el = b; });
-    const u = el('button', 'tult', act, '<b></b><small></small><kbd>5</kbd>'); u.onclick = () => turnAct('ult'); el('div', 'tsc', act, '<span>추리 점수</span><b>0</b><em></em>');
+    ACTS.forEach((a, i) => { const b = el('button', 'tbtn ' + a.cls, act, '<b>' + a.name + '</b><small>' + a.sub + '</small><kbd class="kb-only">' + (i + 1) + '</kbd>'); b.onclick = () => turnAct(a.id); a.el = b; });
+    const u = el('button', 'tult', act, '<b></b><small></small><kbd class="kb-only">5</kbd>'); u.onclick = () => turnAct('ult'); el('div', 'tsc', act, '<span>추리 점수</span><b>0</b><em></em>');
     const fp = hud.querySelector('.fpan'), tg = fp.querySelector('.ftg span'); tg.innerHTML = '<i></i>'.repeat(B.toughMax);
     const wi = fp.querySelector('.fw i'); wi.style.background = ECOL[B.weak]; fp.querySelector('.fw strong').textContent = B.weak;
     B.ui = { rnd: hud.querySelector('.trnd b'), box: fp, bar: fp.querySelector('.gbar i'), pct: fp.querySelector('em'), tg: tg.querySelectorAll('i'), ord: hud.querySelector('.tord'), hint: hud.querySelector('.thint'), pips: act.querySelectorAll('.tpts i'), ult: u, sc: act.querySelector('.tsc') };
@@ -581,9 +581,9 @@ window.Field = (function () {
   function turnBegin() {   // 지금 차례를 시작한다
     if (!B || B.over) return;
     let s = B.order[B.idx], n = 0; while (s >= 0 && B.team[s].hp <= 0 && n++ < 9) { stepIdx(); s = B.order[B.idx]; }
-    if (s < 0) { B.phase = 'foe'; drawTurn(); later(.5, foeTurn); return; }
+    if (s < 0) { B.phase = 'foe'; drawTurn(); later(.3, foeTurn); return; }
     B.cur = s; B.phase = 'pick'; turnHint(); drawTurn();
-    if (auto) later(.8, autoPick);
+    if (auto) later(.5, autoPick);
   }
   function turnEnd(wait) { B.phase = 'wait'; drawTurn(); later(wait, () => { if (B && !B.over) { stepIdx(); turnBegin(); } }); }
   function autoPick() {
@@ -650,7 +650,7 @@ window.Field = (function () {
       later(.3, () => { if (last) tApply(v, reach, false, strong ? [ELEM[m.key], ELEM[who.key]] : ELEM[who.key]); });
     });
     if (id === 'clue') {
-      B.pts = Math.min(PTS_MAX, B.pts + 1); B.score += 1; m.en = Math.min(100, m.en + 20); snd('found'); volley(m, 9, true, .2, false, false); later(1, () => { a.play('idle'); }); turnEnd(1.7);
+      B.pts = Math.min(PTS_MAX, B.pts + 1); B.score += 1; m.en = Math.min(100, m.en + 20); snd('found'); volley(m, 9, true, .2, false, false); later(.9, () => { a.play('idle'); }); turnEnd(1.2);
     } else if (id === 'team') {
       B.pts -= 1; B.score += 2; m.en = Math.min(100, m.en + 25);
       const ps = B.team.filter((x, i) => i !== B.cur && x.hp > 0), pm = ps.find(x => g && ar(x.key) === fr) || ps.find(x => G.friends[x.key]) || ps[0], fixer = (g && (ar(m.key) === fr || (pm && ar(pm.key) === fr)));
@@ -658,14 +658,14 @@ window.Field = (function () {
       if (pm) { pm.en = Math.min(100, pm.en + 15); volley(m, 0, false, .2, !!fixer, true); volley(pm, 18, true, .55, !!fixer, true); later(.4, () => FX.link(scr(a, 1.0), scr(pm.a, 1.0))); } else volley(m, 18, true, .2, !!fixer, true);
       if (fixer && g === 'light') later(.7, () => S.lampPower(2.4));
       if (fixer) later(.65, unhide);
-      later(1.1, () => { B.team.forEach(x => x.a.play('idle')); }); turnEnd(2.2);
+      later(1, () => { B.team.forEach(x => x.a.play('idle')); }); turnEnd(1.6);
     } else if (id === 'guard') {
       B.guard = true; m.en = Math.min(100, m.en + 12); snd('heal'); if (!a.act('dodge', .72, .08)) a.play('use'); FX.guard(scr(a, 1.0));
-      B.team.forEach(x => { if (x.hp > 0) { x.hp = Math.min(100, x.hp + 10); } }); pop(a.x, 1.9, a.z, '방어'); drawTurn(); later(1, () => { a.play('idle'); }); turnEnd(1.6);
+      B.team.forEach(x => { if (x.hp > 0) { x.hp = Math.min(100, x.hp + 10); } }); pop(a.x, 1.9, a.z, '방어'); drawTurn(); later(.8, () => { a.play('idle'); }); turnEnd(1.1);
     } else if (id === 'look') {
       B.pts = Math.min(PTS_MAX, B.pts + 1); B.score += 1; m.en = Math.min(100, m.en + 25); B.read = 1; snd('fast'); if (!a.act('inspect')) a.play('use');
       FX.scan(scr(foe, .9), '약점 ' + B.weak, ECOL[B.weak]); pop(foe.x, 2.1, foe.z, '읽었다');
-      if (B.hide) later(.4, unhide); later(1, () => { a.play('idle'); }); turnEnd(1.7);
+      if (B.hide) later(.4, unhide); later(.9, () => { a.play('idle'); }); turnEnd(1.2);
     } else if (id === 'ult') {
       const U = ULTS[m.key], red = FX.isReduced(), sc = B.score, pw = Math.min(3, 1 + Math.floor(sc / 3)); m.en = 0; B.score = 0; B.ultBusy = true; hud.classList.add('ult'); snd('ultcharge');   // 추리 점수가 쌓일수록 효과(pw 1~3)와 피해가 커진다
       FX.cut({ img: G.leads[m.key].cutin, name: U.name, sub: U.sub, color: U.color }); FX.dim(.66);
@@ -687,7 +687,7 @@ window.Field = (function () {
         if (!B.over) { FX.radial(at(), { n: 30, r: 560, dur: .4 }); if (pw > 1) FX.comic(at(), pw > 2 ? '번뜩!' : '딱!', U.color); }   // 마지막 타격이면 방사선과 터짐 글자 없이 진정 연출만(위쪽 순서 막대와 아래 단추를 가리지 않게)
       });
       later(1.75 + .15 * (pw - 1), () => { FX.dim(0); hud.classList.remove('ult'); S.zoom(1); S.look(B.cx - 1.2, B.cz); B.ultBusy = false; });
-      turnEnd(2.6 + .15 * (pw - 1));
+      turnEnd(2.3 + .15 * (pw - 1));
     }
     return true;
   }
@@ -696,17 +696,17 @@ window.Field = (function () {
     const done = w => later(w, () => { if (!B || B.over) return; B.foeN++; B.guard = false; stepIdx(); say(''); turnBegin(); });
     const fk = FOEFX[D.monster] || 'claw';
     if (B.broken) {   // 균형을 잃은 상대는 이번 행동을 건너뛴다
-      B.broken = false; B.tough = B.toughMax; pop(foe.x, 1.8, foe.z, '움직이지 못한다', 'bad'); say(D.name + iga(D.name) + ' 흔들려서 움직이지 못한다'); drawTurn(); done(1.5); return;
+      B.broken = false; B.tough = B.toughMax; pop(foe.x, 1.8, foe.z, '움직이지 못한다', 'bad'); say(D.name + iga(D.name) + ' 흔들려서 움직이지 못한다'); drawTurn(); done(1); return;
     }
     if (kind === 'throw') {
       const al = aliveTeam(), m = al[(Math.random() * al.length) | 0]; snd('foe'); foe.hop = 1;
-      FX.foeMark(fk, scr(foe, .9), scr(m.a, .9)); foeFlash(fk, scr(foe, .9), scr(m.a, .9), false); later(.4, () => hurt(m, Math.round((D.hit || 9) * 1.6))); done(1.7);
+      FX.foeMark(fk, scr(foe, .9), scr(m.a, .9)); foeFlash(fk, scr(foe, .9), scr(m.a, .9), false); later(.4, () => hurt(m, Math.round((D.hit || 9) * 1.6))); done(1.2);
     } else if (kind === 'hide') {
       B.hide = true; snd('gate'); foe.hop = 1;
       if (g === 'light') { foe.goto(B.cx + 9, B.cz + 2, 6); say('반짝돌이 빛 밖으로 나갔다'); }
       else if (g === 'pond') { foe.goto(sc.battle.pond[0], sc.battle.pond[1], 6); say('가람이가 연못에 들어갔다'); }
       else { foe.play('use'); say('뇌운몽글이 번개를 모으고 있다'); }
-      done(1.8);
+      done(1.3);
     } else {
       say('큰 반응!'); el('div', 'bigwarn', hud, '<span>큰 반응</span>'); pops.push({ e: hud.lastChild, t: .9 }); snd('foe'); foe.hop = 1; FX.vignette(.55);
       const cut = g === 'charge' && !B.hide, burst = Math.round((D.burst || 8) * 2.2);
@@ -717,7 +717,7 @@ window.Field = (function () {
         snd(g === 'charge' ? 'thunder' : 'boom'); S.shake(FX.isReduced() ? 0 : .4); const fp = scr(foe, .9); FX.radial(fp, { color: '#ffe0e6', n: 30, r: 640, dur: .4 });
         B.team.forEach(m => { if (m.hp > 0) { FX.foeMark(fk, fp, scr(m.a, .9), { big: true }); foeFlash(fk, fp, scr(m.a, .9), true); later(.4, () => hurt(m, burst)); } });
       });
-      done(2.7);
+      done(2.2);
     }
   }
   function turnTick(d) {

@@ -298,20 +298,12 @@ window.RoomGallery = (() => {
       mediaCards(entry,[['표지','char/aqua_p01.jpg'],['턴어라운드와 디테일','char/aqua_p02.jpg'],['포즈','char/aqua_p03.jpg'],['2D 설정화와 3D','char/aqua_p04.jpg']]);
       characterLinks(entry,[{label:'기획서 PDF(캐릭터 시트 포함)',url:file('portfolio/char/aqua_plan.pdf')}]);
     });
-    characterDetails(body,'아쿠아 여성형 · 책 감상',entry=>{
+    characterDetails(body,'아쿠아의 클론(분신) MK2 · 책 감상',entry=>{
       mediaCards(entry,[['책을 들어 표지를 보여주는 자세','Character_Aqua_Female.jpg']]);
       characterLinks(entry,[
-        {label:'여성형 기획서',url:file('Character_Aqua_Female_Plan.pdf')},
+        {label:'MK2 기획서',url:file('Character_Aqua_Female_Plan.pdf')},
         {label:'책 감상 GLB',id:'aqua-female-view',download:true},
-        {label:'여성형 Blender',id:'aqua-female',download:true},
-      ]);
-    });
-    characterDetails(body,'아쿠아 MK2 · 중성형',entry=>{
-      mediaCards(entry,[['원래 UV를 사용한 얼굴 재질','Character_Aqua_MK2.jpg']]);
-      characterLinks(entry,[
-        {label:'MK2 재질 작업 안내',url:file('Character_Aqua_MK2_Guide.html')},
-        {label:'Dreamland 원기획서',id:'aqua-mk2-plan'},
-        {label:'MK2 Blender',id:'aqua-mk2',download:true},
+        {label:'MK2 Blender',id:'aqua-female',download:true},
       ]);
     });
   }

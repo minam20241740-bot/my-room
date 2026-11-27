@@ -42,6 +42,8 @@
 .wp.on small { color: #05070d; }
 .wp.empty { opacity: .5; }
 .w-keys { position: absolute; right: 300px; bottom: 34px; display: flex; gap: 16px; font-size: 24px; font-weight: 800; color: #ffffff; background: rgba(5, 7, 12, .8); padding: 6px 24px 8px; transform: skewX(-10deg); }
+html.dv-touch .w-party { display: none; }
+html.dv-touch .w-prompt.on { pointer-events: auto; cursor: pointer; }
 .w-keys kbd, .w-prompt kbd { display: inline-block; font-family: inherit; min-width: 36px; text-align: center; padding: 0 10px; margin-right: 8px; background: var(--lime); color: #05070d; font-weight: 900; }
 .w-prompt { position: absolute; left: 50%; bottom: 300px; transform: translateX(-50%) skewX(-10deg) scale(.9); opacity: 0; transition: opacity .12s, transform .12s; white-space: nowrap; background: #05070d; color: #ffffff; font-size: 34px; font-weight: 900; padding: 10px 44px 12px 22px; border: 3px solid #ffffff; border-left: 14px solid var(--lime); box-shadow: 8px 8px 0 #000000; }
 .w-prompt.on { opacity: 1; transform: translateX(-50%) skewX(-10deg) scale(1); }

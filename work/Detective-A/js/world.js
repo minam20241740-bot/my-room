@@ -66,13 +66,13 @@ window.World = (function () {
     ui.mini = el('div', 'wmini', hud, '<canvas width="240" height="240"></canvas><i class="wn">N</i>'); ui.cv = ui.mini.querySelector('canvas'); ui.cx = ui.cv.getContext('2d');
     ui.zone = el('div', 'wzone', hud, '<small></small><b></b>');
     ui.track = el('div', 'wtrack', hud);
-    ui.menu = el('button', 'wmenu', hud, '<i></i><span>메뉴</span><em>Esc</em>'); ui.menu.onclick = openMenu;
+    ui.menu = el('button', 'wmenu', hud, '<i></i><span>메뉴</span><em class="kb-only">Esc</em>'); ui.menu.onclick = openMenu;
     ui.dust = el('div', 'wdust', hud, '<i></i><b></b>');
     ui.party = el('div', 'wparty', hud);
-    ui.help = el('div', 'whelp', hud, Wd.help);
-    ui.prompt = el('div', 'wprompt', hud, '<i>Space</i><span></span>'); ui.prompt.style.display = 'none';
+    ui.help = el('div', 'whelp kb-only', hud, Wd.help);
+    ui.prompt = el('div', 'wprompt', hud, '<i class="kb-only">Space</i><span></span>'); ui.prompt.style.display = 'none'; ui.prompt.addEventListener('click', () => interact());   // 폰에서는 이 안내를 눌러도 '행동'과 같다
     ui.banner = el('div', 'wban', hud, '<small></small><b></b>');
-    el('button', 'wmapb', hud, '<span>열차 지도</span><em>M</em>').onclick = openMap;
+    el('button', 'wmapb', hud, '<span>열차 지도</span><em class="kb-only">M</em>').onclick = openMap;
     npcs.forEach(n => { const t = el('div', 'wtag', hud, '<b>' + n.def.name + '</b><small>' + (n.def.role || '') + '</small><i class="q">!</i>'); tags.push({ e: t, o: n, h: (n.def.size || 1.3) * (X.size[n.def.model] || 1) + .5 }); });
     wilds.forEach(n => { const t = el('div', 'wtag wild', hud, '<b>' + n.def.name + '</b><small>야생 친구</small><i class="q">?</i>'); tags.push({ e: t, o: n, h: (n.def.size || .7) * (X.size[n.def.model] || 1) + .5 }); });
     gates.forEach(g => { const t = el('div', 'wtag gate', hud, '<b>' + (g.c.site.label || g.c.title) + '</b><small>' + g.c.chapter.name + ' · 의뢰 ' + pad(g.c.no) + '</small><i class="q">◆</i>'); tags.push({ e: t, o: g, h: 2.2 }); });
@@ -88,7 +88,7 @@ window.World = (function () {
   function drawParty() {
     const sv0 = GB.save, lk = sv0.lead, mk = lk === 'arthur' ? 'eri' : 'arthur', fr = X.party(), list = [lk, mk].concat(fr);
     ui.party.innerHTML = ''; list.forEach((k, i) => {
-      const b = el('button', 'wp' + (i === 0 ? ' wlead' : ''), ui.party, '<i style="background-image:url(' + GB.faceUrl(k) + ')"></i><span>' + nameOf(k) + '</span><em>' + (i < 2 ? i + 1 : '') + '</em>');
+      const b = el('button', 'wp' + (i === 0 ? ' wlead' : ''), ui.party, '<i style="background-image:url(' + GB.faceUrl(k) + ')"></i><span>' + nameOf(k) + '</span><em class="kb-only">' + (i < 2 ? i + 1 : '') + '</em>');
       if (i === 1) b.onclick = swap;
     });
   }
@@ -96,7 +96,7 @@ window.World = (function () {
   function drawTrack() {
     const c = GB.nextCase(), w = sv(), q = (Wd.quests || []).find(x => { const s = w.quests[x.id] || 0; return s >= 1 && s < x.steps.length; });
     let h = '<h4>임무</h4>';
-    if (c) h += '<div class="wtm"><small>' + c.chapter.name + ' · 의뢰 ' + pad(c.no) + '</small><b>' + c.title + '</b><p>' + trackLine(c) + '</p></div>'; else h += '<div class="wtm"><b>모든 의뢰를 마쳤다</b><p>도시를 더 둘러보거나, 메뉴(Esc)에서 처음부터 다시 할 수 있다</p></div>';
+    if (c) h += '<div class="wtm"><small>' + c.chapter.name + ' · 의뢰 ' + pad(c.no) + '</small><b>' + c.title + '</b><p>' + trackLine(c) + '</p></div>'; else h += '<div class="wtm"><b>모든 의뢰를 마쳤다</b><p>도시를 더 둘러보거나, ' + (window.DeviceHint && window.DeviceHint.touch ? '메뉴 단추' : '메뉴(Esc)') + '에서 처음부터 다시 할 수 있다</p></div>';
     if (q) h += '<div class="wtm sub"><small>의뢰</small><b>' + q.title + '</b><p>' + q.steps[w.quests[q.id]].hint + '</p></div>';
     ui.track.innerHTML = h;
   }

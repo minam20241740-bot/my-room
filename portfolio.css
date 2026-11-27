@@ -59,3 +59,7 @@ iframe.portfolio-live{box-sizing:border-box;height:clamp(420px,72dvh,860px)}
 /* 단추 글자는 굵게 */
 .portfolio-filters button{font-weight:700}
 .portfolio-actions :is(a,button){font-weight:800}
+/* 하는 법 안내와 불러오는 중 표시 */
+.portfolio-howto{margin:14px 0 6px;padding:12px 16px;border-left:6px solid #ffd92e;background:#161b4a;color:#f7f8fb;font-size:17px;line-height:1.6;max-width:74ch}
+.portfolio-howto strong{color:#ffd92e;margin-right:4px}
+.portfolio-loading{margin:12px 0 0;padding:10px 14px;border:2px solid #ffd92e;background:#0e1233;color:#ffd92e;font-weight:700;font-size:15px}

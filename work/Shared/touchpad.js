@@ -25,7 +25,7 @@
   .tp button{min-width:58px;min-height:58px;padding:0 12px;border:2px solid #ffffff8c;background:#0f1630bf;color:#fff;font:700 15px/1.15 inherit;border-radius:50px;
       backdrop-filter:blur(4px);box-shadow:0 3px 12px #0008}
   .tp button.on{background:#ffda35;color:#0c1535;border-color:#ffda35}
-  .tp-hint{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 6px);z-index:2147482999;font:600 12px/1 Pretendard,system-ui,sans-serif;color:#ffffffb0;background:#0008;padding:5px 10px;border-radius:20px;pointer-events:none;white-space:nowrap}
+  .tp-hint{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 6px);z-index:2147482999;font:600 12px/1 Pretendard,system-ui,sans-serif;color:#ffffffb0;background:#0008;padding:5px 12px;border-radius:14px;pointer-events:none;white-space:normal;max-width:calc(100% - 28px);text-align:center;line-height:1.35}
   .tp-toggle{position:fixed;left:max(14px,env(safe-area-inset-left));transform:none;bottom:calc(max(14px,env(safe-area-inset-bottom)) + var(--tp-cell,58px)*3 + 20px);z-index:2147483001;pointer-events:auto;min-width:0!important;min-height:36px!important;padding:0 14px!important;font-size:13px!important;border-radius:20px!important;opacity:.85}
   .tp.tp-off .tp-move,.tp.tp-off .tp-acts{display:none}
   .tp.tp-off .tp-toggle{bottom:max(10px,env(safe-area-inset-bottom))}
@@ -70,7 +70,7 @@
   let saved = null; try { saved = sessionStorage.getItem('tp-off'); } catch (e) {}
   document.body.appendChild(root); setOff(saved === null ? !!cfg.collapsed : saved === '1');
   let hinted = false;
-  const showHint = () => { if (hinted || !cfg.hint) return; hinted = true; const h = document.createElement('div'); h.className = 'tp-hint'; h.textContent = cfg.hint; document.body.appendChild(h); setTimeout(() => h.remove(), 9000); };
+  const showHint = () => { if (hinted || !cfg.hint) return; if (typeof cfg.hintWhen === 'function') { let w = true; try { w = !!cfg.hintWhen(); } catch (e) {} if (!w) return; } hinted = true; const h = document.createElement('div'); h.className = 'tp-hint'; h.textContent = cfg.hint; document.body.appendChild(h); setTimeout(() => h.remove(), cfg.hintMs || 9000); };
   if (typeof cfg.when !== 'function') showHint();   // 조건이 있으면 패드가 처음 나타날 때 안내를 띄운다
   if (typeof cfg.when === 'function') {   // 작품이 '움직일 수 있는 화면'일 때만 패드를 보인다(전투·대화 화면의 단추를 가리지 않게)
     const tick = () => { let ok = true; try { ok = !!cfg.when(); } catch (e) {} root.style.display = ok ? '' : 'none'; if (ok) showHint();

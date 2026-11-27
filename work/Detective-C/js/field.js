@@ -168,7 +168,7 @@ window.Field = (function () {
     B.ch.forEach((m, i) => { m.el = el('div', 'mem', tm, face(m.key) + '<div><b>' + nameOf(m.key) + '</b><div class="hbar"><i></i></div></div><u></u>'); m.el.onclick = () => { if (B.cur !== i) swap(); }; });
     const ak = el('div', 'akeys', hud, '<div class="agap"><span>빈틈 게이지</span><div class="gbar"><i></i></div></div>'), row = el('div', 'arow', ak); B.btn = {};
     [['strike', '타격', 'Space', strike], ['dash', '피하기', 'Shift', dash], ['swap', '교대', 'E', swap], ['chain', '결정적 추리', 'Q', chain]].forEach(k => {
-      const b = el('button', 'abtn ak-' + k[0], row, '<b>' + k[1] + '</b><kbd>' + k[2] + '</kbd><i></i>'); b.onclick = () => k[3](); b.addEventListener('mousedown', e => e.preventDefault()); B.btn[k[0]] = b;
+      const b = el('button', 'abtn ak-' + k[0], row, '<b>' + k[1] + '</b><kbd class="kb-only">' + k[2] + '</kbd><i></i>'); b.onclick = () => k[3](); b.addEventListener('mousedown', e => e.preventDefault()); B.btn[k[0]] = b;
     });
     B.pr = el('div', 'aprompt', hud, '빈틈! 타격'); B.tag = el('div', 'afoe', hud, '<small>빈틈</small><div class="gbar"><i></i></div>'); B.stp = el('div', 'cstep', hud); B.fl = el('div', 'aflash', hud);
     B.ui = { box: hud.querySelector('.bgauge'), bar: hud.querySelector('.gbar i'), pct: hud.querySelector('.bgauge em'), gap: hud.querySelector('.agap .gbar i') };

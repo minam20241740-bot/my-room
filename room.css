@@ -191,3 +191,10 @@ body[data-phase="title"] .pfx-bar.b2{animation-delay:.08s}
 .title-bottom b{color:#ffd92e}
 /* 준희 말풍선의 이름표 */
 .speaker{display:inline-block;padding:2px 14px 3px;background:#ffd92e;color:#0a0f2e;transform:skewX(-8deg)}
+/* 준희 말풍선: 얼굴 그림을 왼쪽에 둔다 */
+.dialogue{display:grid;grid-template-columns:auto 1fr;column-gap:16px;align-items:start}
+.dialogue .portrait{grid-row:1/4;grid-column:1;width:96px;height:96px;object-fit:cover;object-position:50% 18%;border:3px solid #ffd92e;background:#fff;border-radius:2px}
+.dialogue .speaker,.dialogue p,.dialogue .dialogue-actions{grid-column:2}
+.dialogue .speaker{justify-self:start}
+@media(max-width:640px){.dialogue .portrait{width:64px;height:64px;border-width:2px}.dialogue{column-gap:10px}}
+@media(max-height:560px){.dialogue .portrait{width:56px;height:56px}}

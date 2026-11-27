@@ -29,6 +29,7 @@
 #hud .wp em:empty { display: none; }
 #hud .whelp { position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); background: rgba(8, 15, 50, .72); color: var(--tx2); border-radius: 3px; padding: 7px 28px 9px; font-size: 24px; font-weight: 600; white-space: nowrap; transition: opacity 1.2s; pointer-events: none; }
 #hud .wprompt { position: absolute; transform: translate(-50%, -100%); display: flex; align-items: center; gap: 12px; padding: 8px 22px 10px 10px; background: rgba(250, 252, 255, .97); color: var(--nv); border-radius: 3px; font-size: 27px; font-weight: 900; box-shadow: none; pointer-events: none; white-space: nowrap; }
+html.dv-touch #hud .wprompt { pointer-events: auto; cursor: pointer; }
 #hud .wprompt i { font-style: normal; font-size: 24px; font-weight: 900; background: var(--nv); color: #fff; border-radius: 3px; padding: 3px 12px 5px; }
 #hud .wtag { position: absolute; transform: translate(-50%, -100%); text-align: center; pointer-events: none; white-space: nowrap; text-shadow: 2px 2px 0 #060b24; color: #fff; }
 #hud .wtag b { display: block; font-size: 25px; font-weight: 900; }

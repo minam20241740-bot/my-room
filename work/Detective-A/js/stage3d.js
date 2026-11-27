@@ -69,7 +69,8 @@ window.Stage3D = (function () {
 
   function fitDrawingBuffer() {
     if (!renderer) return;
-    const screenScale = Math.min(innerWidth / 1920, innerHeight / 1080) * (window.devicePixelRatio || 1);
+    const phone = !!(window.DeviceHint && window.DeviceHint.touch), dpr = phone ? Math.min(window.devicePixelRatio || 1, 1.5) : (window.devicePixelRatio || 1);   // 폰은 그림 크기를 줄여 메모리를 아낀다
+    const screenScale = Math.min(innerWidth / 1920, innerHeight / 1080) * dpr;
     const native = window.GB?.save.graphics === 'native';
     const adaptiveScale = quality === 3 ? .6 : quality === 2 ? .75 : 1;
     const scale = native ? 1 : Math.max(.4, Math.min(1, screenScale)) * adaptiveScale;

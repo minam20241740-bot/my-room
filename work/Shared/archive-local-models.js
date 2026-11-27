@@ -2,6 +2,23 @@
 window.ArchiveModels = (() => {
   const requests = new Map();
   let nextId = 0;
+  // 폰에서는 모형 파일을 한꺼번에 받아 풀면 메모리가 순간적으로 크게 늘어 화면이 꺼질 수 있어 세 개씩만 처리한다(컴퓨터는 그대로)
+  const slots = window.DeviceHint && window.DeviceHint.touch ? 3 : Infinity;
+  let running = 0;
+  const waiting = [];
+  function finish() { running--; while (running < slots && waiting.length) { running++; waiting.shift()(); } }
+  // base64를 한 번에 풀지 않고 조각으로 풀어 임시 글자열이 커지지 않게 한다
+  function decode(encoded) {
+    const pad = encoded.endsWith('==') ? 2 : encoded.endsWith('=') ? 1 : 0;
+    const bytes = new Uint8Array(encoded.length / 4 * 3 - pad);
+    const step = 1 << 20;
+    let at = 0;
+    for (let i = 0; i < encoded.length; i += step) {
+      const binary = atob(encoded.slice(i, i + step));
+      for (let k = 0; k < binary.length; k++) bytes[at++] = binary.charCodeAt(k);
+    }
+    return bytes;
+  }
   function accept(id, encoded) {
     const request = requests.get(id);
     if (!request) return;
@@ -9,9 +26,7 @@ window.ArchiveModels = (() => {
     requests.delete(id);
     element.remove();
     try {
-      const binary = atob(encoded);
-      const bytes = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      const bytes = decode(encoded);
       loader.parse(bytes.buffer, new URL('./', path).href, model => {
         if (path.pathname.includes('/assets/city/')) {
           model.scene.traverse(object => {
@@ -29,23 +44,29 @@ window.ArchiveModels = (() => {
     }
   }
   function load(loader, url, ready, fail) {
-    const path = new URL(url, document.baseURI);
-    const element = document.createElement('script');
-    const id = String(++nextId);
-    requests.set(id, { element, loader, ready, fail, path });
-    element.dataset.modelId = id;
-    element.src = path.href + '.js';
-    element.addEventListener('error', () => {
-      requests.delete(id);
-      element.remove();
-      fail(new Error('모형을 열 수 없습니다 · ' + url));
-    }, { once: true });
-    element.addEventListener('load', () => {
-      if (!requests.delete(id)) return;
-      element.remove();
-      fail(new Error('모형 파일을 다시 확인해 주세요 · ' + url));
-    }, { once: true });
-    document.head.appendChild(element);
+    const done = fn => value => { finish(); fn(value); };
+    const start = () => {
+      const path = new URL(url, document.baseURI);
+      const element = document.createElement('script');
+      const id = String(++nextId);
+      requests.set(id, { element, loader, ready: done(ready), fail: done(fail), path });
+      element.dataset.modelId = id;
+      element.src = path.href + '.js';
+      element.addEventListener('error', () => {
+        const request = requests.get(id);
+        requests.delete(id);
+        element.remove();
+        if (request) request.fail(new Error('모형을 열 수 없습니다 · ' + url));
+      }, { once: true });
+      element.addEventListener('load', () => {
+        const request = requests.get(id);
+        if (!requests.delete(id)) return;
+        element.remove();
+        if (request) request.fail(new Error('모형 파일을 다시 확인해 주세요 · ' + url));
+      }, { once: true });
+      document.head.appendChild(element);
+    };
+    if (running < slots) { running++; start(); } else waiting.push(start);
   }
   return { accept, load };
 })();

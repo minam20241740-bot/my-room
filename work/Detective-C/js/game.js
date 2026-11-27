@@ -100,7 +100,7 @@
     show('loading'); tip.querySelector('p').textContent = G.tips[(Math.random() * G.tips.length) | 0];
     go.textContent = '해솔항으로 가는 중'; go.classList.remove('blink'); bar.style.width = '0'; loadDone = null; loading.classList.remove('hold');
     // 도시 자료는 이 로딩 화면에서 한 번에 읽는다(누른 뒤에 로딩이 또 뜨지 않게)
-    window.World.prepare(p => { bar.style.width = Math.round(p * 100) + '%'; }).then(() => {
+    window.World.prepare(p => { const n = Math.round(p * 100); bar.style.width = n + '%'; go.textContent = '해솔항으로 가는 중 ' + n + '%'; }).then(() => {
       bar.style.width = '100%'; go.textContent = '화면을 눌러 시작'; go.classList.add('blink'); loadDone = afterLoad;
     }, e => { console.error(e); show('title'); toast('도시 자료를 읽지 못했습니다'); });
   }
@@ -173,7 +173,7 @@
     dim.onclick = say.onclick = step; step();
   }
 
-  loading.onclick = () => { if (loadDone) { const f = loadDone; loadDone = null; f(); } };
+  loading.onclick = () => { if (loadDone) { const f = loadDone; loadDone = null; f(); } else if (cur === 'loading') toast('아직 불러오는 중이에요'); };   // 다 읽기 전에 눌러도 아무 반응이 없어 '안 눌린다'로 보이지 않게
 
   function enterLobby() { if (window.World) window.World.resume(); }   // 옛 사무소 화면 대신 도시로 돌아간다
 

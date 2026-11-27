@@ -196,8 +196,9 @@ window.World = (function () {
     H.mini = el('div', 'w-mini', hud, '<canvas width="520" height="520"></canvas><u>N</u><span></span>'); H.cv = H.mini.querySelector('canvas'); H.zone = H.mini.querySelector('span'); H.north = H.mini.querySelector('u');
     H.q = el('div', 'w-q', hud); H.sp = el('div', 'w-sp', hud);
     H.party = el('div', 'w-party', hud);
-    H.keys = el('div', 'w-keys', hud, '<span><kbd>WASD · ↑ ↓</kbd>걷기</span><span><kbd>← →</kbd>시점</span><span><kbd>Shift</kbd>달리기</span><span><kbd>F</kbd>살피기</span><span><kbd>Tab</kbd>메뉴</span>');
+    H.keys = el('div', 'w-keys kb-only', hud, '<span><kbd>WASD · ↑ ↓</kbd>걷기</span><span><kbd>← →</kbd>시점</span><span><kbd>Shift</kbd>달리기</span><span><kbd>F</kbd>살피기</span><span><kbd>Tab</kbd>메뉴</span>');
     H.prompt = el('div', 'w-prompt', hud); H.tags = el('div', 'w-tags', hud);
+    H.prompt.addEventListener('click', () => { if (cand && !fighting) cand.fn(); });   // 폰에서는 이 안내를 눌러도 '행동'과 같다
     el('div', 'w-haz a', hud); el('div', 'w-haz b', hud); el('div', 'w-base', hud);   // 표지처럼 모서리 사선 띠와 아래 줄
     drawParty(); drawQuests();
   }
@@ -312,7 +313,7 @@ window.World = (function () {
     });
     bossTick(dt); chaseTick(dt);
     npcsTick(dt);
-    H.prompt.innerHTML = cand ? '<kbd>F</kbd>' + cand.text : ''; H.prompt.classList.toggle('on', !!cand);
+    H.prompt.innerHTML = cand ? '<kbd class="kb-only">F</kbd><kbd class="tc-only">행동</kbd>' + cand.text : ''; H.prompt.classList.toggle('on', !!cand);
   }
   function npcsTick(dt) {
     Object.keys(npcs).forEach(id => { const n = npcs[id]; if (chase && chase.id === id) return; const d = hyp(n.a.x - P.x, n.a.z - P.z); if (d < 9) n.a.wantRy = Math.atan2(P.x - n.a.x, P.z - n.a.z); });
@@ -371,7 +372,7 @@ window.World = (function () {
       /* 결말 카드는 틈 없이 바로 띄운다(진화 장면이 먼저 끼어들어 카드를 덮지 않게). 카드를 닫으면 후루가 남은 할 일을 알려 준다 */
       if (q.end) {
         ws().ended = 1; GB.store();
-        GB.epilogue(() => GB.playStory([{ who: 'huru', text: '사건을 모두 풀었어! 부두에 있는 세라가 남은 항구 기록을 알려 준대.' }, { who: 'huru', text: '처음부터 다시 하고 싶으면 Tab 메뉴에서 고를 수 있어.' }], () => { drawQuests(); }));
+        GB.epilogue(() => GB.playStory([{ who: 'huru', text: '사건을 모두 풀었어! 부두에 있는 세라가 남은 항구 기록을 알려 준대.' }, { who: 'huru', text: '처음부터 다시 하고 싶으면 ' + ((window.DeviceHint && window.DeviceHint.touch) ? '메뉴 단추' : 'Tab 메뉴') + '에서 고를 수 있어.' }], () => { drawQuests(); }));
         return;
       }
       const nx = G.quests.find(x => x.id === q.next);

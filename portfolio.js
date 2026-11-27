@@ -18,7 +18,7 @@
   // 휴대폰에서는 게임·체험을 작은 창이 아니라 화면 전체에 연다(위에 작품 정보·닫기가 늘 붙어 있다)
   const stage = make('dialog', 'portfolio-stage'); stage.id = 'portfolio-stage'; document.body.append(stage);
   const touchLike = () => matchMedia('(pointer:coarse)').matches || innerWidth < 760;
-  function closeStage() { const f = stage.querySelector('iframe'); if (f) f.src = 'about:blank'; if (stage.open) stage.close(); stage.replaceChildren(); }
+  function closeStage() { const f = stage.querySelector('iframe'); if (f) f.src = 'about:blank'; if (stage.open) stage.close(); stage.replaceChildren(); delete document.body.dataset.gameOpen; window.RoomRepaint?.(); }
   function openStage(work, experience) {
     const bar = make('div', 'stage-bar');
     const back = make('button', 'stage-back', '← 작품 정보'); back.type = 'button'; back.addEventListener('click', closeStage);
@@ -30,7 +30,7 @@
     frame.addEventListener('load', () => loader.remove()); setTimeout(() => loader.remove(), 90000);
     stage.replaceChildren(bar, frame, loader);
     if (work.orient === 'landscape' && innerHeight > innerWidth) { const hint = make('p', 'stage-hint', '휴대폰을 가로로 돌리면 더 크게 볼 수 있어요.'); stage.append(hint); setTimeout(() => hint.remove(), 7000); }
-    stage.showModal(); pushLayer(); back.focus({preventScroll: true});
+    document.body.dataset.gameOpen = '1'; stage.showModal(); pushLayer(); back.focus({preventScroll: true});
   }
   stage.addEventListener('cancel', event => { event.preventDefault(); closeStage(); });
   // 휴대폰 뒤로 가기: 목록 → 상세 → 전체 화면 순으로 쌓아 두고 뒤로 가면 맨 위 창부터 닫는다
@@ -81,7 +81,7 @@
     detail.replaceChildren(closeButton(detail));
     detail.setAttribute('aria-labelledby', 'portfolio-work-title');
     if (parentWork) {
-      const back = make('button', 'portfolio-back', '세 가지 플레이로 돌아가기');
+      const back = make('button', 'portfolio-back', parentWork.id === 'W003' ? '세 가지 플레이로 돌아가기' : '앞 화면으로 돌아가기');
       back.type = 'button';
       back.addEventListener('click', () => {
         openWork(parentWork);
@@ -127,8 +127,10 @@
           player.allow = 'fullscreen';
         }
         player.tabIndex = 0;
+        const waiting = make('p', 'portfolio-loading', experience.mb >= 10 ? '불러오는 중이에요 · 처음에는 약 ' + experience.mb + 'MB를 받아 오래 걸릴 수 있어요' : '불러오는 중이에요…'); waiting.setAttribute('role', 'status');
+        const done = () => waiting.remove(); player.addEventListener(experience.type === 'video' ? 'loadeddata' : 'load', done); player.addEventListener('error', done); setTimeout(done, 90000);
         if (experience.type === 'video' && work.image) player.poster = work.image;   // 재생 전 검은 상자 대신 작품 그림
-        detail.insertBefore(player, picture);
+        detail.insertBefore(player, picture); player.before(waiting);
         if (experience.type === 'video') { if (experience.loop) player.loop = true; const started = player.play?.(); if (started) started.catch(() => {}); }   // 누르면 바로 재생, 짧은 클립은 반복
         button.setAttribute('aria-expanded','true');
         player.focus({preventScroll:true});
@@ -152,9 +154,10 @@
       actions.append(plan);
     }
     detail.insertBefore(actions, picture);
+    if (work.howto) { const how = make('p', 'portfolio-howto'); how.append(make('strong', '', '하는 법 '), document.createTextNode(work.howto)); detail.insertBefore(how, actions); }   // 뭘 하는 작품인지 바로 알 수 있게
     if (work.related?.length) {
       const related = make('section', 'portfolio-station');
-      related.append(make('h3', '', work.id === 'W003' ? '세 가지 플레이' : '함께 보는 작업'));
+      related.append(make('h3', '', work.id === 'W003' ? '세 가지 플레이' : work.id === 'W021' ? '새로 디자인한 포스터' : '함께 보는 작업'));
       const list = make('div', 'portfolio-grid');
       list.append(...work.related.map(child => card(child, work)));
       related.append(list); detail.append(related);
@@ -219,11 +222,17 @@
     ['11.26', '휴대폰을 가로로 눕히면 표지가 화면 높이에 맞게 커지고, 작품 자리 판이 대화창에 가려지지 않습니다.'],
     ['11.26', '표지는 그림 어디를 눌러도 시작됩니다. 단추 글자를 굵게, 작품 자리 판의 작은 글자를 키웠습니다.'],
     ['11.26', '준희가 깨어나는 장면에 비스듬한 색 판이 걷히는 전환, 놀람 표시 「앗!」, 표지와 같은 제목 글자 판을 더했습니다. 준희와 3D 장면은 그대로입니다.'],
-    ['11.26', '탐정 사무소 A안의 화면 단추·창(지도·임무·메뉴 등)을 반투명·둥근 모서리·번지는 그림자 없이 단색의 각진 모양으로 정리했습니다.']
+    ['11.26', '탐정 사무소 A안의 화면 단추·창(지도·임무·메뉴 등)을 반투명·둥근 모서리·번지는 그림자 없이 단색의 각진 모양으로 정리했습니다.'],
+    ['11.27', '「작품의 세계」를 「작품 목록」으로 바꾸고, 작품 수 표시와 어지럽던 분류를 줄였습니다.'],
+    ['11.27', '준희가 말할 때 얼굴이 보이도록 대화창에 2D 준희 그림을 넣었습니다.'],
+    ['11.27', '기획 의도를 짧고 쉬운 말로 다시 썼습니다. 작품마다 하는 법과 불러오는 중 표시를 넣고, 포스터 찾기는 한 곳으로 합쳤습니다.'],
+    ['11.27', '포스터 찾기에서 BLUKY가 눌리지 않던 문제와 준희 말풍선이 화면을 가리던 문제를 고쳤습니다. 캠퍼스 마켓은 이름 바꾸기와 「구합니다」 글쓰기를 더했습니다.'],
+    ['11.27', '드림랜드에 불러오기 표시와 문 열고 닫기를, 아쿠아에 왼쪽·오른쪽 옆모습 보기를 더했습니다.'],
+    ['11.27', '탐정 사무소 A·B·C: 컴퓨터와 폰 안내를 나누고, 전투 기다림을 줄이고, 화면이 멈추면 이어서 할 수 있게 했습니다. 폰 부담을 줄이려고 게임을 여는 동안 뒤의 방 그림은 쉬게 했습니다.']
   ];
   function openIndex() {
-    index.replaceChildren(closeButton(index), make('h2', '', '작품의 세계'));
-    index.append(make('p', 'portfolio-description', '준희의 방에서 이어지는 ' + works.length + '개 작업입니다. 종류나 방의 자리로 골라 볼 수 있어요.'));
+    index.replaceChildren(closeButton(index), make('h2', '', '작품 목록'));
+    index.append(make('p', 'portfolio-description', '전체 작품을 볼 수 있는 곳입니다. 종류를 눌러 골라 보세요. 작품은 앞으로 계속 늘어납니다.'));
     const log = make('details', 'portfolio-notes'); log.append(make('summary', '', '업데이트 기록 · 전시 중에도 이 주소에서 계속 고칩니다'));
     const items = make('ul'); for (const [day, text] of PATCHES) items.append(make('li', '', day + ' · ' + text)); log.append(items); index.append(log);
     // 종류로 보기(처음 오는 사람이 '야간 신호실' 같은 방 이름을 몰라도 고를 수 있게)와 방 자리별 보기를 함께 쓴다
@@ -243,18 +252,19 @@
       for (const button of groupNav.children) button.setAttribute('aria-pressed', String(button.dataset.group === curGroup));
     };
     for (const group of ['', '영상·MV', '게임·체험', '3D·캐릭터', '디자인·UIUX']) {
-      const button = make('button', '', group ? group + ' ' + works.filter(work => groupOf(work) === group).length : '종류 전체');
+      const button = make('button', '', group || '전체');
       button.type = 'button'; button.dataset.group = group;
       button.addEventListener('click', () => { curGroup = group; render(); }); groupNav.append(button);
     }
     for (const station of ['', ...new Set(works.map(work => work.station))]) {
-      const button = make('button', '', station ? titleForStation(station) : '자리 전체');
+      const button = make('button', '', station ? titleForStation(station) : '모든 자리');
       button.type = 'button'; button.dataset.station = station;
       button.addEventListener('click', () => { curStation = station; render(); if (station) window.RoomJunhee?.go(station); }); nav.append(button);   // 자리를 고르면 준희도 그 자리 앞으로
     }
     index.querySelector('h2').id = 'portfolio-index-title';
     index.setAttribute('aria-labelledby', 'portfolio-index-title');
-    index.append(make('p', 'portfolio-filter-label', '종류로 보기'), groupNav, make('p', 'portfolio-filter-label', '방의 자리별로 보기'), nav, list); render(); index.showModal(); pushLayer();
+    const byPlace = make('details', 'portfolio-notes'); byPlace.append(make('summary', '', '방의 자리로 찾기 (누르면 준희가 그 자리로 이동합니다)'), nav);
+    index.append(make('p', 'portfolio-filter-label', '종류'), groupNav, byPlace, list); render(); index.showModal(); pushLayer();
   }
   document.addEventListener('click', event => {
     if (!event.target.closest('#worlds, [data-cover-action="worlds"]')) return;
@@ -269,8 +279,8 @@
     new MutationObserver(sync).observe(coverBox, {attributes: true, subtree: true, attributeFilter: ['disabled']}); sync();
   }
   // 방 안 머리말: 작품의 세계(전체 작품)와 기획 의도를 표지가 아니라 안쪽에서 바로 연다
-  const all = make('button', '', '작품의 세계');
-  all.id = 'portfolio-open'; all.type = 'button'; all.title = '전체 작품 ' + works.length + '개 보기';
+  const all = make('button', '', '작품 목록');
+  all.id = 'portfolio-open'; all.type = 'button'; all.title = '전체 작품 보기';
   all.addEventListener('click', openIndex);
   const intent = make('button', '', '기획 의도');
   intent.id = 'concept-open'; intent.type = 'button';

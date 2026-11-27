@@ -31,10 +31,10 @@ window.Stage3D = (function () {
     scene = new T.Scene(); scene.background = new T.Color('#cdeaff'); scene.fog = new T.Fog('#cdeaff', 55, 130);
     camera = new T.PerspectiveCamera(CAM.fov, 16 / 9, 0.5, 300);
     hemi = new T.HemisphereLight('#ffffff', '#c3d2e6', 1.9); scene.add(hemi);
-    lamp = new T.PointLight('#ffd08a', 0, 0, 2); lamp.castShadow = true; lamp.shadow.mapSize.set(1024, 1024); lamp.shadow.bias = -0.004;
+    lamp = new T.PointLight('#ffd08a', 0, 0, 2); lamp.castShadow = true; const lite = !!(window.DeviceHint && window.DeviceHint.touch); lamp.shadow.mapSize.set(lite ? 512 : 1024, lite ? 512 : 1024); lamp.shadow.bias = -0.004;
     lamp.shadow.camera.near = .2; lamp.shadow.camera.far = 20; lamp.visible = false; scene.add(lamp);   // 어두운 곳에서 친구가 내는 불빛
     sun = new T.DirectionalLight('#fff1d2', 2.4); sun.castShadow = true;
-    sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0006; sun.shadow.normalBias = 0.04;
+    sun.shadow.mapSize.set(lite ? 1024 : 2048, lite ? 1024 : 2048); sun.shadow.bias = -0.0006; sun.shadow.normalBias = 0.04;
     const sc = sun.shadow.camera; sc.left = -34; sc.right = 34; sc.top = 30; sc.bottom = -30; sc.near = 1; sc.far = 120;
     scene.add(sun, sun.target);
     fxg = new T.Group(); scene.add(fxg);
@@ -67,7 +67,8 @@ window.Stage3D = (function () {
 
   function fitDrawingBuffer() {
     if (!renderer) return;
-    const screenScale = Math.min(innerWidth / 1920, innerHeight / 1080) * (window.devicePixelRatio || 1);
+    const phone = !!(window.DeviceHint && window.DeviceHint.touch), dpr = phone ? Math.min(window.devicePixelRatio || 1, 1.5) : (window.devicePixelRatio || 1);   // 폰은 그림 크기를 줄여 메모리를 아낀다
+    const screenScale = Math.min(innerWidth / 1920, innerHeight / 1080) * dpr;
     const scale = Math.max(.4, Math.min(1, screenScale));
     if (renderer.getPixelRatio() !== scale) renderer.setDrawingBufferSize(1920, 1080, scale);
   }

@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head>
-<meta name="robots" content="noindex, nofollow, noarchive"><meta charset="utf-8"><link rel="icon" type="image/png" href="../../assets/favicon.png"><meta name="viewport" content="width=device-width,initial-scale=1"><title>포스터 전시관</title>
+<meta name="robots" content="noindex, nofollow, noarchive"><meta charset="utf-8"><link rel="icon" type="image/png" href="../../assets/favicon.png"><meta name="viewport" content="width=device-width,initial-scale=1"><title>포스터 찾기</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:#0d0b12;font-family:Pretendard,"Noto Sans KR",system-ui,sans-serif;color:#fff}
 .stage{position:fixed;inset:0;perspective:700px;perspective-origin:50% 46%;overflow:hidden}
@@ -26,9 +26,33 @@
 .bar{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:5;display:flex;gap:10px}
 .bar button{font:inherit;font-size:16px;padding:10px 20px;border-radius:999px;border:0;background:#fff;color:#111;font-weight:700;cursor:pointer}
 body.nohud .hud,body.nohud .bar{display:none}
-.sheet{position:absolute;inset:0;background:repeating-linear-gradient(135deg,#eceaf2 0 14px,#e2dfea 14px 28px);display:flex;align-items:center;justify-content:center;transition:transform .9s cubic-bezier(.5,0,.2,1),opacity .9s;z-index:2}.sheet b{font-size:90px;color:#a8a3bd}.art.open .sheet{transform:translateY(-105%);opacity:0;pointer-events:none}.say{position:fixed;left:24px;top:84px;z-index:6;display:flex;gap:14px;align-items:flex-start;max-width:min(560px,86vw)}.say img{width:84px;height:84px;border-radius:50%;object-fit:cover;border:4px solid #fff;box-shadow:0 6px 18px rgba(0,0,0,.4);flex:none}.say div{background:#fff;color:#1b1b2a;border-radius:6px 20px 20px 20px;padding:14px 18px;font-size:17px;line-height:1.55;box-shadow:0 8px 22px rgba(0,0,0,.35)}.say b{display:block;font-size:13px;letter-spacing:.14em;color:#6a5bd6;margin-bottom:4px}.say a{display:inline-block;margin-top:8px;padding:7px 16px;border-radius:999px;background:#2f5fd8;color:#fff;text-decoration:none;font-weight:700;font-size:15px}.cnt{position:fixed;right:24px;top:22px;z-index:6;background:rgba(255,255,255,.92);color:#1b1b2a;border-radius:999px;padding:10px 20px;font-weight:800;font-size:18px}body.nohud .say,body.nohud .cnt{display:none}.burst{position:fixed;top:40%;width:16px;height:11px;border-radius:70% 0 70% 0;background:#ffb3cb;z-index:7;pointer-events:none;animation:bur 2.4s cubic-bezier(.2,.7,.3,1) forwards}@keyframes bur{to{transform:translate3d(var(--dx),var(--dy),0) rotate(720deg);opacity:0}}</style></head><body>
-<div class="hud"><h1>포스터 전시관</h1><p>가려진 포스터를 찾아 가림천을 눌러 보세요. 찾은 포스터는 누르면 크게 보입니다.</p></div>
-<div class="say" id="say"><img src="junhee_face.jpg" alt="준희"><div><b>준희</b><span id="sayt"></span></div></div><div class="cnt" id="cnt">찾은 포스터 0 / 4</div>
+.sheet{position:absolute;inset:0;background:repeating-linear-gradient(135deg,#eceaf2 0 14px,#e2dfea 14px 28px);display:flex;align-items:center;justify-content:center;transition:transform .9s cubic-bezier(.5,0,.2,1),opacity .9s;z-index:2}.sheet b{font-size:90px;color:#a8a3bd}.art.open .sheet{transform:translateY(-105%);opacity:0;pointer-events:none}.say{position:fixed;left:24px;top:84px;z-index:6;display:flex;gap:14px;align-items:flex-start;max-width:min(560px,86vw)}.say img{width:84px;height:84px;border-radius:50%;object-fit:cover;border:4px solid #fff;box-shadow:0 6px 18px rgba(0,0,0,.4);flex:none}.say div{background:#fff;color:#1b1b2a;border-radius:6px 20px 20px 20px;padding:14px 18px;font-size:17px;line-height:1.55;box-shadow:0 8px 22px rgba(0,0,0,.35)}.say b{display:block;font-size:13px;letter-spacing:.14em;color:#6a5bd6;margin-bottom:4px}.say a{display:inline-block;margin-top:8px;padding:7px 16px;border-radius:999px;background:#2f5fd8;color:#fff;text-decoration:none;font-weight:700;font-size:15px}.cnt{position:fixed;right:24px;top:22px;z-index:6;background:rgba(255,255,255,.92);color:#1b1b2a;border-radius:999px;padding:10px 20px;font-weight:800;font-size:18px}body.nohud .say,body.nohud .cnt{display:none}.burst{position:fixed;top:40%;width:16px;height:11px;border-radius:70% 0 70% 0;background:#ffb3cb;z-index:7;pointer-events:none;animation:bur 2.4s cubic-bezier(.2,.7,.3,1) forwards}@keyframes bur{to{transform:translate3d(var(--dx),var(--dy),0) rotate(720deg);opacity:0}}</style><style>
+/* 포스터 찾기: 안내 문구, 준희 말풍선(구석·닫기), 터치 */
+.hud{right:150px}
+.hud .how{margin-top:4px;font-size:14px;opacity:.9}
+.hud .ph{display:none}body.touch .hud .pc{display:none}body.touch .hud .ph{display:inline}
+.stage{touch-action:none}
+.say{top:auto;bottom:24px;left:24px;align-items:flex-end;gap:10px;max-width:min(400px,calc(100vw - 48px))}
+.say img{width:60px;height:60px;border-width:3px;cursor:pointer}
+.say div{border-radius:20px 20px 20px 6px;padding:12px 16px;font-size:16px;line-height:1.5;min-width:0}
+.say .say-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:4px}
+.say .say-head b{margin:0}
+.say .say-x{font:inherit;font-size:13px;font-weight:700;min-height:34px;padding:0 14px;border:1px solid #c9c4e6;border-radius:999px;background:#f1effa;color:#1b1b2a;cursor:pointer}
+.say.min div{display:none}
+.hit{position:absolute;left:0;top:0;backface-visibility:hidden;cursor:pointer}
+.bar{width:max-content}.bar button{white-space:nowrap}
+.lbhint{position:fixed;left:0;right:0;bottom:18px;text-align:center;font-size:15px;color:#fff;opacity:.8;pointer-events:none}
+@media (max-width:720px){
+ .hud{left:12px;top:10px;right:132px}.hud h1{font-size:20px}.hud p{font-size:12.5px;line-height:1.4}.hud .how{font-size:12.5px}
+ .cnt{right:10px;top:12px;padding:8px 12px;font-size:14px}
+ .say{left:10px;right:10px;bottom:84px;max-width:none}
+ .say img{width:48px;height:48px}
+ .say div{font-size:14.5px;padding:10px 14px}
+ .bar button{font-size:17px;padding:12px 28px}
+}
+</style></head><body>
+<div class="hud"><h1>포스터 찾기</h1><p>가려진 포스터를 찾아 가림천을 눌러 보세요. 찾은 포스터는 누르면 크게 보입니다.</p><p class="how"><span class="pc">걷기: W·S 키 또는 마우스 휠, 아래 앞으로·뒤로 버튼</span><span class="ph">걷기: 아래 앞으로·뒤로 버튼을 누르거나 화면을 위아래로 밀어 주세요</span></p></div>
+<div class="say" id="say"><img src="junhee_face.jpg" alt="준희 (누르면 말풍선을 다시 봅니다)" id="sayimg"><div><span class="say-head"><b>준희</b><button type="button" class="say-x" id="sayx" aria-label="말풍선 닫기">닫기</button></span><span id="sayt"></span></div></div><div class="cnt" id="cnt">찾은 포스터 0 / 4</div>
 <div class="stage"><div class="scene" id="sc">
  <div class="pl floor"></div><div class="pl ceil"></div>
  <div class="pl wall wl" id="wl"><div class="base"></div></div>
@@ -36,7 +60,7 @@ body.nohud .hud,body.nohud .bar{display:none}
  <div class="pl we"></div>
 </div></div>
 <div class="bar"><button id="b1">뒤로</button><button id="b2">앞으로</button></div>
-<div class="lb" id="lb"><img id="lbi" alt=""></div>
+<div class="lb" id="lb"><img id="lbi" alt=""><div class="lbhint">화면을 누르면 닫힙니다</div></div>
 <script>
 const P=[
  {side:'l',at:800,h:340,src:'p_cherry.jpg',t:'서울 벚꽃 축제',s:'새 디자인 · 2024 축제 포스터'},
@@ -44,18 +68,28 @@ const P=[
  {side:'l',at:1600,h:340,src:'p_bluky.jpg',t:'BLUKY',s:'새 디자인 · 브랜드 포스터'},
  {side:'r',at:1850,h:340,src:'p_akmu.jpg',t:'AKMU DINOSAUR',s:'새 디자인 · 앨범 표지'}
 ];
-const ARTS=[];let FOUND=0;const SAY={'서울 벚꽃 축제':'서울 벚꽃 축제 포스터다. 봄 냄새가 나네.','DDP 그리드 포스터':'DDP 포스터. 칸이 딱딱 맞아 있어서 마음에 들어.','BLUKY':'BLUKY. 하늘색이 정말 맑다.','AKMU DINOSAUR':'AKMU 앨범 표지다. 바로 틀어 볼까?'};
-function say(t,link){document.getElementById('sayt').innerHTML=t+(link?'<br><a href="'+link[0]+'">'+link[1]+'</a>':'')}
+const ARTS=[],HITS=[];let FOUND=0;const SAY={'서울 벚꽃 축제':'서울 벚꽃 축제 포스터다. 봄 냄새가 나네.','DDP 그리드 포스터':'DDP 포스터. 칸이 딱딱 맞아 있어서 마음에 들어.','BLUKY':'BLUKY. 하늘색이 정말 맑다.','AKMU DINOSAUR':'AKMU 앨범 표지다. 바로 틀어 볼까?'};
+let sayTimer=0;const sayBox=document.getElementById('say');
+function say(t,link,ms){document.getElementById('sayt').innerHTML=t+(link?'<br><a href="'+link[0]+'">'+link[1]+'</a>':'');sayBox.classList.remove('min');clearTimeout(sayTimer);sayTimer=setTimeout(()=>sayBox.classList.add('min'),ms||10000)}
+document.getElementById('sayx').onclick=e=>{e.stopPropagation();clearTimeout(sayTimer);sayBox.classList.add('min')};
+document.getElementById('sayimg').onclick=()=>{clearTimeout(sayTimer);sayBox.classList.toggle('min')};
+const TOUCH=matchMedia('(pointer:coarse)').matches||innerWidth<760;document.body.classList.toggle('touch',TOUCH);
 function burst(){for(let i=0;i<70;i++){const e=document.createElement('i');e.className='burst';e.style.left=(30+Math.random()*40)+'vw';e.style.setProperty('--dx',(Math.random()*500-250)+'px');e.style.setProperty('--dy',(Math.random()*500-120)+'px');e.style.animationDelay=(Math.random()*.3)+'s';document.body.appendChild(e);setTimeout(()=>e.remove(),3000)}}
-function open_(a,p){a.classList.add('open');FOUND++;document.getElementById('cnt').textContent='찾은 포스터 '+FOUND+' / 4';if(p.t==='서울 벚꽃 축제')burst();say(FOUND===4?'네 장 다 찾았다. 이제 전시를 열 수 있겠어. 마음에 드는 포스터를 눌러 크게 봐.':SAY[p.t],p.t==='AKMU DINOSAUR'?['../Album/index.html','앨범 재생해 보기']:null)}
-say('포스터 네 장이 어디 갔더라. 같이 찾아 줘. 벽에 걸린 가림천을 눌러 보자. W · S 또는 휠로 걸어갈 수 있어.');
+function open_(a,p){a.classList.add('open');FOUND++;document.getElementById('cnt').textContent='찾은 포스터 '+FOUND+' / 4';if(p.t==='서울 벚꽃 축제')burst();say(FOUND===4?'네 장 다 찾았다. 이제 전시를 열 수 있겠어. 마음에 드는 포스터를 눌러 크게 봐.':SAY[p.t],p.t==='AKMU DINOSAUR'?['../Album/index.html','앨범 재생해 보기']:null,9000)}
+say('포스터 네 장이 어디 갔더라. 같이 찾아 줘. 벽에 걸린 가림천을 눌러 보자. '+(TOUCH?'아래 앞으로 버튼을 누르거나 화면을 밀어서 걸어갈 수 있어.':'W · S 또는 휠로 걸어갈 수 있어.'),null,14000);
 const L=document.getElementById('wl'),R=document.getElementById('wr');
 P.forEach(p=>{const w=p.side==='l'?L:R;const x=p.side==='l'?p.at:3200-p.at;
  const a=document.createElement('div');a.className='art';a.style.left=(x-150)+'px';a.style.height=p.h+'px';a.innerHTML='<img alt="'+p.t+'" src="'+p.src+'">';
- a.insertAdjacentHTML('beforeend','<div class="sheet"><b>?</b></div>');a.onclick=()=>{if(!a.classList.contains('open')){open_(a,p)}else{lbi.src=p.src;lb.style.display='flex'}};ARTS.push(a);w.appendChild(a);
+ a.insertAdjacentHTML('beforeend','<div class="sheet"><b>?</b></div>');const act=()=>{if(!a.classList.contains('open')){open_(a,p)}else{lbi.src=p.src;lb.style.display='flex'}};a.onclick=act;ARTS.push(a);w.appendChild(a);HITS.push([a,p,act]);
  const c=document.createElement('div');c.className='cap';c.style.left=(x-150)+'px';c.innerHTML=p.t+'<small>'+p.s+'</small>';w.appendChild(c);
  const sp=document.createElement('div');sp.className='spot';sp.style.left=(x-300)+'px';sp.style.width='600px';w.appendChild(sp)});
 const lb=document.getElementById('lb'),lbi=document.getElementById('lbi');lb.onclick=()=>lb.style.display='none';
+/* 긴 벽은 가까이 가면 브라우저가 클릭 위치를 못 찾는 경우가 있어서(특히 왼쪽 벽의 BLUKY), 포스터마다 작은 터치 판을 따로 둔다. 포스터보다 넓게 잡아 대충 눌러도 열린다. */
+function placeHits(){const sc0=document.getElementById('sc');HITS.forEach(h=>{const [a,p,act]=h;let el=h[3];if(!el){el=h[3]=document.createElement('div');el.className='pl hit';el.onclick=act;sc0.appendChild(el)}
+ const w=a.offsetWidth,ht=a.offsetHeight,cx=a.offsetLeft+w/2,cy=a.offsetTop+ht/2,W=w+300,H=ht+200,L=p.side==='l';
+ el.style.width=W+'px';el.style.height=H+'px';el.style.margin=(-H/2)+'px 0 0 '+(-W/2)+'px';
+ el.style.transform='translate3d('+(L?-358:358)+'px,'+(cy-260)+'px,'+(L?-cx:cx-3200)+'px) rotateY('+(L?90:-90)+'deg)'})}
+placeHits();addEventListener('load',placeHits);document.querySelectorAll('.art img').forEach(i=>{if(!i.complete)i.addEventListener('load',placeHits)});
 const q=new URLSearchParams(location.search);if(q.get('found')==='all'){document.querySelectorAll('.sheet').forEach(x=>x.parentNode.classList.add('open'))}if(q.get('hud')==='0')document.body.classList.add('nohud');
 let z=+(q.get('z')||0);const MAX=2500;const sc=document.getElementById('sc');
 function go(d){z=Math.max(0,Math.min(MAX,z+d));sc.style.transform='translateZ('+z+'px)'}
@@ -63,5 +97,9 @@ if(q.get('z')!==null){sc.style.transition='none';sc.style.transform='translateZ(
 addEventListener('wheel',e=>{go(e.deltaY>0?-120:120)},{passive:true});
 addEventListener('keydown',e=>{if(e.key==='w'||e.key==='ArrowUp')go(160);if(e.key==='s'||e.key==='ArrowDown')go(-160)});
 document.getElementById('b1').onclick=()=>go(-300);document.getElementById('b2').onclick=()=>go(300);
+/* 휴대폰: 화면을 아래로 끌면 앞으로, 위로 끌면 뒤로 걷는다. 가만히 누르는 것은 그대로 포스터 누르기다. */
+let ty=null;addEventListener('touchstart',e=>{ty=e.touches.length===1&&!e.target.closest('.bar,.say,.lb')?e.touches[0].clientY:null},{passive:true});
+addEventListener('touchmove',e=>{if(ty===null||e.touches.length!==1)return;const y=e.touches[0].clientY;if(Math.abs(y-ty)>=6){go((y-ty)*4);ty=y}},{passive:true});
+addEventListener('touchend',()=>{ty=null},{passive:true});
 if(q.get('petals')!=='0')for(let i=0;i<26;i++){const e=document.createElement('i');e.className='pet';e.style.left=Math.random()*100+'vw';e.style.animationDuration=(7+Math.random()*7)+'s';e.style.animationDelay=(-Math.random()*12)+'s';e.style.transform='scale('+(.7+Math.random()*.8)+')';document.body.appendChild(e)}
 </script></body></html>

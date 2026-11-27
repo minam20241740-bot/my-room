@@ -170,7 +170,7 @@ window.RoomStage = (() => {
     resize.observe(viewport);
     let shadowLive = true, shadowTick = 0, shadowStale = false, shadowForce = true, shadowTimer = 0;
     function request() {
-      if (frameRequest !== null || modelStatus !== 'ready') return;
+      if (frameRequest !== null || modelStatus !== 'ready' || document.body.dataset.gameOpen === '1') return;   // 게임을 화면 전체로 열어 둔 동안은 뒤의 방을 다시 그리지 않는다(폰 메모리 부담 줄이기)
       frameRequest = requestAnimationFrame(() => {
         frameRequest = null;
         // 그림자 지도는 두 프레임에 한 번만 다시 그린다(그리기 횟수의 대부분이 그림자 패스라서). 움직임이 멈출 때는 마지막에 한 번 더 맞춘다.
@@ -182,6 +182,7 @@ window.RoomStage = (() => {
       });
     }
     let onUpdate = null;
+    window.RoomRepaint = request;   // 게임 창을 닫은 뒤 방을 다시 그린다
 
     // The Blender exporter retains UTF-8 labels in extras and original node names in this model.
     const child = (root, name) => {
