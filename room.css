@@ -198,3 +198,36 @@ body[data-phase="title"] .pfx-bar.b2{animation-delay:.08s}
 .dialogue .speaker{justify-self:start}
 @media(max-width:640px){.dialogue .portrait{width:64px;height:64px;border-width:2px}.dialogue{column-gap:10px}}
 @media(max-height:560px){.dialogue .portrait{width:56px;height:56px}}
+
+/* 조작 안내: 대화창 안 한 줄, 마우스를 올릴 때 이름표, 조작법 창, 작품 자리 판 접기 */
+.dialogue p.howto{margin:10px 0 0;padding:7px 10px;min-height:0;background:#161b4a;border:1px solid #6e79b8;color:#e6e9ff;font-size:.84rem;font-weight:600;line-height:1.5}
+.dialogue p.howto:empty{display:none}
+.dialogue p.howto::before{content:"조작";display:inline-block;margin-right:8px;padding:0 7px;background:#ffd92e;color:#0a0f2e;font-size:.74rem;font-weight:900;line-height:1.5}
+.hover-tag{position:absolute;z-index:6;pointer-events:none;padding:5px 10px;background:#ffd92e;color:#0a0f2e;border:2px solid #0a0f2e;font-size:.82rem;font-weight:850;white-space:nowrap}
+.gallery-head{gap:8px}.gallery-head strong{margin-right:auto}
+.gallery-fold{min-height:26px;padding:2px 9px;background:#0e1233;color:#fff;border:1px solid #fff;border-radius:2px;font-size:11px;font-weight:700}.gallery-fold:hover{background:#ffd92e;color:#0a0f2e}
+.gallery-help{margin:-3px 3px 9px;color:#d6dcf5;font-size:11.5px;line-height:1.4}
+.gallery[data-folded="true"] .gallery-help,.gallery[data-folded="true"] .gallery-route,.gallery[data-folded="true"] .gallery-cards{display:none}
+.gallery[data-folded="true"] .gallery-head{margin-bottom:0}
+#info-content ol.info-steps{margin:12px 0;padding-left:24px;display:grid;gap:7px}
+@media(max-width:640px){
+  .stage-name{display:none}
+  .stage-tools{flex:1}.stage-tools button{flex:1 1 auto;min-width:0;padding:5px 6px}
+  body[data-phase^="exhibit"] #concept-open{display:none}   /* 자리를 보는 동안은 머리말 단추를 한 줄에 맞추려고 기획 의도를 잠시 숨긴다 */
+  .dialogue p.howto{margin-top:8px;padding:6px 8px;font-size:.76rem}
+}
+@media(max-height:560px){.dialogue p.howto{margin-top:5px;padding:4px 8px;font-size:.74rem}}
+
+/* 작품 자리 판은 대화창 높이만큼 비켜서 높이를 정하고, 폰에서는 머리말 글자가 줄바꿈되지 않게 한다 */
+.gallery{max-height:calc(100% - 86px - var(--dlg-h,185px) - 52px)}
+.gallery-head strong,#gallery-count{white-space:nowrap}
+@media(max-width:640px){
+  .gallery{max-height:calc(100% - 61px - var(--dlg-h,185px) - 28px)}
+  .gallery-head{gap:5px}.gallery-head strong{font-size:11.5px}#gallery-count{font-size:11px}.gallery-fold{padding:2px 6px;font-size:10px;min-height:24px}
+  .gallery-help{font-size:10.5px;margin-bottom:6px}
+}
+@media(max-height:560px){
+  .gallery{max-height:calc(100% - 56px - var(--dlg-h,150px) - 22px)}
+  body[data-phase="result"] .gallery{max-height:calc(100% - 66px)}
+  body[data-phase="result"] .dialogue{left:auto;right:12px;width:min(430px,calc(100% - 290px))}
+}

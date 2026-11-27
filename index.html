@@ -60,6 +60,7 @@
         <header class="stage-header">
           <p class="stage-name">나의 방 <span>UNKNOWN RE:DRAW ROOM</span></p>
           <div class="stage-tools">
+            <button id="help-open" type="button">조작법</button>
             <button id="sound" type="button" aria-pressed="false">소리 끄기</button>
             <button id="gallery-return" type="button" hidden>방 전체 보기</button>
             <button id="back" type="button">표지</button>
@@ -85,11 +86,13 @@
         <video id="theater-video" preload="none" playsinline aria-label="일루지오 상영 화면" hidden></video>
         <input id="theater-file" type="file" accept="video/mp4,video/webm" hidden>
         <p id="wrong-place" class="wrong-place" aria-live="polite"></p>
+        <span id="hover-tag" class="hover-tag" hidden aria-hidden="true"></span>
 
         <aside id="dialogue" class="dialogue" hidden aria-label="준희의 안내">
           <img id="portrait" class="portrait" src="assets/Junhee_face_guide.jpg" width="300" height="300" alt="준희">
           <span class="speaker" id="speaker">준희</span>
           <p id="speech" aria-live="polite"></p>
+          <p id="howto" class="howto"></p>
           <div class="dialogue-actions">
             <button id="task-main" type="button" hidden></button>
             <button id="task-extra" type="button" hidden></button>
@@ -102,7 +105,8 @@
           <span id="counter">0 / 1</span>
         </div>
         <nav id="gallery" class="gallery" aria-label="작품 자리" hidden>
-          <div class="gallery-head"><strong>작품 자리</strong><span id="gallery-count"></span></div>
+          <div class="gallery-head"><strong>방 안의 자리</strong><span id="gallery-count"></span><button id="gallery-fold" class="gallery-fold" type="button" aria-expanded="true">접기</button></div>
+          <p class="gallery-help">이름을 누르면 준희가 그 자리로 가요.</p>
           <div class="gallery-route">
             <p id="route-description" aria-live="polite"></p>
             <button id="route-next" class="route-next" aria-describedby="route-description" type="button">짧은 관람 시작</button>

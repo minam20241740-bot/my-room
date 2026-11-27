@@ -11,6 +11,7 @@
     'info','info-heading','info-content',
     'gallery','gallery-cards','gallery-count','gallery-dawn','gallery-return','exhibit-target',
     'work-view','work-title','work-body','route-description','route-next',
+    'help-open','howto','hover-tag','gallery-fold',
   ].map((id) => [id,$(id)]));
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
   const key = 'MyRoom.FirstSort.1';
@@ -190,6 +191,37 @@
     }
   }
   window.addEventListener('resize',updateTargets,{passive:true});
+  // 작품 자리 판이 대화창에 가려지지 않게, 대화창 높이를 CSS 변수로 알려 준다
+  if (window.ResizeObserver) new ResizeObserver(() => ui.viewport.style.setProperty('--dlg-h',ui.dialogue.offsetHeight+'px')).observe(ui.dialogue);
+
+  // 조작 안내: 지금 단계에서 무엇을 어떻게 누르는지 대화창 안에 한 줄로 알려 준다(마우스인지 터치인지에 맞춰서)
+  const coarsePointer = window.matchMedia('(pointer:coarse)');
+  const shortScreen = window.matchMedia('(max-height:560px)');
+  const hintFor = (value) => {
+    const text = hintText(value);
+    return shortScreen.matches ? text.split('. ')[0].replace(/\.$/,'') + '.' : text;
+  };
+  function hintText(value) {
+    const touch = coarsePointer.matches;
+    const press = touch ? '손가락으로 눌러' : '마우스로 눌러';
+    const esc = (text) => touch ? '' : ' Esc 키는 ' + text + '예요.';
+    switch (value) {
+      case 'find': return touch
+        ? '이 방은 손가락으로 눌러서 움직여요. 책상 위 노란 이름표나 아래 노란 버튼을 눌러 보세요.'
+        : '이 방은 마우스로 눌러서 움직여요. 방향키는 쓰지 않아요. 책상 위 노란 이름표나 아래 노란 버튼을 눌러 보세요.';
+      case 'holding': return '보라색 자료함이나 노란 이름표를 ' + press + ' 주세요.' + esc('집기 취소');
+      case 'result': return '왼쪽 목록이나 방 안의 자리를 ' + press + ' 보세요. 준희가 그 자리로 가요.';
+      case 'theater': return '노란 이름표나 아래 노란 버튼을 ' + press + ' 보세요.' + esc('방 전체 보기');
+      case 'theater-load': return '영사기의 노란 이름표나 아래 노란 버튼을 ' + press + ' 보세요.' + esc('릴 내려놓기');
+      case 'theater-ready': return '"객석에 앉기"를 누르면 영상을 볼 수 있어요.' + esc('방 전체 보기');
+      case 'theater-viewing': return '아래 노란 버튼으로 재생하고 멈춰요.' + esc('영사대로 돌아가기');
+      case 'exhibit-ready': return '노란 이름표나 아래 노란 버튼을 ' + press + ' 보세요. 정리 없이 작품만 보려면 "바로 관람"을 눌러요.' + esc('방 전체 보기');
+      case 'exhibit-holding': return '이름표나 아래 노란 버튼을 ' + press + ' 제자리에 놓아요.' + esc('내려놓기');
+      case 'exhibit-sorted': return '"작품 열기"를 눌러 작품을 보세요. 다른 자리는 "방 전체 보기"에서 골라요.';
+      case 'dawn': return '창가로 가는 중이에요. 잠시만 기다려 주세요.';
+      default: return '';
+    }
+  }
 
   function showPhase(value) {
     phase = value;
@@ -201,8 +233,10 @@
     const inExhibit = value.startsWith('exhibit-');
     const atWindow = value === 'dawn';
     const active = inTheater || inExhibit || atWindow || ['find','lifting','holding','placing','lighting','result'].includes(value);
-    ui.quest.hidden = !active;
+    ui.quest.hidden = !active || value === 'result';   // 방이 열린 뒤에는 '첫 정리' 칸을 치운다(작품 자리 판에 진행이 따로 있다)
     ui.dialogue.hidden = !active;
+    ui.howto.textContent = active ? hintFor(value) : '';
+    ui['hover-tag'].hidden = true;
     ui.paper.hidden = value !== 'find';
     ui.tray.hidden = value !== 'holding';
     ui.film.hidden = value !== 'theater';
@@ -259,7 +293,7 @@
       restored ? '왼쪽에서 가 보고 싶은 자리를 골라요.' :
       '메모가 제자리에 있어요. 짧은 관람은 활자 작업실에서 시작해요.';
     say(hint + (saved ? '' : ' 이 브라우저에서는 진행을 저장하지 못했어요.'),
-      ['극장 가까이 보기',openTheater],['다시 체험',replay]);
+      ['극장 가까이 보기',openTheater],['처음부터 다시',replay]);
     (routeStop>=0 ? ui['route-next'] : ui['task-main']).focus({preventScroll:true});
   }
 
@@ -696,6 +730,17 @@
       text:'준희와 첫 메모를 정리한 뒤 여섯 작품 자리와 네 감상 자리를 둘러봅니다.',
       names:Object.values(gallery.objects).map(entry=>entry.zone),
     },
+    help:{
+      title:'이렇게 움직여요',
+      text:'이 방은 마우스로 눌러서 움직여요. 휴대폰에서는 화면을 손가락으로 눌러요. 방향키나 WASD로 걷는 방은 아니에요.',
+      steps:[
+        '책상 위 노란 이름표를 눌러 기획 메모를 집고, 보라색 자료함에 넣어요.',
+        '방이 열리면 왼쪽 목록이나 방 안의 자리를 눌러요. 준희가 그 자리로 가요.',
+        '물건을 제자리에 놓으면 그 자리의 작품이 열려요. "바로 관람"을 누르면 정리하지 않고 바로 볼 수 있어요.',
+        '여섯 자리를 모두 정리하면 창문을 열어 마무리해요.',
+      ],
+      after:'키보드로는 Tab 키로 버튼을 고르고 Enter 키로 눌러요. Esc 키는 한 단계 뒤로 가요. 위쪽 "작품 목록"에서는 순서와 상관없이 모든 작품을 바로 볼 수 있어요.',
+    },
   };
   function openInfo(type) {
     const content = overview[type];
@@ -703,6 +748,21 @@
     const body = ui['info-content'];
     const paragraphs = [].concat(content.text).map(text => { const p = document.createElement('p'); p.textContent = text; return p; });
     body.replaceChildren(...paragraphs);
+    if (content.steps) {
+      const steps = document.createElement('ol');
+      steps.className = 'info-steps';
+      for (const text of content.steps) {
+        const item = document.createElement('li');
+        item.textContent = text;
+        steps.append(item);
+      }
+      body.append(steps);
+    }
+    if (content.after) {
+      const p = document.createElement('p');
+      p.textContent = content.after;
+      body.append(p);
+    }
     if (content.names) {
       const list = document.createElement('ul');
       for (const name of content.names) {
@@ -711,7 +771,7 @@
         list.append(item);
       }
       body.append(list);
-    } else {
+    } else if (type === 'concept') {
       const link = document.createElement('a');
       link.href = window.RoomHosted?.planHref ?? window.RoomPack?.planHref ?? '../../01_Plan/나의방_기획서_30쪽.pdf';
       link.target = '_blank';
@@ -768,6 +828,47 @@
   ui['work-view'].addEventListener('close',()=>ui['work-body'].replaceChildren());
   ui.back.addEventListener('click',goCover);
   ui['room-canvas'].addEventListener('click',tryScene);
+  ui['help-open'].addEventListener('click',() => openInfo('help'));
+  ui['gallery-fold'].addEventListener('click',() => {
+    const folded = ui.gallery.dataset.folded !== 'true';
+    ui.gallery.dataset.folded = String(folded);
+    ui['gallery-fold'].textContent = folded ? '펼치기' : '접기';
+    ui['gallery-fold'].setAttribute('aria-expanded',String(!folded));
+  });
+  // 마우스를 올리면 누를 수 있는 곳에서 손가락 모양 커서와 이름표가 나온다(누르는 방이라는 걸 바로 알 수 있게)
+  const hoverTag = ui['hover-tag'];
+  let hoverFrame = 0, hoverEvent = null;
+  function hoverLabel(x,y) {
+    if (!stage || ui.play.hidden) return '';
+    if (phase === 'result') {
+      const entry = gallery.objects[stage.exhibitAt?.(x,y)];
+      return entry ? entry.zone + ' · ' + entry.work : '';
+    }
+    if (['exhibit-ready','exhibit-holding','exhibit-sorted'].includes(phase)) {
+      const here = stage.exhibitPoint(markerStep()?.[2],phase!=='exhibit-ready');
+      const rect = ui.viewport.getBoundingClientRect();
+      return here && Math.hypot(here.x-x+rect.left,here.y-y+rect.top) < 62 ? ui['exhibit-target'].textContent.trim() : '';
+    }
+    const wanted = {find:'paper',holding:'tray',theater:'film','theater-load':'projector'}[phase];
+    return wanted && stage.hit(x,y) === wanted ? ui[wanted].textContent.trim() : '';
+  }
+  ui['room-canvas'].addEventListener('pointermove',(event) => {
+    if (event.pointerType !== 'mouse') return;
+    hoverEvent = event;
+    if (hoverFrame) return;
+    hoverFrame = requestAnimationFrame(() => {
+      hoverFrame = 0;
+      const label = hoverLabel(hoverEvent.clientX,hoverEvent.clientY);
+      ui['room-canvas'].style.cursor = label ? 'pointer' : '';
+      hoverTag.hidden = !label;
+      if (!label) return;
+      const rect = ui.viewport.getBoundingClientRect();
+      hoverTag.textContent = label;
+      hoverTag.style.left = Math.max(8,Math.min(rect.width-hoverTag.offsetWidth-8,hoverEvent.clientX-rect.left+16)) + 'px';
+      hoverTag.style.top = Math.max(8,hoverEvent.clientY-rect.top+20) + 'px';
+    });
+  });
+  ui['room-canvas'].addEventListener('pointerleave',() => { hoverTag.hidden = true; ui['room-canvas'].style.cursor = ''; });
   document.addEventListener('keydown',(event) => {
     if (ui.info.open || ui['work-view'].open || event.repeat) return;
     if (phase === 'cover' && event.key === 'Enter' && !event.target.closest('button,a')) {
