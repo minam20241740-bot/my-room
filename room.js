@@ -11,7 +11,7 @@
     'info','info-heading','info-content',
     'gallery','gallery-cards','gallery-count','gallery-dawn','gallery-return','exhibit-target',
     'work-view','work-title','work-body','route-description','route-next',
-    'help-open','howto','hover-tag','gallery-fold',
+    'help-open','prompts','hover-tag','gallery-fold',
   ].map((id) => [id,$(id)]));
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
   const key = 'MyRoom.FirstSort.1';
@@ -90,10 +90,27 @@
     audio.play().catch(() => {});
   }
 
+  const ICONS = {
+    soundOn:'M4 9.5v5h3.5L12 18.5v-13L7.5 9.5zM15.5 9a4 4 0 0 1 0 6M18 6.5a8 8 0 0 1 0 11',
+    soundOff:'M4 9.5v5h3.5L12 18.5v-13L7.5 9.5zM16 9.5l5 5M21 9.5l-5 5',
+    mouse:'M12 3a6 6 0 0 0-6 6v6a6 6 0 0 0 12 0V9a6 6 0 0 0-6-6zM12 3v7M6 10h12',
+    touch:'M9 12V6a1.5 1.5 0 0 1 3 0v5M12 11a1.5 1.5 0 0 1 3 0v1a1.5 1.5 0 0 1 3 0v4a6 6 0 0 1-6 6h-.5A6 6 0 0 1 7 18.4L5.2 14.6a1.5 1.5 0 0 1 2.5-1.6L9 14.5',
+  };
+  function icon(name) {
+    const ns = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(ns,'svg');
+    svg.setAttribute('viewBox','0 0 24 24'); svg.setAttribute('class','ico'); svg.setAttribute('aria-hidden','true');
+    const path = document.createElementNS(ns,'path'); path.setAttribute('d',ICONS[name]); svg.append(path);
+    return svg;
+  }
+
   function soundControls() {
     video.muted=muted;
     for (const workVideo of ui['work-body'].querySelectorAll('video')) workVideo.muted=muted;
-    ui.sound.textContent = muted ? '소리 켜기' : '소리 끄기';
+    const soundLabel = document.createElement('span'); soundLabel.className = 'lab'; soundLabel.textContent = muted ? '소리 꺼짐' : '소리 켜짐';
+    ui.sound.replaceChildren(icon(muted ? 'soundOff' : 'soundOn'),soundLabel);   // 지금 상태를 그림과 글자로 보여 준다
+    ui.sound.dataset.muted = String(muted);
+    ui.sound.title = muted ? '소리가 꺼져 있어요. 누르면 켜요' : '소리가 켜져 있어요. 누르면 꺼요';
     ui.sound.setAttribute('aria-pressed',String(muted));
   }
   soundControls();
@@ -194,33 +211,42 @@
   // 작품 자리 판이 대화창에 가려지지 않게, 대화창 높이를 CSS 변수로 알려 준다
   if (window.ResizeObserver) new ResizeObserver(() => ui.viewport.style.setProperty('--dlg-h',ui.dialogue.offsetHeight+'px')).observe(ui.dialogue);
 
-  // 조작 안내: 지금 단계에서 무엇을 어떻게 누르는지 대화창 안에 한 줄로 알려 준다(마우스인지 터치인지에 맞춰서)
+  // 조작 안내: 게임 화면처럼 지금 쓰는 조작(마우스·손가락·Esc)을 키캡 칩으로 대화창 위에 보여 준다
   const coarsePointer = window.matchMedia('(pointer:coarse)');
   const shortScreen = window.matchMedia('(max-height:560px)');
-  const hintFor = (value) => {
-    const text = hintText(value);
-    return shortScreen.matches ? text.split('. ')[0].replace(/\.$/,'') + '.' : text;
-  };
-  function hintText(value) {
+  function promptsFor(value) {
     const touch = coarsePointer.matches;
-    const press = touch ? '손가락으로 눌러' : '마우스로 눌러';
-    const esc = (text) => touch ? '' : ' Esc 키는 ' + text + '예요.';
+    const main = (text) => [touch ? 'touch' : 'mouse',text];
+    const esc = (text) => touch ? null : ['esc',text];
+    let list;
     switch (value) {
-      case 'find': return touch
-        ? '이 방은 손가락으로 눌러서 움직여요. 책상 위 노란 이름표나 아래 노란 버튼을 눌러 보세요.'
-        : '이 방은 마우스로 눌러서 움직여요. 방향키는 쓰지 않아요. 책상 위 노란 이름표나 아래 노란 버튼을 눌러 보세요.';
-      case 'holding': return '보라색 자료함이나 노란 이름표를 ' + press + ' 주세요.' + esc('집기 취소');
-      case 'result': return '왼쪽 목록이나 방 안의 자리를 ' + press + ' 보세요. 준희가 그 자리로 가요.';
-      case 'theater': return '노란 이름표나 아래 노란 버튼을 ' + press + ' 보세요.' + esc('방 전체 보기');
-      case 'theater-load': return '영사기의 노란 이름표나 아래 노란 버튼을 ' + press + ' 보세요.' + esc('릴 내려놓기');
-      case 'theater-ready': return '"객석에 앉기"를 누르면 영상을 볼 수 있어요.' + esc('방 전체 보기');
-      case 'theater-viewing': return '아래 노란 버튼으로 재생하고 멈춰요.' + esc('영사대로 돌아가기');
-      case 'exhibit-ready': return '노란 이름표나 아래 노란 버튼을 ' + press + ' 보세요. 정리 없이 작품만 보려면 "바로 관람"을 눌러요.' + esc('방 전체 보기');
-      case 'exhibit-holding': return '이름표나 아래 노란 버튼을 ' + press + ' 제자리에 놓아요.' + esc('내려놓기');
-      case 'exhibit-sorted': return '"작품 열기"를 눌러 작품을 보세요. 다른 자리는 "방 전체 보기"에서 골라요.';
-      case 'dawn': return '창가로 가는 중이에요. 잠시만 기다려 주세요.';
-      default: return '';
+      case 'find': list = [main('책상 위 노란 이름표를 눌러요')]; break;
+      case 'holding': list = [main('보라색 자료함을 눌러 넣어요'),esc('집기 취소')]; break;
+      case 'result': list = [main('왼쪽 목록이나 방 안의 자리를 눌러요')]; break;
+      case 'theater': list = [main('노란 이름표를 눌러요'),esc('방 전체 보기')]; break;
+      case 'theater-load': list = [main('영사기의 노란 이름표를 눌러요'),esc('릴 내려놓기')]; break;
+      case 'theater-ready': list = [main('"객석에 앉기"를 눌러요'),esc('방 전체 보기')]; break;
+      case 'theater-viewing': list = [main('아래 노란 버튼으로 재생·멈춤'),esc('영사대로 돌아가기')]; break;
+      case 'exhibit-ready': list = [main('노란 이름표를 눌러요'),esc('방 전체 보기')]; break;
+      case 'exhibit-holding': list = [main('이름표를 눌러 제자리에 놓아요'),esc('내려놓기')]; break;
+      case 'exhibit-sorted': list = [main('"작품 열기"를 눌러요')]; break;
+      default: list = [];
     }
+    list = list.filter(Boolean);
+    return shortScreen.matches ? list.slice(0,1) : list;
+  }
+  const KEY_LABEL = {mouse:'마우스',touch:'손가락',esc:'Esc'};
+  function renderPrompts(value) {
+    const chips = value ? promptsFor(value).map(([kind,text],index) => {
+      const chip = document.createElement('span'); chip.className = 'pchip' + (value === 'find' && index === 0 ? ' pulse' : '');
+      const key = document.createElement('span'); key.className = 'pkey ' + kind;
+      if (kind !== 'esc') key.append(icon(kind));
+      key.append(KEY_LABEL[kind]);
+      const label = document.createElement('span'); label.textContent = text;
+      chip.append(key,label);
+      return chip;
+    }) : [];
+    ui.prompts.replaceChildren(...chips);
   }
 
   function showPhase(value) {
@@ -235,7 +261,7 @@
     const active = inTheater || inExhibit || atWindow || ['find','lifting','holding','placing','lighting','result'].includes(value);
     ui.quest.hidden = !active || value === 'result';   // 방이 열린 뒤에는 '첫 정리' 칸을 치운다(작품 자리 판에 진행이 따로 있다)
     ui.dialogue.hidden = !active;
-    ui.howto.textContent = active ? hintFor(value) : '';
+    renderPrompts(active ? value : '');
     ui['hover-tag'].hidden = true;
     ui.paper.hidden = value !== 'find';
     ui.tray.hidden = value !== 'holding';
@@ -309,7 +335,7 @@
   }
   function refreshGallery() {
     const count=gallery.main.filter(isSorted).length;
-    ui['gallery-count'].textContent=count+' / '+gallery.main.length;
+    ui['gallery-count'].textContent='정리 '+count+' / '+gallery.main.length;
     ui['gallery-dawn'].hidden=dawn || count!==gallery.main.length;
     ui['gallery-cards'].replaceChildren();
     gallery.showCards(ui['gallery-cards'],isSorted,selectExhibit);
@@ -739,6 +765,13 @@
         '물건을 제자리에 놓으면 그 자리의 작품이 열려요. "바로 관람"을 누르면 정리하지 않고 바로 볼 수 있어요.',
         '여섯 자리를 모두 정리하면 창문을 열어 마무리해요.',
       ],
+      legendTitle:'화면은 이렇게 읽어요',
+      legend:[
+        ['왼쪽 위','지금 해야 할 목표예요. 자리를 보는 동안에는 "방 전체 보기"도 여기에 있어요.'],
+        ['오른쪽 위','작품 목록, 기획 의도, 조작법, 소리, 표지 메뉴예요.'],
+        ['아래 말풍선','준희가 하는 말과 눌러야 할 노란 버튼이에요.'],
+        ['말풍선 위 칩','지금 쓰는 조작이에요. 마우스 클릭인지 Esc 키인지 알려 줘요.'],
+      ],
       after:'키보드로는 Tab 키로 버튼을 고르고 Enter 키로 눌러요. Esc 키는 한 단계 뒤로 가요. 위쪽 "작품 목록"에서는 순서와 상관없이 모든 작품을 바로 볼 수 있어요.',
     },
   };
@@ -757,6 +790,19 @@
         steps.append(item);
       }
       body.append(steps);
+    }
+    if (content.legend) {
+      const heading = document.createElement('p');
+      heading.className = 'info-subtitle'; heading.textContent = content.legendTitle;
+      const list = document.createElement('ul');
+      list.className = 'info-legend';
+      for (const [where,what] of content.legend) {
+        const item = document.createElement('li');
+        const strong = document.createElement('strong'); strong.textContent = where;
+        item.append(strong,' ' + what);
+        list.append(item);
+      }
+      body.append(heading,list);
     }
     if (content.after) {
       const p = document.createElement('p');

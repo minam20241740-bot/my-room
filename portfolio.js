@@ -231,6 +231,7 @@
     ['11.27', '탐정 사무소 A·B·C: 컴퓨터와 폰 안내를 나누고, 전투 기다림을 줄이고, 화면이 멈추면 이어서 할 수 있게 했습니다. 폰 부담을 줄이려고 게임을 여는 동안 뒤의 방 그림은 쉬게 했습니다.'],
     ['11.27', '나의 그림자 영상을 다시 고쳤습니다. 도둑이 밧줄을 빠르게 내려오고, 보석만 붉게 빛나며, 그림자가 작게 나와 도둑을 붙잡을 때마다 커집니다. 기획 의도 글도 짧게 다시 썼습니다.'],
     ['11.27', '방 화면에 조작 안내를 더했습니다. 마우스로 누르는 방이라는 말(휴대폰은 손가락)과 단계마다 눌러야 할 곳을 대화창에 적고, 위쪽에 「조작법」 창을 만들었습니다. 마우스를 올리면 누를 수 있는 곳에서 손가락 커서와 이름표가 나옵니다. 방이 열린 뒤에 남던 「첫 정리」 칸을 없애고, 「방 안의 자리」 판은 접을 수 있게 했습니다.'],
+    ['11.28', '방 화면을 게임 화면처럼 정리했습니다. 목표는 왼쪽 위, 메뉴는 오른쪽 위에 모으고 단추에 그림을 넣었습니다. 말풍선 위에 지금 쓰는 조작(마우스·손가락·Esc 키)을 작은 칩으로 보여 주고, 조작법 창에 화면 읽는 법을 더했습니다. 작품 목록 창이 열리지 않던 오류도 고쳤습니다.'],
   ];
   function openIndex() {
     index.replaceChildren(closeButton(index), make('h2', '', '작품 목록'));
@@ -284,8 +285,12 @@
   const all = make('button', '', '작품 목록');
   all.id = 'portfolio-open'; all.type = 'button'; all.title = '전체 작품 보기';
   all.addEventListener('click', openIndex);
+  const svgIcon = (d) => { const ns = 'http://www.w3.org/2000/svg', s = document.createElementNS(ns, 'svg'), p = document.createElementNS(ns, 'path'); s.setAttribute('viewBox', '0 0 24 24'); s.setAttribute('class', 'ico'); s.setAttribute('aria-hidden', 'true'); p.setAttribute('d', d); s.append(p); return s; };
+  const labelOf = (text) => { const s = document.createElement('span'); s.className = 'lab'; s.textContent = text; return s; };
+  all.replaceChildren(svgIcon('M8 7h12M8 12h12M8 17h12M4 7h.01M4 12h.01M4 17h.01'), labelOf('작품 목록'));
   const intent = make('button', '', '기획 의도');
-  intent.id = 'concept-open'; intent.type = 'button';
+  intent.id = 'concept-open'; intent.type = 'button'; intent.title = '기획 의도 보기';
+  intent.replaceChildren(svgIcon('M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h7'), labelOf('기획 의도'));
   intent.addEventListener('click', () => document.getElementById('concept')?.click());
   document.querySelector('.stage-tools').prepend(all, intent);
 
